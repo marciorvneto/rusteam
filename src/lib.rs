@@ -163,7 +163,7 @@ fn pi_1(P: f64) -> f64 {
 /// Returns the region-1 enthalpy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-fn h_TP_1(T: f64, P: f64) -> f64 {
+pub fn h_TP_1(T: f64, P: f64) -> f64 {
     _R * T * tau_1(T) * gamma_tau_1(T, P)
 }
 
@@ -216,7 +216,7 @@ fn gamma_tau_2_res(T: f64, P: f64) -> f64 {
 /// Returns the region-2 enthalpy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-fn h_TP_2(T: f64, P: f64) -> f64 {
+pub fn h_TP_2(T: f64, P: f64) -> f64 {
     _R * T * tau_2(T) * (gamma_tau_2_ideal(T, P) + gamma_tau_2_res(T, P))
 }
 
@@ -224,7 +224,7 @@ fn h_TP_2(T: f64, P: f64) -> f64 {
 
 /// Returns the saturation pressure in Pa
 /// Temperature is assumed to be in K
-fn p_sat(T: f64) -> f64 {
+pub fn p_sat(T: f64) -> f64 {
     let n1 = REGION_4_SATURATION_COEFFS[0];
     let n2 = REGION_4_SATURATION_COEFFS[1];
     let n3 = REGION_4_SATURATION_COEFFS[2];
@@ -246,7 +246,7 @@ fn p_sat(T: f64) -> f64 {
 
 /// Returns the saturation temperature in K
 /// Pressure is assumed to be in Pa
-fn t_sat(P: f64) -> f64 {
+pub fn t_sat(P: f64) -> f64 {
     let n1 = REGION_4_SATURATION_COEFFS[0];
     let n2 = REGION_4_SATURATION_COEFFS[1];
     let n3 = REGION_4_SATURATION_COEFFS[2];
