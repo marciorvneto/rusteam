@@ -30,6 +30,18 @@ Here you can find the current status of each of the calculations implemented so 
 |T(p,s)                 |**Yes**| **Yes** |
 
 
+### Region 2
+
+- **Forward equations**
+
+| Property | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|Specific volume                 |**No**| **No** |
+|Specific enthalpy               |**Yes**| **Yes**|
+|Specific internal energy        |**No**| **No** |
+|Specific entropy                |**No**| **No** |
+|Specific isobaric heat capacity |**No**| **No** |
+
 ### Region 4
 
 | Property | Implemented | Tested |
