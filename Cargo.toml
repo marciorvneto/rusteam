@@ -3,6 +3,7 @@ name = "rust-steam"
 version = "0.1.2"
 edition = "2021"
 description = "A Rust implementation of the IAPWS-IF97 steam tables"
+repository = "https://github.com/marciorvneto/rusteam"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
