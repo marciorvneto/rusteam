@@ -22,6 +22,13 @@ Here you can find the current status of each of the calculations implemented so 
 |Specific entropy                |**Yes**| **Yes** |
 |Specific isobaric heat capacity |**Yes**| **Yes** |
 
+- **Backward equations**
+
+| Equation | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|T(p,h)                 |**Yes**| **Yes** |
+|T(p,s)                 |**Yes**| **Yes** |
+
 
 ### Region 4
 

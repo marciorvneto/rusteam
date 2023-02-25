@@ -38,6 +38,55 @@ const REGION_1_COEFFS: [[f64; 3]; 34] = [
     [32.0, -41.0, -0.93537087292458e-25],
 ];
 
+const REGION_1_BACK_COEFFS_PH: [[f64; 3]; 20] = [
+            [0.0,  0.0, -0.23872489924521e+3],
+            [0.0,  1.0,  0.40421188637945e+3],
+            [0.0,  2.0,  0.11349746881718e+3],
+            [0.0,  6.0, -0.58457616048039e+1],
+            [0.0, 22.0, -0.15285482413140e-3],
+            [0.0, 32.0, -0.10866707695377e-5],
+            [1.0,  0.0, -0.13391744872602e+2],
+            [1.0,  1.0,  0.43211039183559e+2],
+            [1.0,  2.0, -0.54010067170506e+2],
+            [1.0,  3.0,  0.30535892203916e+2],
+            [1.0,  4.0, -0.65964749423638e+1],
+            [1.0, 10.0,  0.93965400878363e-2],
+            [1.0, 32.0,  0.11573647505340e-6],
+            [2.0, 10.0, -0.25858641282073e-4],
+            [2.0, 32.0, -0.40644363084799e-8],
+            [3.0, 10.0,  0.66456186191635e-7],
+            [3.0, 32.0,  0.80670734103027e-10],
+            [4.0, 32.0, -0.93477771213947e-12],
+            [5.0, 32.0,  0.58265442020601e-14],
+            [6.0, 32.0, -0.15020185953503e-16]
+
+];
+const REGION_1_BACK_COEFFS_PS: [[f64; 3]; 20] = [
+            [0.0,  0.0,  0.17478268058307e+03],
+            [0.0,  1.0,  0.34806930892873e+02],
+            [0.0,  2.0,  0.65292584978455e+01],
+            [0.0,  3.0,  0.33039981775489],
+            [0.0, 11.0, -0.19281382923196e-06],
+            [0.0, 31.0, -0.24909197244573e-22],
+            [1.0,  0.0, -0.26107636489332],
+            [1.0,  1.0,  0.22592965981586],
+            [1.0,  2.0, -0.64256463395226e-01],
+            [1.0,  3.0,  0.78876289270526e-02],
+            [1.0, 12.0,  0.35672110607366e-09],
+            [1.0, 31.0,  0.17332496994895e-23],
+            [2.0,  0.0,  0.56608900654837e-03],
+            [2.0,  1.0, -0.32635483139717e-03],
+            [2.0,  2.0,  0.44778286690632e-04],
+            [2.0,  9.0, -0.51322156908507e-09],
+            [2.0, 31.0, -0.42522657042207e-25],
+            [3.0, 10.0,  0.26400441360689e-12],
+            [3.0, 32.0,  0.78124600459723e-28],
+            [4.0, 32.0, -0.30732199903668e-30]
+];
+
+
+// Region 2
+
 const REGION_2_COEFFS_RES: [[f64; 3]; 43] = [
     [1.0, 0.0, -0.0017731742473213],
     [1.0, 1.0, -0.017834862292358],
@@ -284,6 +333,62 @@ pub fn w_tp_1(t: f64, p: f64) -> f64 {
     square.sqrt()
 }
 
+/// Returns the region-1 theta for backwards calculations
+/// Temperature is assumed to be in K
+fn theta_1_back(t: f64) -> f64 {
+    t
+}
+
+/// Returns the region-1 eta for backwards calculations
+/// Enthalpy is assumed to be in kJ/kg
+fn eta_1_back(h: f64) -> f64 {
+    h / 2500.0 
+}
+
+/// Returns the region-1 pi for backwards calculations
+/// Pressure is assumed to be in Pa
+fn pi_1_back(p: f64) -> f64{
+    p / 1e6
+}
+
+/// Returns the region-1 sigma for backwards calculations
+/// Entropy is assumed to be in kJ/kg.K
+fn sigma_1_back(s: f64) -> f64{
+    s
+}
+
+/// Returns the region-1 backward correlation for T(p,s)
+/// Entropy is assumed to be in kJ/kg.K
+/// Pressure is assumed to be in Pa
+fn t_ps_1(p: f64, s: f64) -> f64 {
+    let sig = sigma_1_back(s);
+    let pi = pi_1_back(p);
+    let mut sum = 0.0;
+    for i in 0..20 {
+        let ii = REGION_1_BACK_COEFFS_PS[i][0] as i32;
+        let ji = REGION_1_BACK_COEFFS_PS[i][1] as i32;
+        let ni = REGION_1_BACK_COEFFS_PS[i][2];
+        sum += ni * pi.powi(ii) * (sig + 2.0).powi(ji);
+    }
+    sum
+}
+
+/// Returns the region-1 backward correlation for T(p,h)
+/// Enthalpy is assumed to be in kJ/kg
+/// Pressure is assumed to be in Pa
+fn t_ph_1(p: f64, h: f64) -> f64 {
+    let eta = eta_1_back(h);
+    let pi = pi_1_back(p);
+    let mut sum = 0.0;
+    for i in 0..20 {
+        let ii = REGION_1_BACK_COEFFS_PH[i][0] as i32;
+        let ji = REGION_1_BACK_COEFFS_PH[i][1] as i32;
+        let ni = REGION_1_BACK_COEFFS_PH[i][2];
+        sum += ni * pi.powi(ii) * (eta + 1.0).powi(ji);
+    }
+    sum
+}
+
 // ================    Region 2 ===================
 
 /// Returns the region-2 tau
@@ -451,7 +556,6 @@ mod tests {
     #[test]
     fn region_1_sound_velocity() {
         let w1 = w_tp_1(300.0, 3e6);
-        println!("{}", w1);
         assert!(is_close(w1/10000.0 , 0.150773921 , 1e-9));
 
         let w1 = w_tp_1(300.0, 80e6);
@@ -464,15 +568,39 @@ mod tests {
     #[test]
     fn region_1_specific_volume() {
         let v1 = v_tp_1(300.0, 3e6);
-        println!("{}", v1);
+        assert!(is_close(v1 * 100.0, 0.100215168, 1e-9));
 
-        assert!(is_close(v1, 0.100215168e-2, 1e-9));
+        let v1 = v_tp_1(300.0, 80e6);
+        assert!(is_close(v1 * 1000.0 , 0.971180894, 1e-9));
 
-        // let v1 = v_tp_1(300.0, 80e6);
-        // assert!(is_close(v1 / 1000.0, 0.184142828, 1e-9));
+        let v1 = v_tp_1(500.0, 3e6);
+        assert!(is_close(v1 * 100.0, 0.120241800, 1e-9));
+    }
 
-        // let v1 = v_tp_1(500.0, 3e6);
-        // assert!(is_close(v1 / 1000.0, 0.975542239, 1e-9));
+    #[test]
+    fn region_1_backwards_t_ph() {
+        let t = t_ph_1( 3e6, 500.0);
+        assert!(is_close(t / 1000.0, 0.391798509, 1e-9));
+
+        let t = t_ph_1( 80e6, 500.0);
+        assert!(is_close(t / 1000.0, 0.378108626, 1e-9));
+
+        let t = t_ph_1( 80e6, 1500.0);
+        assert!(is_close(t / 1000.0, 0.611041229, 1e-9));
+
+    }
+
+    #[test]
+    fn region_1_backwards_t_ps() {
+        let t = t_ps_1( 3e6, 0.5);
+        assert!(is_close(t / 1000.0, 0.307842258, 1e-9));
+
+        let t = t_ps_1( 80e6, 0.5);
+        assert!(is_close(t / 1000.0, 0.309979785, 1e-9));
+
+        let t = t_ps_1( 80e6, 3.0);
+        assert!(is_close(t / 1000.0, 0.565899909, 1e-9));
+
     }
 
     #[test]
