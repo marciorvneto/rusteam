@@ -16,18 +16,18 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Specific volume                 |**OK**| No |
-|Specific enthalpy               |**OK**| **OK**|
-|Specific internal energy        |**OK**| No |
-|Specific entropy                |**OK**| No |
-|Specific isobaric heat capacity |**OK**| No |
+|Specific volume                 |**Yes**| **Yes** |
+|Specific enthalpy               |**Yes**| **Yes**|
+|Specific internal energy        |**Yes**| **Yes** |
+|Specific entropy                |**Yes**| **Yes** |
+|Specific isobaric heat capacity |**Yes**| **Yes** |
 
 
 ### Region 4
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Saturation pressure |**OK**| **OK** |
-|Saturation temperature |**OK**| **OK** |
+|Saturation pressure |**Yes**| **Yes** |
+|Saturation temperature |**Yes**| **Yes** |
 
 

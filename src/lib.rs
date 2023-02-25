@@ -233,7 +233,8 @@ pub fn h_tp_1(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 pub fn v_tp_1(t: f64, p: f64) -> f64 {
-    _R * t / p * pi_1(p) * gamma_pi_1(t, p)
+    // The multiplication by 1000 is necessary to convert R from kJ/kg.K to J/kg.K
+    ((_R * 1000.0) * t / p) * pi_1(p) * gamma_pi_1(t, p)
 }
 
 /// Returns the region-1 specific internal energy
@@ -247,7 +248,7 @@ pub fn u_tp_1(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 pub fn s_tp_1(t: f64, p: f64) -> f64 {
-    _R * t * (tau_1(t) * gamma_tau_1(t, p) - gamma_1(t,p))
+    _R * (tau_1(t) * gamma_tau_1(t, p) - gamma_1(t,p))
 }
 
 /// Returns the region-1 specific isobaric heat capacity
@@ -277,7 +278,10 @@ pub fn w_tp_1(t: f64, p: f64) -> f64 {
     let gamma_pi_pi = gamma_pi_pi_1(t, p);
     let gamma_tau_tau = gamma_tau_tau_1(t, p);
     let term = (gamma_pi - tau * gamma_pi_tau).powi(2)/(tau.powi(2) * gamma_tau_tau);
-    _R * t * (gamma_pi.powi(2)/(term - gamma_pi_pi))
+
+    // The multiplication by 1000 is necessary to convert R from kJ/kg.K to J/kg.K
+    let square = (_R * 1000.0) * t * (gamma_pi.powi(2)/(term - gamma_pi_pi));
+    square.sqrt()
 }
 
 // ================    Region 2 ===================
@@ -299,7 +303,7 @@ fn pi_2(p: f64) -> f64 {
 /// Returns the region-2 ideal gamma_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-fn gamma_tau_2_ideal(t: f64, p: f64) -> f64 {
+fn gamma_tau_2_ideal(t: f64, _: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     for i in 0..REGION_2_COEFFS_IDEAL.len() {
@@ -351,10 +355,10 @@ pub fn p_sat(t: f64) -> f64 {
 
     let theta = t + n9 / (t - n10);
 
-    let A = theta * theta + n1 * theta + n2;
-    let B = n3 * theta * theta + n4 * theta + n5;
-    let C = n6 * theta * theta + n7 * theta + n8;
-    (2.0 * C / (-B + (B * B - 4.0 * A * C).sqrt())).powi(4) * 1e6
+    let coef_a = theta * theta + n1 * theta + n2;
+    let coef_b = n3 * theta * theta + n4 * theta + n5;
+    let coef_c = n6 * theta * theta + n7 * theta + n8;
+    (2.0 * coef_c / (-coef_b + (coef_b * coef_b - 4.0 * coef_a * coef_c).sqrt())).powi(4) * 1e6
 }
 
 /// Returns the saturation temperature in K
@@ -373,13 +377,13 @@ pub fn t_sat(p: f64) -> f64 {
 
     let beta = (p / 1e6).powf(0.25);
 
-    let E = beta * beta + n3 * beta + n6;
-    let F = n1 * beta * beta + n4 * beta + n7;
-    let G = n2 * beta * beta + n5 * beta + n8;
+    let coef_e = beta * beta + n3 * beta + n6;
+    let coef_f = n1 * beta * beta + n4 * beta + n7;
+    let coef_g = n2 * beta * beta + n5 * beta + n8;
 
-    let D = 2.0 * G / (-F - (F * F - 4.0 * E * G).sqrt());
+    let coef_d = 2.0 * coef_g / (-coef_f - (coef_f * coef_f - 4.0 * coef_e * coef_g).sqrt());
 
-    (n10 + D - ((n10 + D).powi(2) - 4.0 * (n9 + n10 * D)).sqrt()) / 2.0
+    (n10 + coef_d - ((n10 + coef_d).powi(2) - 4.0 * (n9 + n10 * coef_d)).sqrt()) / 2.0
 }
 
 #[cfg(test)]
@@ -404,6 +408,57 @@ mod tests {
 
         let h1 = h_tp_1(500.0, 3e6);
         assert!(is_close(h1 / 1000.0, 0.975542239, 1e-9));
+    }
+
+    #[test]
+    fn region_1_internal_energy() {
+        let u1 = u_tp_1(300.0, 3e6);
+
+        assert!(is_close(u1 / 1000.0, 0.112324818, 1e-9));
+
+        let u1 = u_tp_1(300.0, 80e6);
+        assert!(is_close(u1 / 1000.0, 0.106448356, 1e-9));
+
+        let u1 = u_tp_1(500.0, 3e6);
+        assert!(is_close(u1 / 1000.0, 0.971934985, 1e-9));
+    }
+
+    #[test]
+    fn region_1_entropy() {
+        let s1 = s_tp_1(300.0, 3e6);
+        assert!(is_close(s1 , 0.392294792, 1e-9));
+
+        let s1 = s_tp_1(300.0, 80e6);
+        assert!(is_close(s1 , 0.368563852, 1e-9));
+
+        let s1 = s_tp_1(500.0, 3e6);
+        assert!(is_close(s1 , 0.258041912e1, 1e-9));
+    }
+
+    #[test]
+    fn region_1_cp() {
+        let cp1 = cp_tp_1(300.0, 3e6);
+        println!("{}", cp1);
+        assert!(is_close(cp1/10.0 , 0.417301218, 1e-9));
+
+        let cp1 = cp_tp_1(300.0, 80e6);
+        assert!(is_close(cp1/10.0 , 0.401008987, 1e-9));
+
+        let cp1 = cp_tp_1(500.0, 3e6);
+        assert!(is_close(cp1/10.0 , 0.465580682, 1e-9));
+    }
+
+    #[test]
+    fn region_1_sound_velocity() {
+        let w1 = w_tp_1(300.0, 3e6);
+        println!("{}", w1);
+        assert!(is_close(w1/10000.0 , 0.150773921 , 1e-9));
+
+        let w1 = w_tp_1(300.0, 80e6);
+        assert!(is_close(w1/10000.0 , 0.163469054, 1e-9));
+
+        let w1 = w_tp_1(500.0, 3e6);
+        assert!(is_close(w1/10000.0 , 0.124071337, 1e-9));
     }
 
     #[test]
