@@ -397,8 +397,6 @@ mod tests {
     fn region_1_enthalpy() {
         let h1 = h_tp_1(300.0, 3e6);
 
-        println!("H(300, 3e6) = {}", h1);
-
         assert!(is_close(h1 / 1000.0, 0.115331273, 1e-9));
 
         let h1 = h_tp_1(300.0, 80e6);
@@ -406,6 +404,20 @@ mod tests {
 
         let h1 = h_tp_1(500.0, 3e6);
         assert!(is_close(h1 / 1000.0, 0.975542239, 1e-9));
+    }
+
+    #[test]
+    fn region_1_specific_volume() {
+        let v1 = v_tp_1(300.0, 3e6);
+        println!("{}", v1);
+
+        assert!(is_close(v1, 0.100215168e-2, 1e-9));
+
+        // let v1 = v_tp_1(300.0, 80e6);
+        // assert!(is_close(v1 / 1000.0, 0.184142828, 1e-9));
+
+        // let v1 = v_tp_1(500.0, 3e6);
+        // assert!(is_close(v1 / 1000.0, 0.975542239, 1e-9));
     }
 
     #[test]
