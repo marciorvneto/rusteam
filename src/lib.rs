@@ -157,6 +157,92 @@ const REGION_4_SATURATION_COEFFS: [f64; 10] = [
     0.65017534844798e3,
 ];
 
+pub enum Region {
+    Region1,
+    Region2,
+    Region3,
+    Region4,
+    Region5,
+}
+
+#[derive(Debug)]
+pub enum IAPWSError {
+    OutOfBounds(f64, f64),
+    NotImplemented()
+}
+
+// ===============     Main API ===================
+
+pub fn region(t: f64, p: f64) -> Result<Region,IAPWSError> {
+    if t < 273.15 || t > 2273.15{
+        return Err(IAPWSError::OutOfBounds(t, p));
+    }
+    if p > 100e6 || p < 0.0{
+        return Err(IAPWSError::OutOfBounds(t, p));
+    }
+
+    if t < 623.15 && p > p_sat(t) {
+        if p > p_sat(t){
+            return Ok(Region::Region1);
+        }else if p < p_sat(t) {
+            return Ok(Region::Region2);
+        }
+        return Ok(Region::Region4);
+    }
+
+    if t >= 1073.15 {
+        if p > 50e6 {
+            return Err(IAPWSError::OutOfBounds(t, p));
+        }
+        return Ok(Region::Region5);
+    }
+    
+
+    Err(IAPWSError::OutOfBounds(t, p))
+}
+
+/// Calculates the water enthalpy in kJ/kg at a given
+/// temperature and pressure.
+///
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+///
+/// Example
+///
+/// ```rust
+/// use rust_steam::{h_tp};
+/// let h = h_tp(300.0, 101325.0).unwrap();
+/// ```
+pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+    let region = region(t, p)?;
+    return match region {
+        Region::Region1 => Ok(h_tp_1(t, p)),
+        Region::Region2 => Ok(h_tp_2(t, p)),
+        _ => Err(IAPWSError::NotImplemented())
+    }
+}
+
+/// Calculates the water internal energy in kJ/kg at a given
+/// temperature and pressure.
+///
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+///
+/// Example
+///
+/// ```rust
+/// use rust_steam::{u_tp};
+/// let u = u_tp(300.0, 101325.0).unwrap();
+/// ```
+pub fn u_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+    let region = region(t, p)?;
+    return match region {
+        Region::Region1 => Ok(u_tp_1(t, p)),
+        Region::Region2 => Ok(u_tp_2(t, p)),
+        _ => Err(IAPWSError::NotImplemented())
+    }
+}
+
 // ================    Region 1 ===================
 
 /// Returns the region-1 gamma
