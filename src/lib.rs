@@ -1,4 +1,3 @@
-
 const _R: f64 = 0.461526;
 
 const REGION_1_COEFFS: [[f64; 3]; 34] = [
@@ -167,7 +166,7 @@ fn gamma_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..34 {
+    for i in 0..REGION_1_COEFFS.len() {
         let ii = REGION_1_COEFFS[i][0] as i32;
         let ji = REGION_1_COEFFS[i][1] as i32;
         let ni = REGION_1_COEFFS[i][2];
@@ -183,7 +182,7 @@ fn gamma_pi_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..34 {
+    for i in 0..REGION_1_COEFFS.len() {
         let ii = REGION_1_COEFFS[i][0] as i32;
         let ji = REGION_1_COEFFS[i][1] as i32;
         let ni = REGION_1_COEFFS[i][2];
@@ -199,7 +198,7 @@ fn gamma_pi_pi_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..34 {
+    for i in 0..REGION_1_COEFFS.len() {
         let ii = REGION_1_COEFFS[i][0] as i32;
         let ji = REGION_1_COEFFS[i][1] as i32;
         let ni = REGION_1_COEFFS[i][2];
@@ -215,7 +214,7 @@ fn gamma_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..34 {
+    for i in 0..REGION_1_COEFFS.len() {
         let ii = REGION_1_COEFFS[i][0] as i32;
         let ji = REGION_1_COEFFS[i][1] as i32;
         let ni = REGION_1_COEFFS[i][2];
@@ -231,7 +230,7 @@ fn gamma_tau_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..34 {
+    for i in 0..REGION_1_COEFFS.len() {
         let ii = REGION_1_COEFFS[i][0] as i32;
         let ji = REGION_1_COEFFS[i][1] as i32;
         let ni = REGION_1_COEFFS[i][2];
@@ -247,7 +246,7 @@ fn gamma_pi_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..34 {
+    for i in 0..REGION_1_COEFFS.len() {
         let ii = REGION_1_COEFFS[i][0] as i32;
         let ji = REGION_1_COEFFS[i][1] as i32;
         let ni = REGION_1_COEFFS[i][2];
@@ -360,11 +359,11 @@ fn sigma_1_back(s: f64) -> f64{
 /// Returns the region-1 backward correlation for T(p,s)
 /// Entropy is assumed to be in kJ/kg.K
 /// Pressure is assumed to be in Pa
-fn t_ps_1(p: f64, s: f64) -> f64 {
+pub fn t_ps_1(p: f64, s: f64) -> f64 {
     let sig = sigma_1_back(s);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
-    for i in 0..20 {
+    for i in 0..REGION_1_BACK_COEFFS_PS.len() {
         let ii = REGION_1_BACK_COEFFS_PS[i][0] as i32;
         let ji = REGION_1_BACK_COEFFS_PS[i][1] as i32;
         let ni = REGION_1_BACK_COEFFS_PS[i][2];
@@ -376,11 +375,11 @@ fn t_ps_1(p: f64, s: f64) -> f64 {
 /// Returns the region-1 backward correlation for T(p,h)
 /// Enthalpy is assumed to be in kJ/kg
 /// Pressure is assumed to be in Pa
-fn t_ph_1(p: f64, h: f64) -> f64 {
+pub fn t_ph_1(p: f64, h: f64) -> f64 {
     let eta = eta_1_back(h);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
-    for i in 0..20 {
+    for i in 0..REGION_1_BACK_COEFFS_PH.len() {
         let ii = REGION_1_BACK_COEFFS_PH[i][0] as i32;
         let ji = REGION_1_BACK_COEFFS_PH[i][1] as i32;
         let ni = REGION_1_BACK_COEFFS_PH[i][2];
@@ -405,6 +404,37 @@ fn pi_2(p: f64) -> f64 {
     p / 1e6
 }
 
+/// Returns the region-2 ideal gamma
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_2_ideal(t: f64, p: f64) -> f64 {
+    let pi = pi_2(p);
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    for i in 0..REGION_2_COEFFS_IDEAL.len() {
+        let ji = REGION_2_COEFFS_IDEAL[i][0];
+        let ni = REGION_2_COEFFS_IDEAL[i][1];
+        sum += ni * tau.powf(ji);
+    }
+    pi.ln() + sum
+}
+
+/// Returns the region-2 residual gamma
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_2_res(t: f64, p: f64) -> f64 {
+    let pi = pi_2(p);
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    for i in 0..REGION_2_COEFFS_RES.len() {
+        let ii = REGION_2_COEFFS_RES[i][0] as i32;
+        let ji = REGION_2_COEFFS_RES[i][1] as i32;
+        let ni = REGION_2_COEFFS_RES[i][2];
+        sum += ni * pi.powi(ii) * (tau - 0.5).powi(ji);
+    }
+    sum
+}
+
 /// Returns the region-2 ideal gamma_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
@@ -412,11 +442,32 @@ fn gamma_tau_2_ideal(t: f64, _: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     for i in 0..REGION_2_COEFFS_IDEAL.len() {
-        let ji = REGION_2_COEFFS_IDEAL[i][0];
+        let ji = REGION_2_COEFFS_IDEAL[i][0] as i32;
         let ni = REGION_2_COEFFS_IDEAL[i][1];
-        sum += ni * ji * tau.powf(ji - 1.0);
+        sum += ni * f64::from(ji) * tau.powi(ji - 1);
     }
     sum
+}
+
+/// Returns the region-2 ideal gamma_tau_tau
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_tau_tau_2_ideal(t: f64, _: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    for i in 0..REGION_2_COEFFS_IDEAL.len() {
+        let ji = REGION_2_COEFFS_IDEAL[i][0] as i32;
+        let ni = REGION_2_COEFFS_IDEAL[i][1];
+        sum += ni * f64::from(ji * (ji - 1)) * tau.powi(ji - 2);
+    }
+    sum
+}
+
+/// Returns the region-2 ideal gamma_pi
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_pi_2_ideal(_: f64, p: f64) -> f64 {
+    1.0 / pi_2(p)
 }
 
 /// Returns the region-2 residual gamma_tau
@@ -427,12 +478,83 @@ fn gamma_tau_2_res(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
     for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0];
-        let ji = REGION_2_COEFFS_RES[i][1];
+        let ii = REGION_2_COEFFS_RES[i][0] as i32;
+        let ji = REGION_2_COEFFS_RES[i][1] as i32;
         let ni = REGION_2_COEFFS_RES[i][2];
-        sum += ni * pi.powf(ii) * ji * (tau - 0.5).powf(ji - 1.0);
+        sum += ni * pi.powi(ii) * f64::from(ji) * (tau - 0.5).powi(ji - 1);
     }
     sum
+}
+
+/// Returns the region-2 residual gamma_tau_tau
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_tau_tau_2_res(t: f64, p: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    for i in 0..REGION_2_COEFFS_RES.len() {
+        let ii = REGION_2_COEFFS_RES[i][0] as i32;
+        let ji = REGION_2_COEFFS_RES[i][1] as i32;
+        let ni = REGION_2_COEFFS_RES[i][2];
+        sum += ni * pi.powi(ii) * f64::from(ji * (ji - 1)) * (tau - 0.5).powi(ji - 2);
+    }
+    sum
+}
+
+/// Returns the region-2 residual gamma_pi
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_pi_2_res(t: f64, p: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    for i in 0..REGION_2_COEFFS_RES.len() {
+        let ii = REGION_2_COEFFS_RES[i][0] as i32;
+        let ji = REGION_2_COEFFS_RES[i][1] as i32;
+        let ni = REGION_2_COEFFS_RES[i][2];
+        sum += ni * pi.powi(ii - 1) * f64::from(ii) * (tau - 0.5).powi(ji);
+    }
+    sum
+}
+
+/// Returns the region-2 residual gamma_pi_pi
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_pi_pi_2_res(t: f64, p: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    for i in 0..REGION_2_COEFFS_RES.len() {
+        let ii = REGION_2_COEFFS_RES[i][0] as i32;
+        let ji = REGION_2_COEFFS_RES[i][1] as i32;
+        let ni = REGION_2_COEFFS_RES[i][2];
+        sum += ni * pi.powi(ii - 2) * f64::from(ii * (ii - 1)) * (tau - 0.5).powi(ji);
+    }
+    sum
+}
+
+/// Returns the region-2 residual gamma_pi_tau
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    for i in 0..REGION_2_COEFFS_RES.len() {
+        let ii = REGION_2_COEFFS_RES[i][0] as i32;
+        let ji = REGION_2_COEFFS_RES[i][1] as i32;
+        let ni = REGION_2_COEFFS_RES[i][2];
+        sum += ni * pi.powi(ii - 1) * f64::from(ii * ji) * (tau - 0.5).powi(ji - 1);
+    }
+    sum
+}
+
+/// Returns the region-2 specific volume
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+pub fn v_tp_2(t: f64, p: f64) -> f64 {
+    ((_R * 1000.0) * t / p) * pi_2(p) * (gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p))
 }
 
 /// Returns the region-2 enthalpy
@@ -440,6 +562,59 @@ fn gamma_tau_2_res(t: f64, p: f64) -> f64 {
 /// Pressure is assumed to be in Pa
 pub fn h_tp_2(t: f64, p: f64) -> f64 {
     _R * t * tau_2(t) * (gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p))
+}
+
+/// Returns the region-2 internal energy
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+pub fn u_tp_2(t: f64, p: f64) -> f64 {
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    let tau_term = gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p);
+    let pi_term = gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p);
+    _R * t * (tau * tau_term - pi * pi_term)
+}
+
+/// Returns the region-2 entropy
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+pub fn s_tp_2(t: f64, p: f64) -> f64 {
+    let tau = tau_2(t);
+    let tau_term = gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p);
+    let pi_term = gamma_2_ideal(t, p) + gamma_2_res(t, p);
+    _R * (tau * tau_term - pi_term)
+}
+
+/// Returns the region-2 isobaric specific heat
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+pub fn cp_tp_2(t: f64, p: f64) -> f64 {
+    let tau = tau_2(t);
+    - _R  * tau.powi(2) * (gamma_tau_tau_2_ideal(t, p) + gamma_tau_tau_2_res(t, p))
+}
+
+/// Returns the region-2 isochoric specific heat
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+pub fn cv_tp_2(t: f64, p: f64) -> f64 {
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    let num = (1.0 + pi*gamma_pi_2_res(t, p) - tau * pi * gamma_pi_tau_2_res(t,p)).powi(2);
+    let den = 1.0 - pi.powi(2) * gamma_pi_pi_2_res(t,p);
+    cp_tp_2(t, p) - _R * num/ den
+}
+
+/// Returns the region-2 sound velocity
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+pub fn w_tp_2(t: f64, p: f64) -> f64 {
+    let tau = tau_2(t);
+    let pi = pi_2(p);
+    let num = 1.0 + 2.0*pi*gamma_pi_2_res(t, p) +  pi.powi(2) * gamma_pi_2_res(t,p).powi(2);
+    let subnum = (1.0 + pi * gamma_pi_2_res(t, p) - tau * pi * gamma_pi_tau_2_res(t, p)).powi(2);
+    let subden = tau.powi(2)*(gamma_tau_tau_2_ideal(t, p) + gamma_tau_tau_2_res(t, p));
+    let den = 1.0 - pi.powi(2) * gamma_pi_pi_2_res(t,p) + subnum / subden;
+    ((_R * 1000.0 * t) * num / den).sqrt()
 }
 
 // ================    Region 4 ===================
@@ -604,16 +779,82 @@ mod tests {
     }
 
     #[test]
-    fn region_2_enthalpy() {
-        let h2 = h_tp_2(300.0, 0.0035e6);
-        assert!(is_close(h2 / 10000.0, 0.254991145, 1e-9));
+    fn region_2_specific_volume() {
+        let v = v_tp_2(300.0, 0.0035e6);
+        assert!(is_close(v / 100.0, 0.394913866, 1e-9));
 
-        let h2 = h_tp_2(700.0, 0.0035e6);
-        assert!(is_close(h2 / 10000.0, 0.333568375, 1e-9));
+        let v = v_tp_2(700.0, 0.0035e6);
+        assert!(is_close(v / 100.0, 0.923015898 , 1e-9));
 
-        let h2 = h_tp_2(700.0, 30e6);
-        assert!(is_close(h2 / 10000.0, 0.263149474, 1e-9));
+        let v = v_tp_2(700.0, 30e6);
+        assert!(is_close(v / 0.01, 0.542946619, 1e-9));
     }
+
+    #[test]
+    fn region_2_enthalpy() {
+        let h = h_tp_2(300.0, 0.0035e6);
+        assert!(is_close(h / 10000.0, 0.254991145, 1e-9));
+
+        let h = h_tp_2(700.0, 0.0035e6);
+        assert!(is_close(h / 10000.0, 0.333568375, 1e-9));
+
+        let h = h_tp_2(700.0, 30e6);
+        assert!(is_close(h / 10000.0, 0.263149474, 1e-9));
+    }
+
+    #[test]
+    fn region_2_internal_energy() {
+        let u = u_tp_2(300.0, 0.0035e6);
+        assert!(is_close(u / 10000.0, 0.241169160, 1e-9));
+
+        let u = u_tp_2(700.0, 0.0035e6);
+        assert!(is_close(u / 10000.0, 0.301262819, 1e-9));
+
+        let u = u_tp_2(700.0, 30e6);
+        assert!(is_close(u / 10000.0, 0.246861076, 1e-9));
+    }
+
+    #[test]
+    fn region_2_entropy() {
+        let s = s_tp_2(300.0, 0.0035e6);
+        println!("{}", s);
+        assert!(is_close(s / 10.0, 0.852238967, 1e-9));
+
+        let s = s_tp_2(700.0, 0.0035e6);
+        assert!(is_close(s / 100.0, 0.101749996, 1e-9));
+
+        let s = s_tp_2(700.0, 30e6);
+        assert!(is_close(s / 10.0, 0.517540298, 1e-9));
+    }
+
+    #[test]
+    fn region_2_cp() {
+        let cp = cp_tp_2(300.0, 0.0035e6);
+        println!("{}", cp);
+        assert!(is_close(cp / 10.0, 0.191300162, 1e-9));
+
+        let cp = cp_tp_2(700.0, 0.0035e6);
+        assert!(is_close(cp / 10.0, 0.208141274 , 1e-9));
+
+        let cp = cp_tp_2(700.0, 30e6);
+        assert!(is_close(cp / 100.0, 0.103505092, 1e-9));
+    }
+
+    #[test]
+    fn region_2_sound_velocity() {
+        let w = w_tp_2(300.0, 0.0035e6);
+        println!("{}", w);
+        assert!(is_close(w / 1000.0, 0.427920172, 1e-9));
+
+        let w = w_tp_2(700.0, 0.0035e6);
+        assert!(is_close(w / 1000.0, 0.644289068, 1e-9));
+
+        let w = w_tp_2(700.0, 30e6);
+        assert!(is_close(w / 1000.0, 0.480386523, 1e-9));
+    }
+
+
+    // Region 4
 
     #[test]
     fn region_4_saturation_pressure() {

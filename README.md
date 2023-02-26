@@ -36,11 +36,11 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Specific volume                 |**No**| **No** |
+|Specific volume                 |**Yes**| **Yes** |
 |Specific enthalpy               |**Yes**| **Yes**|
-|Specific internal energy        |**No**| **No** |
-|Specific entropy                |**No**| **No** |
-|Specific isobaric heat capacity |**No**| **No** |
+|Specific internal energy        |**Yes**| **Yes** |
+|Specific entropy                |**Yes**| **Yes** |
+|Specific isobaric heat capacity |**Yes**| **Yes** |
 
 ### Region 4
 
