@@ -1,6 +1,6 @@
 [package]
 name = "rust-steam"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 description = "A Rust implementation of the IAPWS-IF97 steam tables"
 repository = "https://github.com/marciorvneto/rusteam"

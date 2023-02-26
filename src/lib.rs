@@ -157,6 +157,52 @@ const REGION_4_SATURATION_COEFFS: [f64; 10] = [
     0.65017534844798e3,
 ];
 
+// Region 3
+
+
+const REGION_3_COEFFS: [[f64; 3]; 40] = [
+    [0.0,  0.0,    0.10658070028513e1],
+    [0.0,  0.0,   -0.15732845290239e2],
+    [0.0,  1.0,    0.20944396974307e2],
+    [0.0,  2.0,   -0.76867707878716e1],
+    [0.0,  7.0,    0.26185947787954e1],
+    [0.0,  10.0,  -0.28080781148620e1],
+    [0.0,  12.0,   0.12053369696517e1],
+    [0.0,  23.0,  -0.84566812812502e-2],
+    [1.0,  2.0,   -0.12654315477714e1],
+    [1.0,  6.0,   -0.11524407806681e1],
+    [1.0,  15.0,   0.88521043984318],
+    [1.0,  17.0,  -0.64207765181607],
+    [2.0,  0.0,    0.38493460186671],
+    [2.0,  2.0,   -0.85214708824206],
+    [2.0,  6.0,    0.48972281541877e1],
+    [2.0,  7.0,   -0.30502617256965e1],
+    [2.0,  22.0,   0.39420536879154e-1],
+    [2.0,  26.0,   0.12558408424308],
+    [3.0,  0.0,   -0.27999329698710],
+    [3.0,  2.0,    0.13899799569460e1],
+    [3.0,  4.0,   -0.20189915023570e1],
+    [3.0,  16.0,  -0.82147637173963e-2],
+    [3.0,  26.0,  -0.47596035734923],
+    [4.0,  0.0,    0.43984074473500e-1],
+    [4.0,  2.0,   -0.44476435428739],
+    [4.0,  4.0,    0.90572070719733],
+    [4.0,  26.0,   0.70522450087967],
+    [5.0,  1.0,    0.10770512626332],
+    [5.0,  3.0,   -0.32913623258954],
+    [5.0,  26.0,  -0.50871062041158],
+    [6.0,  0.0,   -0.22175400873096e-1],
+    [6.0,  2.0,    0.94260751665092e-1],
+    [6.0,  26.0,   0.16436278447961],
+    [7.0,  2.0,   -0.13503372241348e-1],
+    [8.0,  26.0,  -0.14834345352472e-1],
+    [9.0,  2.0,    0.57922953628084e-3],
+    [9.0,  26.0,   0.32308904703711e-2],
+    [10.0, 0.0,   0.80964802996215e-4],
+    [10.0, 1.0,  -0.16557679795037e-3],
+    [11.0, 26.0, -0.44923899061815e-4],
+];
+
 pub enum Region {
     Region1,
     Region2,
@@ -173,6 +219,21 @@ pub enum IAPWSError {
 
 // ===============     Main API ===================
 
+/// Determines which region of the pT chart
+/// a point belongs to.
+///
+/// Returns an error if the point is outside the
+/// bounds of the IAPWS-IF97 correlations.
+///
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+///
+/// Example
+///
+/// ```rust
+/// use rust_steam::{region};
+/// let region = region(300.0, 101325.0).unwrap();
+/// ```
 pub fn region(t: f64, p: f64) -> Result<Region,IAPWSError> {
     if t < 273.15 || t > 2273.15{
         return Err(IAPWSError::OutOfBounds(t, p));
@@ -181,13 +242,26 @@ pub fn region(t: f64, p: f64) -> Result<Region,IAPWSError> {
         return Err(IAPWSError::OutOfBounds(t, p));
     }
 
-    if t < 623.15 && p > p_sat(t) {
+    if t <= 623.15 {
         if p > p_sat(t){
             return Ok(Region::Region1);
         }else if p < p_sat(t) {
             return Ok(Region::Region2);
         }
         return Ok(Region::Region4);
+    }
+
+    if t <= 863.15 {
+        if p > p_boundary_2_3(t){
+            return Ok(Region::Region3);
+        }else if p < p_boundary_2_3(t) {
+            return Ok(Region::Region2);
+        }
+        return Ok(Region::Region4);
+    }
+
+    if t < 1073.15 {
+        return Ok(Region::Region2);
     }
 
     if t >= 1073.15 {
@@ -475,6 +549,26 @@ pub fn t_ph_1(p: f64, h: f64) -> f64 {
 }
 
 // ================    Region 2 ===================
+
+/// Auxiliary equation separating regions 2 and 3
+fn t_boundary_2_3(p: f64) -> f64 {
+    let pi = p / 1e6;
+    let theta_star = 1.0;
+    let n3 = 0.10192970039326e-2;
+    let n4 = 0.57254459862746e3;
+    let n5 = 0.13918839778870e2;
+    let theta = n4 + ((pi - n5)/n3).sqrt();
+    theta * theta_star
+}
+fn p_boundary_2_3(t: f64) -> f64 {
+    let p_star = 1e6;
+    let theta = t / 1.0;
+    let n1 = 0.34805185628969e3;
+    let n2 = -0.11671859879975e1;
+    let n3 = 0.10192970039326e-2;
+    p_star * (n1 + n2 * theta + n3 * theta*theta)
+
+    }
 
 /// Returns the region-2 tau
 /// Temperature is assumed to be in K
@@ -916,7 +1010,6 @@ mod tests {
     #[test]
     fn region_2_cp() {
         let cp = cp_tp_2(300.0, 0.0035e6);
-        println!("{}", cp);
         assert!(is_close(cp / 10.0, 0.191300162, 1e-9));
 
         let cp = cp_tp_2(700.0, 0.0035e6);
@@ -929,7 +1022,6 @@ mod tests {
     #[test]
     fn region_2_sound_velocity() {
         let w = w_tp_2(300.0, 0.0035e6);
-        println!("{}", w);
         assert!(is_close(w / 1000.0, 0.427920172, 1e-9));
 
         let w = w_tp_2(700.0, 0.0035e6);
@@ -937,6 +1029,16 @@ mod tests {
 
         let w = w_tp_2(700.0, 30e6);
         assert!(is_close(w / 1000.0, 0.480386523, 1e-9));
+    }
+
+    #[test]
+    fn region_2_3_auxiliary_boundary() {
+        let p = p_boundary_2_3(623.15);
+        assert!(is_close(p / 1e8, 0.165291643, 1e-9));
+
+        let t = t_boundary_2_3(0.165291643e8);
+        assert!(is_close(t / 1e3, 0.623150000, 1e-9));
+
     }
 
 
