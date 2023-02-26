@@ -1,4 +1,7 @@
 const _R: f64 = 0.461526;
+const t_c: f64 = 647.096;
+const rho_c: f64 = 322.0;
+const p_c: f64 = 22.064e6;
 
 const REGION_1_COEFFS: [[f64; 3]; 34] = [
     [0.0, -2.0, 0.14632971213167],
@@ -797,6 +800,52 @@ pub fn w_tp_2(t: f64, p: f64) -> f64 {
     ((_R * 1000.0 * t) * num / den).sqrt()
 }
 
+// ================    Region 3 ===================
+
+
+/// Returns the region-3 delta
+/// Specific mass is assumed to be in kg/m3 
+fn delta_3(rho: f64) -> f64 {
+    rho / rho_c
+}
+
+/// Returns the region-3 tau
+/// Temperature is assumed to be in K
+fn tau_3(t: f64) -> f64 {
+    t_c / t
+}
+
+pub fn phi_delta_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for i in 1..REGION_3_COEFFS.len() {
+        let ii = REGION_3_COEFFS[i][0] as i32;
+        let ji = REGION_3_COEFFS[i][1] as i32;
+        let ni = REGION_3_COEFFS[i][2];
+        sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
+    }
+    sum + REGION_3_COEFFS[0][2] / delta
+}
+
+pub fn phi_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for i in 1..REGION_3_COEFFS.len() {
+        let ii = REGION_3_COEFFS[i][0] as i32;
+        let ji = REGION_3_COEFFS[i][1] as i32;
+        let ni = REGION_3_COEFFS[i][2];
+        sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji -1);
+    }
+    sum
+}
+
+pub fn p_rho_t_3(rho: f64, t: f64) -> f64 {
+    rho * (_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
+}
+
+
 // ================    Region 4 ===================
 
 /// Returns the saturation pressure in Pa
@@ -1039,6 +1088,20 @@ mod tests {
         let t = t_boundary_2_3(0.165291643e8);
         assert!(is_close(t / 1e3, 0.623150000, 1e-9));
 
+    }
+
+    // Region 3
+   
+    #[test]
+    fn region_3_p() {
+        let p = p_rho_t_3(500.0, 650.0);
+        assert!(is_close(p / 1e8, 0.255837018, 1e-9));
+
+        let p = p_rho_t_3(200.0, 650.0);
+        assert!(is_close(p / 1e8, 0.222930643, 1e-9));
+
+        let p = p_rho_t_3(500.0, 750.0);
+        assert!(is_close(p / 1e8, 0.783095639, 1e-9));
     }
 
 
