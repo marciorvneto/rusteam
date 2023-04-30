@@ -234,10 +234,10 @@ pub enum IAPWSError {
 /// let region = region(300.0, 101325.0).unwrap();
 /// ```
 pub fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
-    if t < 273.15 || t > 2273.15 {
+    if !(273.15..=2273.15).contains(&t) {
         return Err(IAPWSError::OutOfBounds(t, p));
     }
-    if p > 100e6 || p < 0.0 {
+    if !(0.0..=100e6).contains(&p) {
         return Err(IAPWSError::OutOfBounds(t, p));
     }
 
@@ -287,11 +287,11 @@ pub fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
 /// ```
 pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
-    return match region {
+    match region {
         Region::Region1 => Ok(h_tp_1(t, p)),
         Region::Region2 => Ok(h_tp_2(t, p)),
         _ => Err(IAPWSError::NotImplemented()),
-    };
+    }
 }
 
 /// Calculates the water internal energy in kJ/kg at a given
@@ -308,11 +308,11 @@ pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 /// ```
 pub fn u_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
-    return match region {
+    match region {
         Region::Region1 => Ok(u_tp_1(t, p)),
         Region::Region2 => Ok(u_tp_2(t, p)),
         _ => Err(IAPWSError::NotImplemented()),
-    };
+    }
 }
 
 // ================    Region 1 ===================
@@ -324,10 +324,10 @@ fn gamma_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_COEFFS.len() {
-        let ii = REGION_1_COEFFS[i][0] as i32;
-        let ji = REGION_1_COEFFS[i][1] as i32;
-        let ni = REGION_1_COEFFS[i][2];
+    for coefficient in REGION_1_COEFFS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji);
     }
     sum
@@ -340,10 +340,10 @@ fn gamma_pi_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_COEFFS.len() {
-        let ii = REGION_1_COEFFS[i][0] as i32;
-        let ji = REGION_1_COEFFS[i][1] as i32;
-        let ni = REGION_1_COEFFS[i][2];
+    for coefficient in REGION_1_COEFFS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += -ni * f64::from(ii) * (7.1 - pi).powi(ii - 1) * (tau - 1.222).powi(ji);
     }
     sum
@@ -356,10 +356,10 @@ fn gamma_pi_pi_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_COEFFS.len() {
-        let ii = REGION_1_COEFFS[i][0] as i32;
-        let ji = REGION_1_COEFFS[i][1] as i32;
-        let ni = REGION_1_COEFFS[i][2];
+    for coefficient in REGION_1_COEFFS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * f64::from(ii * (ii - 1)) * (7.1 - pi).powi(ii - 2) * (tau - 1.222).powi(ji);
     }
     sum
@@ -372,10 +372,10 @@ fn gamma_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_COEFFS.len() {
-        let ii = REGION_1_COEFFS[i][0] as i32;
-        let ji = REGION_1_COEFFS[i][1] as i32;
-        let ni = REGION_1_COEFFS[i][2];
+    for coefficient in REGION_1_COEFFS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * f64::from(ji) * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji - 1);
     }
     sum
@@ -388,10 +388,10 @@ fn gamma_tau_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_COEFFS.len() {
-        let ii = REGION_1_COEFFS[i][0] as i32;
-        let ji = REGION_1_COEFFS[i][1] as i32;
-        let ni = REGION_1_COEFFS[i][2];
+    for coefficient in REGION_1_COEFFS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * f64::from(ji * (ji - 1)) * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji - 2);
     }
     sum
@@ -404,10 +404,10 @@ fn gamma_pi_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_COEFFS.len() {
-        let ii = REGION_1_COEFFS[i][0] as i32;
-        let ji = REGION_1_COEFFS[i][1] as i32;
-        let ni = REGION_1_COEFFS[i][2];
+    for coefficient in REGION_1_COEFFS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += -ni * f64::from(ii * ji) * (7.1 - pi).powi(ii - 1) * (tau - 1.222).powi(ji - 1);
     }
     sum
@@ -514,10 +514,10 @@ pub fn t_ps_1(p: f64, s: f64) -> f64 {
     let sig = sigma_1_back(s);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_BACK_COEFFS_PS.len() {
-        let ii = REGION_1_BACK_COEFFS_PS[i][0] as i32;
-        let ji = REGION_1_BACK_COEFFS_PS[i][1] as i32;
-        let ni = REGION_1_BACK_COEFFS_PS[i][2];
+    for coefficient in REGION_1_BACK_COEFFS_PS {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii) * (sig + 2.0).powi(ji);
     }
     sum
@@ -530,10 +530,10 @@ pub fn t_ph_1(p: f64, h: f64) -> f64 {
     let eta = eta_1_back(h);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
-    for i in 0..REGION_1_BACK_COEFFS_PH.len() {
-        let ii = REGION_1_BACK_COEFFS_PH[i][0] as i32;
-        let ji = REGION_1_BACK_COEFFS_PH[i][1] as i32;
-        let ni = REGION_1_BACK_COEFFS_PH[i][2];
+    for coefficient in REGION_1_BACK_COEFFS_PH{
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii) * (eta + 1.0).powi(ji);
     }
     sum
@@ -571,9 +571,9 @@ fn gamma_2_ideal(t: f64, p: f64) -> f64 {
     let pi = pi_2(p);
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for i in 0..REGION_2_COEFFS_IDEAL.len() {
-        let ji = REGION_2_COEFFS_IDEAL[i][0];
-        let ni = REGION_2_COEFFS_IDEAL[i][1];
+    for coefficient in REGION_2_COEFFS_IDEAL {
+        let ji = coefficient[0];
+        let ni = coefficient[1];
         sum += ni * tau.powf(ji);
     }
     pi.ln() + sum
@@ -586,10 +586,10 @@ fn gamma_2_res(t: f64, p: f64) -> f64 {
     let pi = pi_2(p);
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0] as i32;
-        let ji = REGION_2_COEFFS_RES[i][1] as i32;
-        let ni = REGION_2_COEFFS_RES[i][2];
+    for coefficient in REGION_2_COEFFS_RES {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii) * (tau - 0.5).powi(ji);
     }
     sum
@@ -601,10 +601,10 @@ fn gamma_2_res(t: f64, p: f64) -> f64 {
 fn gamma_tau_2_ideal(t: f64, _: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for i in 0..REGION_2_COEFFS_IDEAL.len() {
-        let ji = REGION_2_COEFFS_IDEAL[i][0] as i32;
-        let ni = REGION_2_COEFFS_IDEAL[i][1];
-        sum += ni * f64::from(ji) * tau.powi(ji - 1);
+    for coefficient in REGION_2_COEFFS_IDEAL {
+        let ji = coefficient[0];
+        let ni = coefficient[1];
+        sum += ni * ji * tau.powf(ji - 1.0);
     }
     sum
 }
@@ -615,10 +615,10 @@ fn gamma_tau_2_ideal(t: f64, _: f64) -> f64 {
 fn gamma_tau_tau_2_ideal(t: f64, _: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for i in 0..REGION_2_COEFFS_IDEAL.len() {
-        let ji = REGION_2_COEFFS_IDEAL[i][0] as i32;
-        let ni = REGION_2_COEFFS_IDEAL[i][1];
-        sum += ni * f64::from(ji * (ji - 1)) * tau.powi(ji - 2);
+    for coefficient in REGION_2_COEFFS_IDEAL {
+        let ji = coefficient[0];
+        let ni = coefficient[1];
+        sum += ni * ji * (ji - 1.0) * tau.powf(ji - 2.0);
     }
     sum
 }
@@ -637,10 +637,10 @@ fn gamma_tau_2_res(t: f64, p: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0] as i32;
-        let ji = REGION_2_COEFFS_RES[i][1] as i32;
-        let ni = REGION_2_COEFFS_RES[i][2];
+    for coefficient in REGION_2_COEFFS_RES {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii) * f64::from(ji) * (tau - 0.5).powi(ji - 1);
     }
     sum
@@ -653,10 +653,10 @@ fn gamma_tau_tau_2_res(t: f64, p: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0] as i32;
-        let ji = REGION_2_COEFFS_RES[i][1] as i32;
-        let ni = REGION_2_COEFFS_RES[i][2];
+    for coefficient in REGION_2_COEFFS_RES {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii) * f64::from(ji * (ji - 1)) * (tau - 0.5).powi(ji - 2);
     }
     sum
@@ -669,10 +669,10 @@ fn gamma_pi_2_res(t: f64, p: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0] as i32;
-        let ji = REGION_2_COEFFS_RES[i][1] as i32;
-        let ni = REGION_2_COEFFS_RES[i][2];
+    for coefficient in REGION_2_COEFFS_RES {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii - 1) * f64::from(ii) * (tau - 0.5).powi(ji);
     }
     sum
@@ -685,10 +685,10 @@ fn gamma_pi_pi_2_res(t: f64, p: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0] as i32;
-        let ji = REGION_2_COEFFS_RES[i][1] as i32;
-        let ni = REGION_2_COEFFS_RES[i][2];
+    for coefficient in REGION_2_COEFFS_RES {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii - 2) * f64::from(ii * (ii - 1)) * (tau - 0.5).powi(ji);
     }
     sum
@@ -701,10 +701,10 @@ fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for i in 0..REGION_2_COEFFS_RES.len() {
-        let ii = REGION_2_COEFFS_RES[i][0] as i32;
-        let ji = REGION_2_COEFFS_RES[i][1] as i32;
-        let ni = REGION_2_COEFFS_RES[i][2];
+    for coefficient in REGION_2_COEFFS_RES {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * pi.powi(ii - 1) * f64::from(ii * ji) * (tau - 0.5).powi(ji - 1);
     }
     sum
@@ -795,10 +795,10 @@ pub fn phi_delta_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_3(t);
     let delta = delta_3(rho);
-    for i in 1..REGION_3_COEFFS.len() {
-        let ii = REGION_3_COEFFS[i][0] as i32;
-        let ji = REGION_3_COEFFS[i][1] as i32;
-        let ni = REGION_3_COEFFS[i][2];
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
     }
     sum + REGION_3_COEFFS[0][2] / delta
@@ -808,10 +808,10 @@ pub fn phi_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_3(t);
     let delta = delta_3(rho);
-    for i in 1..REGION_3_COEFFS.len() {
-        let ii = REGION_3_COEFFS[i][0] as i32;
-        let ji = REGION_3_COEFFS[i][1] as i32;
-        let ni = REGION_3_COEFFS[i][2];
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
         sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji - 1);
     }
     sum
