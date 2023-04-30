@@ -1,7 +1,6 @@
 const _R: f64 = 0.461526;
-const t_c: f64 = 647.096;
-const rho_c: f64 = 322.0;
-const p_c: f64 = 22.064e6;
+const T_C: f64 = 647.096;
+const RHO_C: f64 = 322.0;
 
 const REGION_1_COEFFS: [[f64; 3]; 34] = [
     [0.0, -2.0, 0.14632971213167],
@@ -490,12 +489,6 @@ pub fn w_tp_1(t: f64, p: f64) -> f64 {
     square.sqrt()
 }
 
-/// Returns the region-1 theta for backwards calculations
-/// Temperature is assumed to be in K
-fn theta_1_back(t: f64) -> f64 {
-    t
-}
-
 /// Returns the region-1 eta for backwards calculations
 /// Enthalpy is assumed to be in kJ/kg
 fn eta_1_back(h: f64) -> f64 {
@@ -548,16 +541,6 @@ pub fn t_ph_1(p: f64, h: f64) -> f64 {
 
 // ================    Region 2 ===================
 
-/// Auxiliary equation separating regions 2 and 3
-fn t_boundary_2_3(p: f64) -> f64 {
-    let pi = p / 1e6;
-    let theta_star = 1.0;
-    let n3 = 0.10192970039326e-2;
-    let n4 = 0.57254459862746e3;
-    let n5 = 0.13918839778870e2;
-    let theta = n4 + ((pi - n5) / n3).sqrt();
-    theta * theta_star
-}
 fn p_boundary_2_3(t: f64) -> f64 {
     let p_star = 1e6;
     let theta = t / 1.0;
@@ -799,13 +782,13 @@ pub fn w_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-3 delta
 /// Specific mass is assumed to be in kg/m3
 fn delta_3(rho: f64) -> f64 {
-    rho / rho_c
+    rho / RHO_C
 }
 
 /// Returns the region-3 tau
 /// Temperature is assumed to be in K
 fn tau_3(t: f64) -> f64 {
-    t_c / t
+    T_C / t
 }
 
 pub fn phi_delta_3(rho: f64, t: f64) -> f64 {
@@ -1074,9 +1057,6 @@ mod tests {
     fn region_2_3_auxiliary_boundary() {
         let p = p_boundary_2_3(623.15);
         assert!(is_close(p / 1e8, 0.165291643, 1e-9));
-
-        let t = t_boundary_2_3(0.165291643e8);
-        assert!(is_close(t / 1e3, 0.623150000, 1e-9));
     }
 
     // Region 3
