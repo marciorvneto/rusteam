@@ -530,7 +530,7 @@ pub fn t_ph_1(p: f64, h: f64) -> f64 {
     let eta = eta_1_back(h);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
-    for coefficient in REGION_1_BACK_COEFFS_PH{
+    for coefficient in REGION_1_BACK_COEFFS_PH {
         let ii = coefficient[0] as i32;
         let ji = coefficient[1] as i32;
         let ni = coefficient[2];
