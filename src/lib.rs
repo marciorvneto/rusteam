@@ -236,7 +236,7 @@ pub enum IAPWSError {
 /// use rust_steam::{region};
 /// let region = region(300.0, 101325.0).unwrap();
 /// ```
-pub fn region(t: f64, p: f64) -> Result<Region,IAPWSError> {
+fn region(t: f64, p: f64) -> Result<Region,IAPWSError> {
     if t < 273.15 || t > 2273.15{
         return Err(IAPWSError::OutOfBounds(t, p));
     }
@@ -435,14 +435,14 @@ fn pi_1(p: f64) -> f64 {
 /// Returns the region-1 specific enthalpy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn h_tp_1(t: f64, p: f64) -> f64 {
+fn h_tp_1(t: f64, p: f64) -> f64 {
     _R * t * tau_1(t) * gamma_tau_1(t, p)
 }
 
 /// Returns the region-1 specific volume
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn v_tp_1(t: f64, p: f64) -> f64 {
+fn v_tp_1(t: f64, p: f64) -> f64 {
     // The multiplication by 1000 is necessary to convert R from kJ/kg.K to J/kg.K
     ((_R * 1000.0) * t / p) * pi_1(p) * gamma_pi_1(t, p)
 }
@@ -450,21 +450,21 @@ pub fn v_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 specific internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn u_tp_1(t: f64, p: f64) -> f64 {
+fn u_tp_1(t: f64, p: f64) -> f64 {
     _R * t * (tau_1(t) * gamma_tau_1(t, p) - pi_1(p) * gamma_pi_1(t,p))
 }
 
 /// Returns the region-1 specific internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn s_tp_1(t: f64, p: f64) -> f64 {
+fn s_tp_1(t: f64, p: f64) -> f64 {
     _R * (tau_1(t) * gamma_tau_1(t, p) - gamma_1(t,p))
 }
 
 /// Returns the region-1 specific isobaric heat capacity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn cp_tp_1(t: f64, p: f64) -> f64 {
+fn cp_tp_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     _R * (-tau.powi(2) * gamma_tau_tau_1(t, p))
 }
@@ -472,7 +472,7 @@ pub fn cp_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 specific isochoric heat capacity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn cv_tp_1(t: f64, p: f64) -> f64 {
+fn cv_tp_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let corr = (gamma_pi_1(t, p) - tau * gamma_pi_tau_1(t, p)).powi(2)/gamma_pi_pi_1(t, p);
     _R * (-tau.powi(2) * gamma_tau_tau_1(t, p) + corr)
@@ -481,7 +481,7 @@ pub fn cv_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 speed of sound
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn w_tp_1(t: f64, p: f64) -> f64 {
+fn w_tp_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let gamma_pi = gamma_pi_1(t, p);
     let gamma_pi_tau = gamma_pi_tau_1(t, p);
@@ -515,7 +515,7 @@ fn sigma_1_back(s: f64) -> f64{
 /// Returns the region-1 backward correlation for T(p,s)
 /// Entropy is assumed to be in kJ/kg.K
 /// Pressure is assumed to be in Pa
-pub fn t_ps_1(p: f64, s: f64) -> f64 {
+fn t_ps_1(p: f64, s: f64) -> f64 {
     let sig = sigma_1_back(s);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
@@ -531,7 +531,7 @@ pub fn t_ps_1(p: f64, s: f64) -> f64 {
 /// Returns the region-1 backward correlation for T(p,h)
 /// Enthalpy is assumed to be in kJ/kg
 /// Pressure is assumed to be in Pa
-pub fn t_ph_1(p: f64, h: f64) -> f64 {
+fn t_ph_1(p: f64, h: f64) -> f64 {
     let eta = eta_1_back(h);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
@@ -719,21 +719,21 @@ fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
 /// Returns the region-2 specific volume
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn v_tp_2(t: f64, p: f64) -> f64 {
+fn v_tp_2(t: f64, p: f64) -> f64 {
     ((_R * 1000.0) * t / p) * pi_2(p) * (gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p))
 }
 
 /// Returns the region-2 enthalpy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn h_tp_2(t: f64, p: f64) -> f64 {
+fn h_tp_2(t: f64, p: f64) -> f64 {
     _R * t * tau_2(t) * (gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p))
 }
 
 /// Returns the region-2 internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn u_tp_2(t: f64, p: f64) -> f64 {
+fn u_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
     let tau_term = gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p);
@@ -744,7 +744,7 @@ pub fn u_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 entropy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn s_tp_2(t: f64, p: f64) -> f64 {
+fn s_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let tau_term = gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p);
     let pi_term = gamma_2_ideal(t, p) + gamma_2_res(t, p);
@@ -754,7 +754,7 @@ pub fn s_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 isobaric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn cp_tp_2(t: f64, p: f64) -> f64 {
+fn cp_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     - _R  * tau.powi(2) * (gamma_tau_tau_2_ideal(t, p) + gamma_tau_tau_2_res(t, p))
 }
@@ -762,7 +762,7 @@ pub fn cp_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 isochoric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn cv_tp_2(t: f64, p: f64) -> f64 {
+fn cv_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
     let num = (1.0 + pi*gamma_pi_2_res(t, p) - tau * pi * gamma_pi_tau_2_res(t,p)).powi(2);
@@ -773,7 +773,7 @@ pub fn cv_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 sound velocity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-pub fn w_tp_2(t: f64, p: f64) -> f64 {
+fn w_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
     let num = 1.0 + 2.0*pi*gamma_pi_2_res(t, p) +  pi.powi(2) * gamma_pi_2_res(t,p).powi(2);
@@ -798,7 +798,7 @@ fn tau_3(t: f64) -> f64 {
     T_C / t
 }
 
-pub fn phi_delta_3(rho: f64, t: f64) -> f64 {
+fn phi_delta_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_3(t);
     let delta = delta_3(rho);
@@ -811,7 +811,7 @@ pub fn phi_delta_3(rho: f64, t: f64) -> f64 {
     sum + REGION_3_COEFFS[0][2] / delta
 }
 
-pub fn phi_tau_3(rho: f64, t: f64) -> f64 {
+fn phi_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_3(t);
     let delta = delta_3(rho);
@@ -824,7 +824,7 @@ pub fn phi_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
-pub fn p_rho_t_3(rho: f64, t: f64) -> f64 {
+fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
 
