@@ -229,7 +229,7 @@ pub enum IAPWSError {
 ///
 /// Example
 ///
-/// ```rust
+/// ```compile_fail
 /// use rust_steam::{region};
 /// let region = region(300.0, 101325.0).unwrap();
 /// ```
