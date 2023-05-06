@@ -18,18 +18,18 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Specific volume                 |**Yes**| **Yes** |
-|Specific enthalpy               |**Yes**| **Yes**|
-|Specific internal energy        |**Yes**| **Yes** |
-|Specific entropy                |**Yes**| **Yes** |
-|Specific isobaric heat capacity |**Yes**| **Yes** |
+|Specific volume                 |:heavy_check_mark:| :heavy_check_mark: |
+|Specific internal energy        |:heavy_check_mark:| :heavy_check_mark: |
+|Specific entropy                |:heavy_check_mark:| :heavy_check_mark: |
+|Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
 
 - **Backward equations**
 
 | Equation | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|T(p,h)                 |**Yes**| **Yes** |
-|T(p,s)                 |**Yes**| **Yes** |
+|T(p,h)                 |:heavy_check_mark:| :heavy_check_mark: |
+|T(p,s)                 |:heavy_check_mark:| :heavy_check_mark: |
 
 
 ### Region 2
@@ -38,17 +38,17 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Specific volume                 |**Yes**| **Yes** |
-|Specific enthalpy               |**Yes**| **Yes**|
-|Specific internal energy        |**Yes**| **Yes** |
-|Specific entropy                |**Yes**| **Yes** |
-|Specific isobaric heat capacity |**Yes**| **Yes** |
+|Specific volume                 |:heavy_check_mark:| :heavy_check_mark: |
+|Specific internal energy        |:heavy_check_mark:| :heavy_check_mark: |
+|Specific entropy                |:heavy_check_mark:| :heavy_check_mark: |
+|Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
 
 ### Region 4
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Saturation pressure |**Yes**| **Yes** |
-|Saturation temperature |**Yes**| **Yes** |
+|Saturation pressure |:heavy_check_mark:| :heavy_check_mark: |
+|Saturation temperature |:heavy_check_mark:| :heavy_check_mark: |
 
 
