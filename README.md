@@ -55,6 +55,21 @@ Here you can find the current status of each of the calculations implemented so 
 |T(p,h)                |:x:| :x: |
 |T(p,s)                 |:x:| :x: |
 
+### Region 3
+
+- **Forward equations**
+
+| Property | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|Pressure|:x:| :x: |
+|Specific internal energy|:x:| :x: |
+|Specific entropy|:x:| :x: |
+|Specific enthalpy|:x:| :x: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Specific isobaric heat capacity |:x:| :x: |
+|Speed of sound |:x:| :x: |
+|Phase-equilibrium condition|:x:| :x: |
+
 ### Region 4
 
 | Property | Implemented | Tested |
