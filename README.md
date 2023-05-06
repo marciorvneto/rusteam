@@ -24,7 +24,7 @@ Here you can find the current status of each of the calculations implemented so 
 |Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
 |Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
 |Specific isochoric heat capacity |:x:| :x: |
-|Speed of sound|:x:| :x: |
+|Speed of sound|:heavy_check_mark:| :heavy_check_mark: |
 
 - **Backward equations**
 
@@ -46,7 +46,7 @@ Here you can find the current status of each of the calculations implemented so 
 |Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
 |Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
 |Specific isochoric heat capacity |:x:| :x: |
-|Speed of sound |:x:| :x: |
+|Speed of sound |:heavy_check_mark:| :heavy_check_mark: |
 
 - **Backward equations**
 
@@ -61,7 +61,7 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Pressure|:x:| :x: |
+|Pressure|:heavy_check_mark:| :heavy_check_mark: |
 |Specific internal energy|:x:| :x: |
 |Specific entropy|:x:| :x: |
 |Specific enthalpy|:x:| :x: |
