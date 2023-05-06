@@ -23,6 +23,8 @@ Here you can find the current status of each of the calculations implemented so 
 |Specific entropy                |:heavy_check_mark:| :heavy_check_mark: |
 |Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
 |Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Speed of sound|:x:| :x: |
 
 - **Backward equations**
 
@@ -43,6 +45,15 @@ Here you can find the current status of each of the calculations implemented so 
 |Specific entropy                |:heavy_check_mark:| :heavy_check_mark: |
 |Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
 |Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Speed of sound |:x:| :x: |
+
+- **Backward equations**
+
+| Equation | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|T(p,h)                |:x:| :x: |
+|T(p,s)                 |:x:| :x: |
 
 ### Region 4
 
