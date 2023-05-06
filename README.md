@@ -18,18 +18,20 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Specific volume                 |**Yes**| **Yes** |
-|Specific enthalpy               |**Yes**| **Yes**|
-|Specific internal energy        |**Yes**| **Yes** |
-|Specific entropy                |**Yes**| **Yes** |
-|Specific isobaric heat capacity |**Yes**| **Yes** |
+|Specific volume                 |:heavy_check_mark:| :heavy_check_mark: |
+|Specific internal energy        |:heavy_check_mark:| :heavy_check_mark: |
+|Specific entropy                |:heavy_check_mark:| :heavy_check_mark: |
+|Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Speed of sound|:x:| :x: |
 
 - **Backward equations**
 
 | Equation | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|T(p,h)                 |**Yes**| **Yes** |
-|T(p,s)                 |**Yes**| **Yes** |
+|T(p,h)                 |:heavy_check_mark:| :heavy_check_mark: |
+|T(p,s)                 |:heavy_check_mark:| :heavy_check_mark: |
 
 
 ### Region 2
@@ -38,17 +40,53 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Specific volume                 |**Yes**| **Yes** |
-|Specific enthalpy               |**Yes**| **Yes**|
-|Specific internal energy        |**Yes**| **Yes** |
-|Specific entropy                |**Yes**| **Yes** |
-|Specific isobaric heat capacity |**Yes**| **Yes** |
+|Specific volume                 |:heavy_check_mark:| :heavy_check_mark: |
+|Specific internal energy        |:heavy_check_mark:| :heavy_check_mark: |
+|Specific entropy                |:heavy_check_mark:| :heavy_check_mark: |
+|Specific enthalpy               |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Speed of sound |:x:| :x: |
+
+- **Backward equations**
+
+| Equation | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|T(p,h)                |:x:| :x: |
+|T(p,s)                 |:x:| :x: |
+
+### Region 3
+
+- **Forward equations**
+
+| Property | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|Pressure|:x:| :x: |
+|Specific internal energy|:x:| :x: |
+|Specific entropy|:x:| :x: |
+|Specific enthalpy|:x:| :x: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Specific isobaric heat capacity |:x:| :x: |
+|Speed of sound |:x:| :x: |
+|Phase-equilibrium condition|:x:| :x: |
 
 ### Region 4
 
 | Property | Implemented | Tested |
 |:---------|:--------------:|:-------:|
-|Saturation pressure |**Yes**| **Yes** |
-|Saturation temperature |**Yes**| **Yes** |
+|Saturation pressure |:heavy_check_mark:| :heavy_check_mark: |
+|Saturation temperature |:heavy_check_mark:| :heavy_check_mark: |
 
+### Region 5
 
+- **Forward equations**
+
+| Property | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|Specific volume|:x:| :x: |
+|Specific internal energy|:x:| :x: |
+|Specific entropy|:x:| :x: |
+|Specific enthalpy|:x:| :x: |
+|Specific isobaric heat capacity |:x:| :x: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Speed of sound |:x:| :x: |
