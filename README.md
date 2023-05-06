@@ -77,4 +77,16 @@ Here you can find the current status of each of the calculations implemented so 
 |Saturation pressure |:heavy_check_mark:| :heavy_check_mark: |
 |Saturation temperature |:heavy_check_mark:| :heavy_check_mark: |
 
+### Region 5
 
+- **Forward equations**
+
+| Property | Implemented | Tested |
+|:---------|:--------------:|:-------:|
+|Specific volume|:x:| :x: |
+|Specific internal energy|:x:| :x: |
+|Specific entropy|:x:| :x: |
+|Specific enthalpy|:x:| :x: |
+|Specific isobaric heat capacity |:x:| :x: |
+|Specific isochoric heat capacity |:x:| :x: |
+|Speed of sound |:x:| :x: |
