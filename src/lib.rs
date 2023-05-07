@@ -890,6 +890,139 @@ pub fn tsat97(p: f64) -> f64 {
 }
 
 #[cfg(test)]
+mod public_interface {
+
+    use crate::{hmass_tp, psat97, tsat97, umass_tp};
+    extern crate float_cmp;
+    use float_cmp::ApproxEq;
+
+    struct TestData {
+        temperature: f64,
+        pressure: f64,
+        divisor: f64,
+        expected_result: f64,
+    }
+
+    #[test]
+    fn enthalpy_temperature_pressure() {
+        let test_set = vec![
+            TestData {
+                temperature: 300.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.115331273,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 80e6,
+                divisor: 1000.0,
+                expected_result: 0.184142828,
+            },
+            TestData {
+                temperature: 500.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.975542239,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.254991145,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.333568375,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 30e6,
+                divisor: 10000.0,
+                expected_result: 0.263149474,
+            },
+        ];
+
+        for test_data in test_set.iter() {
+            let enthalpy =
+                hmass_tp(test_data.temperature, test_data.pressure).unwrap() / test_data.divisor;
+            assert!(enthalpy.approx_eq(test_data.expected_result, (1e-9, 2)));
+        }
+    }
+
+    #[test]
+    fn internal_energy_temperature_pressure() {
+        let test_set = vec![
+            TestData {
+                temperature: 300.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.112324818,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 80e6,
+                divisor: 1000.0,
+                expected_result: 0.106448356,
+            },
+            TestData {
+                temperature: 500.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.971934985,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.241169160,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.301262819,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 30e6,
+                divisor: 10000.0,
+                expected_result: 0.246861076,
+            },
+        ];
+        for test_data in test_set.iter() {
+            let internal_energy =
+                umass_tp(test_data.temperature, test_data.pressure).unwrap() / test_data.divisor;
+            assert!(internal_energy.approx_eq(test_data.expected_result, (1e-9, 2)));
+        }
+    }
+
+    #[test]
+    fn saturation_pressure() {
+        let ps = psat97(300.0) / 10000.0;
+        assert!(ps.approx_eq(0.353658941, (1e-9, 2)));
+
+        let ps = psat97(500.0) / 1e7;
+        assert!(ps.approx_eq(0.263889776, (1e-9, 2)));
+
+        let ps = psat97(600.0) / 1e8;
+        assert!(ps.approx_eq(0.123443146, (1e-9, 2)));
+    }
+
+    #[test]
+    fn saturation_temperature() {
+        let ts = tsat97(0.1e6) / 1000.0;
+        assert!(ts.approx_eq(0.372755919, (1e-9, 2)));
+
+        let ts = tsat97(1e6) / 1000.0;
+        assert!(ts.approx_eq(0.453035632, (1e-9, 2)));
+
+        let ts = tsat97(10e6) / 1000.0;
+        assert!(ts.approx_eq(0.584149488, (1e-9, 2)));
+    }
+}
+#[cfg(test)]
 mod tests {
     use super::*;
     extern crate float_cmp;
@@ -1082,31 +1215,5 @@ mod tests {
 
         let p = p_rho_t_3(500.0, 750.0) / 1e8;
         assert!(p.approx_eq(0.783095639, (1e-9, 2)));
-    }
-
-    // Region 4
-
-    #[test]
-    fn region_4_saturation_pressure() {
-        let ps = psat97(300.0) / 10000.0;
-        assert!(ps.approx_eq(0.353658941, (1e-9, 2)));
-
-        let ps = psat97(500.0) / 1e7;
-        assert!(ps.approx_eq(0.263889776, (1e-9, 2)));
-
-        let ps = psat97(600.0) / 1e8;
-        assert!(ps.approx_eq(0.123443146, (1e-9, 2)));
-    }
-
-    #[test]
-    fn region_4_saturation_temperature() {
-        let ts = tsat97(0.1e6) / 1000.0;
-        assert!(ts.approx_eq(0.372755919, (1e-9, 2)));
-
-        let ts = tsat97(1e6) / 1000.0;
-        assert!(ts.approx_eq(0.453035632, (1e-9, 2)));
-
-        let ts = tsat97(10e6) / 1000.0;
-        assert!(ts.approx_eq(0.584149488, (1e-9, 2)));
     }
 }
