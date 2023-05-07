@@ -242,9 +242,9 @@ fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
     }
 
     if t <= 623.15 {
-        if p > p_sat(t) {
+        if p > psat97(t) {
             return Ok(Region::Region1);
-        } else if p < p_sat(t) {
+        } else if p < psat97(t) {
             return Ok(Region::Region2);
         }
         return Ok(Region::Region4);
@@ -282,10 +282,10 @@ fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
 /// Example
 ///
 /// ```rust
-/// use rust_steam::{h_tp};
-/// let h = h_tp(300.0, 101325.0).unwrap();
+/// use rust_steam::{hmass_tp};
+/// let h = hmass_tp(300.0, 101325.0).unwrap();
 /// ```
-pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+pub fn hmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
     match region {
         Region::Region1 => Ok(h_tp_1(t, p)),
@@ -303,10 +303,10 @@ pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 /// Example
 ///
 /// ```rust
-/// use rust_steam::{u_tp};
-/// let u = u_tp(300.0, 101325.0).unwrap();
+/// use rust_steam::{umass_tp};
+/// let u = umass_tp(300.0, 101325.0).unwrap();
 /// ```
-pub fn u_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+pub fn umass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
     match region {
         Region::Region1 => Ok(u_tp_1(t, p)),
@@ -844,7 +844,7 @@ fn p_rho_t_3(rho: f64, t: f64) -> f64 {
 
 /// Returns the saturation pressure in Pa
 /// Temperature is assumed to be in K
-pub fn p_sat(t: f64) -> f64 {
+pub fn psat97(t: f64) -> f64 {
     let n1 = REGION_4_SATURATION_COEFFS[0];
     let n2 = REGION_4_SATURATION_COEFFS[1];
     let n3 = REGION_4_SATURATION_COEFFS[2];
@@ -866,7 +866,7 @@ pub fn p_sat(t: f64) -> f64 {
 
 /// Returns the saturation temperature in K
 /// Pressure is assumed to be in Pa
-pub fn t_sat(p: f64) -> f64 {
+pub fn tsat97(p: f64) -> f64 {
     let n1 = REGION_4_SATURATION_COEFFS[0];
     let n2 = REGION_4_SATURATION_COEFFS[1];
     let n3 = REGION_4_SATURATION_COEFFS[2];
@@ -890,231 +890,330 @@ pub fn t_sat(p: f64) -> f64 {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
+mod public_interface {
 
-    fn is_close(x: f64, y: f64, tol: f64) -> bool {
-        (x - y).abs() < tol
+    use crate::{hmass_tp, psat97, tsat97, umass_tp};
+    extern crate float_cmp;
+    use float_cmp::ApproxEq;
+
+    struct TestData {
+        temperature: f64,
+        pressure: f64,
+        divisor: f64,
+        expected_result: f64,
     }
 
     #[test]
-    fn canary() {}
+    fn enthalpy_temperature_pressure() {
+        let test_set = vec![
+            TestData {
+                temperature: 300.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.115331273,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 80e6,
+                divisor: 1000.0,
+                expected_result: 0.184142828,
+            },
+            TestData {
+                temperature: 500.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.975542239,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.254991145,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.333568375,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 30e6,
+                divisor: 10000.0,
+                expected_result: 0.263149474,
+            },
+        ];
+
+        for test_data in test_set.iter() {
+            let enthalpy =
+                hmass_tp(test_data.temperature, test_data.pressure).unwrap() / test_data.divisor;
+            assert!(enthalpy.approx_eq(test_data.expected_result, (1e-9, 2)));
+        }
+    }
+
+    #[test]
+    fn internal_energy_temperature_pressure() {
+        let test_set = vec![
+            TestData {
+                temperature: 300.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.112324818,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 80e6,
+                divisor: 1000.0,
+                expected_result: 0.106448356,
+            },
+            TestData {
+                temperature: 500.0,
+                pressure: 3e6,
+                divisor: 1000.0,
+                expected_result: 0.971934985,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.241169160,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 0.0035e6,
+                divisor: 10000.0,
+                expected_result: 0.301262819,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 30e6,
+                divisor: 10000.0,
+                expected_result: 0.246861076,
+            },
+        ];
+        for test_data in test_set.iter() {
+            let internal_energy =
+                umass_tp(test_data.temperature, test_data.pressure).unwrap() / test_data.divisor;
+            assert!(internal_energy.approx_eq(test_data.expected_result, (1e-9, 2)));
+        }
+    }
+
+    #[test]
+    fn saturation_pressure() {
+        let ps = psat97(300.0) / 10000.0;
+        assert!(ps.approx_eq(0.353658941, (1e-9, 2)));
+
+        let ps = psat97(500.0) / 1e7;
+        assert!(ps.approx_eq(0.263889776, (1e-9, 2)));
+
+        let ps = psat97(600.0) / 1e8;
+        assert!(ps.approx_eq(0.123443146, (1e-9, 2)));
+    }
+
+    #[test]
+    fn saturation_temperature() {
+        let ts = tsat97(0.1e6) / 1000.0;
+        assert!(ts.approx_eq(0.372755919, (1e-9, 2)));
+
+        let ts = tsat97(1e6) / 1000.0;
+        assert!(ts.approx_eq(0.453035632, (1e-9, 2)));
+
+        let ts = tsat97(10e6) / 1000.0;
+        assert!(ts.approx_eq(0.584149488, (1e-9, 2)));
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    extern crate float_cmp;
+    use float_cmp::ApproxEq;
 
     #[test]
     fn region_1_enthalpy() {
-        let h1 = h_tp_1(300.0, 3e6);
+        let h1 = h_tp_1(300.0, 3e6) / 1000.0;
 
-        assert!(is_close(h1 / 1000.0, 0.115331273, 1e-9));
+        assert!(h1.approx_eq(0.115331273, (1e-9, 2)));
 
-        let h1 = h_tp_1(300.0, 80e6);
-        assert!(is_close(h1 / 1000.0, 0.184142828, 1e-9));
+        let h1 = h_tp_1(300.0, 80e6) / 1000.0;
+        assert!(h1.approx_eq(0.184142828, (1e-9, 2)));
 
-        let h1 = h_tp_1(500.0, 3e6);
-        assert!(is_close(h1 / 1000.0, 0.975542239, 1e-9));
+        let h1 = h_tp_1(500.0, 3e6) / 1000.0;
+        assert!(h1.approx_eq(0.975542239, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_internal_energy() {
-        let u1 = u_tp_1(300.0, 3e6);
+        let u1 = u_tp_1(300.0, 3e6) / 1000.0;
+        assert!(u1.approx_eq(0.112324818, (1e-9, 2)));
 
-        assert!(is_close(u1 / 1000.0, 0.112324818, 1e-9));
+        let u1 = u_tp_1(300.0, 80e6) / 1000.0;
+        assert!(u1.approx_eq(0.106448356, (1e-9, 2)));
 
-        let u1 = u_tp_1(300.0, 80e6);
-        assert!(is_close(u1 / 1000.0, 0.106448356, 1e-9));
-
-        let u1 = u_tp_1(500.0, 3e6);
-        assert!(is_close(u1 / 1000.0, 0.971934985, 1e-9));
+        let u1 = u_tp_1(500.0, 3e6) / 1000.0;
+        assert!(u1.approx_eq(0.971934985, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_entropy() {
         let s1 = s_tp_1(300.0, 3e6);
-        assert!(is_close(s1, 0.392294792, 1e-9));
+        assert!(s1.approx_eq(0.392294792, (1e-9, 2)));
 
         let s1 = s_tp_1(300.0, 80e6);
-        assert!(is_close(s1, 0.368563852, 1e-9));
+        assert!(s1.approx_eq(0.368563852, (1e-9, 2)));
 
         let s1 = s_tp_1(500.0, 3e6);
-        assert!(is_close(s1, 0.258041912e1, 1e-9));
+        assert!(s1.approx_eq(0.258041912e1, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_cp() {
-        let cp1 = cp_tp_1(300.0, 3e6);
-        println!("{}", cp1);
-        assert!(is_close(cp1 / 10.0, 0.417301218, 1e-9));
+        let cp1 = cp_tp_1(300.0, 3e6) / 10.0;
+        assert!(cp1.approx_eq(0.417301218, (1e-9, 2)));
 
-        let cp1 = cp_tp_1(300.0, 80e6);
-        assert!(is_close(cp1 / 10.0, 0.401008987, 1e-9));
+        let cp1 = cp_tp_1(300.0, 80e6) / 10.0;
+        assert!(cp1.approx_eq(0.401008987, (1e-9, 2)));
 
-        let cp1 = cp_tp_1(500.0, 3e6);
-        assert!(is_close(cp1 / 10.0, 0.465580682, 1e-9));
+        let cp1 = cp_tp_1(500.0, 3e6) / 10.0;
+        assert!(cp1.approx_eq(0.465580682, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_sound_velocity() {
-        let w1 = w_tp_1(300.0, 3e6);
-        assert!(is_close(w1 / 10000.0, 0.150773921, 1e-9));
+        let w1 = w_tp_1(300.0, 3e6) / 10000.0;
+        assert!(w1.approx_eq(0.150773921, (1e-9, 2)));
 
-        let w1 = w_tp_1(300.0, 80e6);
-        assert!(is_close(w1 / 10000.0, 0.163469054, 1e-9));
+        let w1 = w_tp_1(300.0, 80e6) / 10000.0;
+        assert!(w1.approx_eq(0.163469054, (1e-9, 2)));
 
-        let w1 = w_tp_1(500.0, 3e6);
-        assert!(is_close(w1 / 10000.0, 0.124071337, 1e-9));
+        let w1 = w_tp_1(500.0, 3e6) / 10000.0;
+        assert!(w1.approx_eq(0.124071337, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_specific_volume() {
-        let v1 = v_tp_1(300.0, 3e6);
-        assert!(is_close(v1 * 100.0, 0.100215168, 1e-9));
+        let v1 = v_tp_1(300.0, 3e6) * 100.0;
+        assert!(v1.approx_eq(0.100215168, (1e-9, 2)));
 
-        let v1 = v_tp_1(300.0, 80e6);
-        assert!(is_close(v1 * 1000.0, 0.971180894, 1e-9));
+        let v1 = v_tp_1(300.0, 80e6) * 1000.0;
+        assert!(v1.approx_eq(0.971180894, (1e-9, 2)));
 
-        let v1 = v_tp_1(500.0, 3e6);
-        assert!(is_close(v1 * 100.0, 0.120241800, 1e-9));
+        let v1 = v_tp_1(500.0, 3e6) * 100.0;
+        assert!(v1.approx_eq(0.120241800, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_backwards_t_ph() {
-        let t = t_ph_1(3e6, 500.0);
-        assert!(is_close(t / 1000.0, 0.391798509, 1e-9));
+        let t = t_ph_1(3e6, 500.0) / 1000.0;
+        assert!(t.approx_eq(0.391798509, (1e-9, 2)));
 
-        let t = t_ph_1(80e6, 500.0);
-        assert!(is_close(t / 1000.0, 0.378108626, 1e-9));
+        let t = t_ph_1(80e6, 500.0) / 1000.0;
+        assert!(t.approx_eq(0.378108626, (1e-9, 2)));
 
-        let t = t_ph_1(80e6, 1500.0);
-        assert!(is_close(t / 1000.0, 0.611041229, 1e-9));
+        let t = t_ph_1(80e6, 1500.0) / 1000.0;
+        assert!(t.approx_eq(0.611041229, (1e-9, 2)));
     }
 
     #[test]
     fn region_1_backwards_t_ps() {
-        let t = t_ps_1(3e6, 0.5);
-        assert!(is_close(t / 1000.0, 0.307842258, 1e-9));
+        let t = t_ps_1(3e6, 0.5) / 1000.0;
+        assert!(t.approx_eq(0.307842258, (1e-9, 2)));
 
-        let t = t_ps_1(80e6, 0.5);
-        assert!(is_close(t / 1000.0, 0.309979785, 1e-9));
+        let t = t_ps_1(80e6, 0.5) / 1000.0;
+        assert!(t.approx_eq(0.309979785, (1e-9, 2)));
 
-        let t = t_ps_1(80e6, 3.0);
-        assert!(is_close(t / 1000.0, 0.565899909, 1e-9));
+        let t = t_ps_1(80e6, 3.0) / 1000.0;
+        assert!(t.approx_eq(0.565899909, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_specific_volume() {
-        let v = v_tp_2(300.0, 0.0035e6);
-        assert!(is_close(v / 100.0, 0.394913866, 1e-9));
+        let v = v_tp_2(300.0, 0.0035e6) / 100.0;
+        assert!(v.approx_eq(0.394913866, (1e-9, 2)));
 
-        let v = v_tp_2(700.0, 0.0035e6);
-        assert!(is_close(v / 100.0, 0.923015898, 1e-9));
+        let v = v_tp_2(700.0, 0.0035e6) / 100.0;
+        assert!(v.approx_eq(0.923015898, (1e-9, 2)));
 
-        let v = v_tp_2(700.0, 30e6);
-        assert!(is_close(v / 0.01, 0.542946619, 1e-9));
+        let v = v_tp_2(700.0, 30e6) / 0.01;
+        assert!(v.approx_eq(0.542946619, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_enthalpy() {
-        let h = h_tp_2(300.0, 0.0035e6);
-        assert!(is_close(h / 10000.0, 0.254991145, 1e-9));
+        let h = h_tp_2(300.0, 0.0035e6) / 10000.0;
+        assert!(h.approx_eq(0.254991145, (1e-9, 2)));
 
-        let h = h_tp_2(700.0, 0.0035e6);
-        assert!(is_close(h / 10000.0, 0.333568375, 1e-9));
+        let h = h_tp_2(700.0, 0.0035e6) / 10000.0;
+        assert!(h.approx_eq(0.333568375, (1e-9, 2)));
 
-        let h = h_tp_2(700.0, 30e6);
-        assert!(is_close(h / 10000.0, 0.263149474, 1e-9));
+        let h = h_tp_2(700.0, 30e6) / 10000.0;
+        assert!(h.approx_eq(0.263149474, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_internal_energy() {
-        let u = u_tp_2(300.0, 0.0035e6);
-        assert!(is_close(u / 10000.0, 0.241169160, 1e-9));
+        let u = u_tp_2(300.0, 0.0035e6) / 10000.0;
+        assert!(u.approx_eq(0.241169160, (1e-9, 2)));
 
-        let u = u_tp_2(700.0, 0.0035e6);
-        assert!(is_close(u / 10000.0, 0.301262819, 1e-9));
+        let u = u_tp_2(700.0, 0.0035e6) / 10000.0;
+        assert!(u.approx_eq(0.301262819, (1e-9, 2)));
 
-        let u = u_tp_2(700.0, 30e6);
-        assert!(is_close(u / 10000.0, 0.246861076, 1e-9));
+        let u = u_tp_2(700.0, 30e6) / 10000.0;
+        assert!(u.approx_eq(0.246861076, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_entropy() {
-        let s = s_tp_2(300.0, 0.0035e6);
-        println!("{}", s);
-        assert!(is_close(s / 10.0, 0.852238967, 1e-9));
+        let s = s_tp_2(300.0, 0.0035e6) / 10.0;
+        assert!(s.approx_eq(0.852238967, (1e-9, 2)));
 
-        let s = s_tp_2(700.0, 0.0035e6);
-        assert!(is_close(s / 100.0, 0.101749996, 1e-9));
+        let s = s_tp_2(700.0, 0.0035e6) / 100.0;
+        assert!(s.approx_eq(0.101749996, (1e-9, 2)));
 
-        let s = s_tp_2(700.0, 30e6);
-        assert!(is_close(s / 10.0, 0.517540298, 1e-9));
+        let s = s_tp_2(700.0, 30e6) / 10.0;
+        assert!(s.approx_eq(0.517540298, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_cp() {
-        let cp = cp_tp_2(300.0, 0.0035e6);
-        assert!(is_close(cp / 10.0, 0.191300162, 1e-9));
+        let cp = cp_tp_2(300.0, 0.0035e6) / 10.0;
+        assert!(cp.approx_eq(0.191300162, (1e-9, 2)));
 
-        let cp = cp_tp_2(700.0, 0.0035e6);
-        assert!(is_close(cp / 10.0, 0.208141274, 1e-9));
+        let cp = cp_tp_2(700.0, 0.0035e6) / 10.0;
+        assert!(cp.approx_eq(0.208141274, (1e-9, 2)));
 
-        let cp = cp_tp_2(700.0, 30e6);
-        assert!(is_close(cp / 100.0, 0.103505092, 1e-9));
+        let cp = cp_tp_2(700.0, 30e6) / 100.0;
+        assert!(cp.approx_eq(0.103505092, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_sound_velocity() {
-        let w = w_tp_2(300.0, 0.0035e6);
-        assert!(is_close(w / 1000.0, 0.427920172, 1e-9));
+        let w = w_tp_2(300.0, 0.0035e6) / 1000.0;
+        assert!(w.approx_eq(0.427920172, (1e-9, 2)));
 
-        let w = w_tp_2(700.0, 0.0035e6);
-        assert!(is_close(w / 1000.0, 0.644289068, 1e-9));
+        let w = w_tp_2(700.0, 0.0035e6) / 1000.0;
+        assert!(w.approx_eq(0.644289068, (1e-9, 2)));
 
-        let w = w_tp_2(700.0, 30e6);
-        assert!(is_close(w / 1000.0, 0.480386523, 1e-9));
+        let w = w_tp_2(700.0, 30e6) / 1000.0;
+        assert!(w.approx_eq(0.480386523, (1e-9, 2)));
     }
 
     #[test]
     fn region_2_3_auxiliary_boundary() {
-        let p = p_boundary_2_3(623.15);
-        assert!(is_close(p / 1e8, 0.165291643, 1e-9));
+        let p = p_boundary_2_3(623.15) / 1e8;
+        assert!(p.approx_eq(0.165291643, (1e-9, 2)));
     }
 
     // Region 3
 
     #[test]
     fn region_3_p() {
-        let p = p_rho_t_3(500.0, 650.0);
-        assert!(is_close(p / 1e8, 0.255837018, 1e-9));
+        let p = p_rho_t_3(500.0, 650.0) / 1e8;
+        assert!(p.approx_eq(0.255837018, (1e-9, 2)));
 
-        let p = p_rho_t_3(200.0, 650.0);
-        assert!(is_close(p / 1e8, 0.222930643, 1e-9));
+        let p = p_rho_t_3(200.0, 650.0) / 1e8;
+        assert!(p.approx_eq(0.222930643, (1e-9, 2)));
 
-        let p = p_rho_t_3(500.0, 750.0);
-        assert!(is_close(p / 1e8, 0.783095639, 1e-9));
-    }
-
-    // Region 4
-
-    #[test]
-    fn region_4_saturation_pressure() {
-        let ps = p_sat(300.0);
-        assert!(is_close(ps / 10000.0, 0.353658941, 1e-9));
-
-        let ps = p_sat(500.0);
-        assert!(is_close(ps / 1e7, 0.263889776, 1e-9));
-
-        let ps = p_sat(600.0);
-        assert!(is_close(ps / 1e8, 0.123443146, 1e-9));
-    }
-
-    #[test]
-    fn region_4_saturation_temperature() {
-        let ts = t_sat(0.1e6);
-        assert!(is_close(ts / 1000.0, 0.372755919, 1e-9));
-
-        let ts = t_sat(1e6);
-        assert!(is_close(ts / 1000.0, 0.453035632, 1e-9));
-
-        let ts = t_sat(10e6);
-        assert!(is_close(ts / 1000.0, 0.584149488, 1e-9));
+        let p = p_rho_t_3(500.0, 750.0) / 1e8;
+        assert!(p.approx_eq(0.783095639, (1e-9, 2)));
     }
 }
