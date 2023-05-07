@@ -242,9 +242,9 @@ fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
     }
 
     if t <= 623.15 {
-        if p > p_sat(t) {
+        if p > psat97(t) {
             return Ok(Region::Region1);
-        } else if p < p_sat(t) {
+        } else if p < psat97(t) {
             return Ok(Region::Region2);
         }
         return Ok(Region::Region4);
@@ -285,7 +285,7 @@ fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
 /// use rust_steam::{h_tp};
 /// let h = h_tp(300.0, 101325.0).unwrap();
 /// ```
-pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+pub fn hmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
     match region {
         Region::Region1 => Ok(h_tp_1(t, p)),
@@ -306,7 +306,7 @@ pub fn h_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 /// use rust_steam::{u_tp};
 /// let u = u_tp(300.0, 101325.0).unwrap();
 /// ```
-pub fn u_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+pub fn umass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
     match region {
         Region::Region1 => Ok(u_tp_1(t, p)),
@@ -844,7 +844,7 @@ fn p_rho_t_3(rho: f64, t: f64) -> f64 {
 
 /// Returns the saturation pressure in Pa
 /// Temperature is assumed to be in K
-pub fn p_sat(t: f64) -> f64 {
+pub fn psat97(t: f64) -> f64 {
     let n1 = REGION_4_SATURATION_COEFFS[0];
     let n2 = REGION_4_SATURATION_COEFFS[1];
     let n3 = REGION_4_SATURATION_COEFFS[2];
@@ -866,7 +866,7 @@ pub fn p_sat(t: f64) -> f64 {
 
 /// Returns the saturation temperature in K
 /// Pressure is assumed to be in Pa
-pub fn t_sat(p: f64) -> f64 {
+pub fn tsat97(p: f64) -> f64 {
     let n1 = REGION_4_SATURATION_COEFFS[0];
     let n2 = REGION_4_SATURATION_COEFFS[1];
     let n3 = REGION_4_SATURATION_COEFFS[2];
