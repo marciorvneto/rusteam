@@ -896,9 +896,6 @@ mod tests {
     use float_cmp::ApproxEq;
 
     #[test]
-    fn canary() {}
-
-    #[test]
     fn region_1_enthalpy() {
         let h1 = h_tp_1(300.0, 3e6) / 1000.0;
 
