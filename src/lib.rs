@@ -336,7 +336,7 @@ pub fn smass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     }
 }
 
-/// Calculates the mass constant pressure in J/kg/K at a given
+/// Calculates the mass constant pressure heat in J/kg/K at a given
 /// temperature and pressure.
 ///
 /// Temperature is assumed to be in K
@@ -356,6 +356,28 @@ pub fn cpmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
         _ => Err(IAPWSError::NotImplemented()),
     }
 }
+
+/// Calculates the mass volume in m^3/kg at a given
+/// temperature and pressure.
+///
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+///
+/// Example
+///
+/// ```rust
+/// use rust_steam::{vmass_tp};
+/// let u = vmass_tp(300.0, 101325.0).unwrap();
+/// ```
+pub fn vmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+    let region = region(t, p)?;
+    match region {
+        Region::Region1 => Ok(v_tp_1(t, p)),
+        Region::Region2 => Ok(v_tp_2(t, p)),
+        _ => Err(IAPWSError::NotImplemented()),
+    }
+}
+
 // ================    Region 1 ===================
 
 /// Returns the region-1 gamma
@@ -479,7 +501,6 @@ fn h_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 specific volume
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn v_tp_1(t: f64, p: f64) -> f64 {
     // The multiplication by 1000 is necessary to convert R from kJ/kg.K to J/kg.K
     ((_R * 1000.0) * t / p) * pi_1(p) * gamma_pi_1(t, p)
@@ -495,7 +516,6 @@ fn u_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 specific internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn s_tp_1(t: f64, p: f64) -> f64 {
     _R * (tau_1(t) * gamma_tau_1(t, p) - gamma_1(t, p))
 }
@@ -503,7 +523,6 @@ fn s_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 specific isobaric heat capacity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn cp_tp_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     _R * (-tau.powi(2) * gamma_tau_tau_1(t, p))
@@ -765,7 +784,6 @@ fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
 /// Returns the region-2 specific volume
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn v_tp_2(t: f64, p: f64) -> f64 {
     ((_R * 1000.0) * t / p) * pi_2(p) * (gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p))
 }
@@ -780,7 +798,6 @@ fn h_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn u_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
@@ -792,7 +809,6 @@ fn u_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 entropy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn s_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let tau_term = gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p);
@@ -803,7 +819,6 @@ fn s_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 isobaric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn cp_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     -_R * tau.powi(2) * (gamma_tau_tau_2_ideal(t, p) + gamma_tau_tau_2_res(t, p))
@@ -933,7 +948,7 @@ pub fn tsat97(p: f64) -> f64 {
 #[cfg(test)]
 mod public_interface {
 
-    use crate::{cpmass_tp, hmass_tp, psat97, smass_tp, tsat97, umass_tp};
+    use crate::{cpmass_tp, hmass_tp, psat97, smass_tp, tsat97, umass_tp, vmass_tp};
     extern crate float_cmp;
     use float_cmp::ApproxEq;
 
@@ -1140,6 +1155,59 @@ mod public_interface {
                 "Expected: {} Result: {}",
                 test_data.expected_result,
                 isobaricheat
+            );
+        }
+    }
+
+    #[test]
+    fn volume_heat_pressure() {
+        let test_set = vec![
+            TestData {
+                temperature: 300.0,
+                pressure: 3e6,
+                divisor: 0.01,
+                expected_result: 0.100215168,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 80e6,
+                divisor: 0.001,
+                expected_result: 0.971180894,
+            },
+            TestData {
+                temperature: 500.0,
+                pressure: 3e6,
+                divisor: 0.01,
+                expected_result: 0.120241800,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 0.0035e6,
+                divisor: 100.0,
+                expected_result: 0.394913866,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 0.0035e6,
+                divisor: 100.0,
+                expected_result: 0.923015898,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 30e6,
+                divisor: 0.01,
+                expected_result: 0.542946619,
+            },
+        ];
+
+        for test_data in test_set.iter() {
+            let volume =
+                vmass_tp(test_data.temperature, test_data.pressure).unwrap() / test_data.divisor;
+            assert!(
+                volume.approx_eq(test_data.expected_result, (1e-9, 2)),
+                "Expected: {} Result: {}",
+                test_data.expected_result,
+                volume
             );
         }
     }
