@@ -1358,10 +1358,24 @@ mod tests {
         assert!(cp1.approx_eq(0.417301218, (1e-9, 2)));
 
         let cp1 = cp_tp_1(300.0, 80e6) / 10.0;
+        print!("{}",cp1);
         assert!(cp1.approx_eq(0.401008987, (1e-9, 2)));
 
         let cp1 = cp_tp_1(500.0, 3e6) / 10.0;
         assert!(cp1.approx_eq(0.465580682, (1e-9, 2)));
+    }
+
+    ///Test results based on current implementation
+    #[test]
+    fn region_1_cv() {
+        let cv1 = cv_tp_1(300.0, 3e6);
+        assert!(cv1.approx_eq(4.121201603, (1e-9, 2)));
+
+        let cv1 = cv_tp_1(300.0, 80e6);
+        assert!(cv1.approx_eq(3.917366061, (1e-9, 2)));
+
+        let cv1 = cv_tp_1(500.0, 3e6);
+        assert!(cv1.approx_eq(3.221392229, (1e-9, 2)));
     }
 
     #[test]
@@ -1470,6 +1484,19 @@ mod tests {
 
         let cp = cp_tp_2(700.0, 30e6) / 100.0;
         assert!(cp.approx_eq(0.103505092, (1e-9, 2)));
+    }
+
+    ///Test results based on current implementation
+    #[test]
+    fn region_2_cv() {
+        let cv = cv_tp_2(300.0, 0.0035e6) / 10.0;
+        assert!(cv.approx_eq(0.1441326618, (1e-9, 2)));
+
+        let cv = cv_tp_2(700.0, 0.0035e6) / 10.0;
+        assert!(cv.approx_eq(0.1619783325, (1e-9, 2)));
+
+        let cv = cv_tp_2(700.0, 30e6) / 100.0;
+        assert!(cv.approx_eq(0.0297553836, (1e-9, 2)));
     }
 
     #[test]
