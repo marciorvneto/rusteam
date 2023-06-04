@@ -562,7 +562,6 @@ fn cv_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 speed of sound
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn w_tp_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let gamma_pi = gamma_pi_1(t, p);
@@ -860,7 +859,6 @@ fn cv_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 sound velocity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn w_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
