@@ -425,7 +425,6 @@ pub fn speed_sound_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 /// Returns the region-1 gamma
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn gamma_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
@@ -573,7 +572,6 @@ fn cp_tp_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 specific isochoric heat capacity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn cv_tp_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let corr = (gamma_pi_1(t, p) - tau * gamma_pi_tau_1(t, p)).powi(2) / gamma_pi_pi_1(t, p);
@@ -598,21 +596,18 @@ fn w_tp_1(t: f64, p: f64) -> f64 {
 
 /// Returns the region-1 eta for backwards calculations
 /// Enthalpy is assumed to be in kJ/kg
-#[allow(dead_code)]
 fn eta_1_back(h: f64) -> f64 {
     h / 2500.0
 }
 
 /// Returns the region-1 pi for backwards calculations
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn pi_1_back(p: f64) -> f64 {
     p / 1e6
 }
 
 /// Returns the region-1 sigma for backwards calculations
 /// Entropy is assumed to be in kJ/kg.K
-#[allow(dead_code)]
 fn sigma_1_back(s: f64) -> f64 {
     s
 }
@@ -868,7 +863,6 @@ fn cp_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 isochoric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
 fn cv_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
