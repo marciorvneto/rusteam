@@ -325,7 +325,7 @@ pub fn umass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 ///
 /// ```rust
 /// use rust_steam::{smass_tp};
-/// let u = smass_tp(300.0, 101325.0).unwrap();
+/// let s = smass_tp(300.0, 101325.0).unwrap();
 /// ```
 pub fn smass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
@@ -346,7 +346,7 @@ pub fn smass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 ///
 /// ```rust
 /// use rust_steam::{cpmass_tp};
-/// let u = cpmass_tp(300.0, 101325.0).unwrap();
+/// let cp = cpmass_tp(300.0, 101325.0).unwrap();
 /// ```
 pub fn cpmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
@@ -367,13 +367,34 @@ pub fn cpmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
 ///
 /// ```rust
 /// use rust_steam::{vmass_tp};
-/// let u = vmass_tp(300.0, 101325.0).unwrap();
+/// let v = vmass_tp(300.0, 101325.0).unwrap();
 /// ```
 pub fn vmass_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
     let region = region(t, p)?;
     match region {
         Region::Region1 => Ok(v_tp_1(t, p)),
         Region::Region2 => Ok(v_tp_2(t, p)),
+        _ => Err(IAPWSError::NotImplemented()),
+    }
+}
+
+/// Calculates the mass volume in m^3/kg at a given
+/// temperature and pressure.
+///
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
+///
+/// Example
+///
+/// ```rust
+/// use rust_steam::{speed_sound_tp};
+/// let w = speed_sound_tp(300.0, 101325.0).unwrap();
+/// ```
+pub fn speed_sound_tp(t: f64, p: f64) -> Result<f64, IAPWSError> {
+    let region = region(t, p)?;
+    match region {
+        Region::Region1 => Ok(w_tp_1(t, p)),
+        Region::Region2 => Ok(w_tp_2(t, p)),
         _ => Err(IAPWSError::NotImplemented()),
     }
 }
@@ -948,7 +969,9 @@ pub fn tsat97(p: f64) -> f64 {
 #[cfg(test)]
 mod public_interface {
 
-    use crate::{cpmass_tp, hmass_tp, psat97, smass_tp, tsat97, umass_tp, vmass_tp};
+    use crate::{
+        cpmass_tp, hmass_tp, psat97, smass_tp, speed_sound_tp, tsat97, umass_tp, vmass_tp,
+    };
     extern crate float_cmp;
     use float_cmp::ApproxEq;
 
@@ -1208,6 +1231,58 @@ mod public_interface {
                 "Expected: {} Result: {}",
                 test_data.expected_result,
                 volume
+            );
+        }
+    }
+
+    #[test]
+    fn speed_sound_temperature_pressure() {
+        let test_set = vec![
+            TestData {
+                temperature: 300.0,
+                pressure: 3e6,
+                divisor: 10000.0,
+                expected_result: 0.150773921,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 80e6,
+                divisor: 10000.0,
+                expected_result: 0.163469054,
+            },
+            TestData {
+                temperature: 500.0,
+                pressure: 3e6,
+                divisor: 10000.0,
+                expected_result: 0.124071337,
+            },
+            TestData {
+                temperature: 300.0,
+                pressure: 0.0035e6,
+                divisor: 1000.0,
+                expected_result: 0.427920172,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 0.0035e6,
+                divisor: 1000.0,
+                expected_result: 0.644289068,
+            },
+            TestData {
+                temperature: 700.0,
+                pressure: 30e6,
+                divisor: 1000.0,
+                expected_result: 0.480386523,
+            },
+        ];
+        for test_data in test_set.iter() {
+            let speed_sound = speed_sound_tp(test_data.temperature, test_data.pressure).unwrap()
+                / test_data.divisor;
+            assert!(
+                speed_sound.approx_eq(test_data.expected_result, (1e-9, 2)),
+                "Expected: {} Result: {}",
+                test_data.expected_result,
+                speed_sound
             );
         }
     }
