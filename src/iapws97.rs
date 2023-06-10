@@ -1,10 +1,11 @@
 pub mod iapws97 {
 
-    mod regions;
-    use crate::iapws97::regions::{
-        cp_tp_1, cp_tp_2, cv_tp_1, cv_tp_2, h_tp_1, h_tp_2, s_tp_1, s_tp_2, u_tp_1, u_tp_2, v_tp_1,
-        v_tp_2, w_tp_1, w_tp_2,
-    };
+    mod constants;
+    mod region_1;
+    mod region_2;
+    mod region_3;
+    use crate::iapws97::region_1::{cp_tp_1, cv_tp_1, h_tp_1, s_tp_1, u_tp_1, v_tp_1, w_tp_1};
+    use crate::iapws97::region_2::{cp_tp_2, cv_tp_2, h_tp_2, s_tp_2, u_tp_2, v_tp_2, w_tp_2};
 
     pub enum Region {
         Region1,
@@ -296,7 +297,7 @@ pub mod iapws97 {
     }
 
     #[cfg(test)]
-    mod public_interface {
+    mod tests {
 
         use super::{
             cpmass_tp, cvmass_tp, hmass_tp, p_boundary_2_3, psat97, smass_tp, speed_sound_tp,
