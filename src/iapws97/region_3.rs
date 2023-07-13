@@ -139,32 +139,32 @@ fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
 }
 
 #[allow(dead_code)]
-fn p_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
 
 #[allow(dead_code)]
-fn u_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn u_rho_t_3(rho: f64, t: f64) -> f64 {
     (constants::_R) * t * tau_3(t) * phi_tau_3(rho, t)
 }
 
 #[allow(dead_code)]
-fn s_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn s_rho_t_3(rho: f64, t: f64) -> f64 {
     (constants::_R) * (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t))
 }
 
 #[allow(dead_code)]
-fn h_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn h_rho_t_3(rho: f64, t: f64) -> f64 {
     (constants::_R) * t * (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t))
 }
 
 #[allow(dead_code)]
-fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
     -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * (constants::_R)
 }
 
 #[allow(dead_code)]
-fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
     (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
         + ((delta_3(rho) * phi_delta_3(rho, t)
             - delta_3(rho) * tau_3(t) * phi_delta_tau_3(rho, t))
@@ -175,7 +175,7 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
 }
 
 #[allow(dead_code)]
-fn w_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn w_rho_t_3(rho: f64, t: f64) -> f64 {
     let w = ((2.0 * delta_3(rho) * phi_delta_3(rho, t)
         + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
         - ((delta_3(rho) * phi_delta_3(rho, t)
