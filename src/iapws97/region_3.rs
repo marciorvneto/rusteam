@@ -1,0 +1,110 @@
+use crate::iapws97::constants;
+// Region 3
+
+const REGION_3_COEFFS: [[f64; 3]; 40] = [
+    [0.0, 0.0, 0.10658070028513e1],
+    [0.0, 0.0, -0.15732845290239e2],
+    [0.0, 1.0, 0.20944396974307e2],
+    [0.0, 2.0, -0.76867707878716e1],
+    [0.0, 7.0, 0.26185947787954e1],
+    [0.0, 10.0, -0.28080781148620e1],
+    [0.0, 12.0, 0.12053369696517e1],
+    [0.0, 23.0, -0.84566812812502e-2],
+    [1.0, 2.0, -0.12654315477714e1],
+    [1.0, 6.0, -0.11524407806681e1],
+    [1.0, 15.0, 0.88521043984318],
+    [1.0, 17.0, -0.64207765181607],
+    [2.0, 0.0, 0.38493460186671],
+    [2.0, 2.0, -0.85214708824206],
+    [2.0, 6.0, 0.48972281541877e1],
+    [2.0, 7.0, -0.30502617256965e1],
+    [2.0, 22.0, 0.39420536879154e-1],
+    [2.0, 26.0, 0.12558408424308],
+    [3.0, 0.0, -0.27999329698710],
+    [3.0, 2.0, 0.13899799569460e1],
+    [3.0, 4.0, -0.20189915023570e1],
+    [3.0, 16.0, -0.82147637173963e-2],
+    [3.0, 26.0, -0.47596035734923],
+    [4.0, 0.0, 0.43984074473500e-1],
+    [4.0, 2.0, -0.44476435428739],
+    [4.0, 4.0, 0.90572070719733],
+    [4.0, 26.0, 0.70522450087967],
+    [5.0, 1.0, 0.10770512626332],
+    [5.0, 3.0, -0.32913623258954],
+    [5.0, 26.0, -0.50871062041158],
+    [6.0, 0.0, -0.22175400873096e-1],
+    [6.0, 2.0, 0.94260751665092e-1],
+    [6.0, 26.0, 0.16436278447961],
+    [7.0, 2.0, -0.13503372241348e-1],
+    [8.0, 26.0, -0.14834345352472e-1],
+    [9.0, 2.0, 0.57922953628084e-3],
+    [9.0, 26.0, 0.32308904703711e-2],
+    [10.0, 0.0, 0.80964802996215e-4],
+    [10.0, 1.0, -0.16557679795037e-3],
+    [11.0, 26.0, -0.44923899061815e-4],
+];
+
+// ================    Region 3 ===================
+
+/// Returns the region-3 delta
+/// Specific mass is assumed to be in kg/m3
+fn delta_3(rho: f64) -> f64 {
+    rho / constants::RHO_C
+}
+
+/// Returns the region-3 tau
+/// Temperature is assumed to be in K
+fn tau_3(t: f64) -> f64 {
+    constants::T_C / t
+}
+
+fn phi_delta_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
+        sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
+    }
+    sum + REGION_3_COEFFS[0][2] / delta
+}
+
+#[allow(dead_code)]
+fn phi_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
+        sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji - 1);
+    }
+    sum
+}
+
+#[allow(dead_code)]
+fn p_rho_t_3(rho: f64, t: f64) -> f64 {
+    rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    extern crate float_cmp;
+    use float_cmp::ApproxEq;
+
+    #[test]
+    fn region_3_p() {
+        let p = p_rho_t_3(500.0, 650.0) / 1e8;
+        assert!(p.approx_eq(0.255837018, (1e-9, 2)));
+
+        let p = p_rho_t_3(200.0, 650.0) / 1e8;
+        assert!(p.approx_eq(0.222930643, (1e-9, 2)));
+
+        let p = p_rho_t_3(500.0, 750.0) / 1e8;
+        assert!(p.approx_eq(0.783095639, (1e-9, 2)));
+    }
+}
