@@ -50,27 +50,33 @@ pub mod iapws97 {
     /// let region = region(300.0, 101325.0).unwrap();
     /// ```
     fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
-        if p < 0.0 || 100.0e6 < p || 273.15 < t || (1073.15 < t && 50.0e6 < p) {
+        if !(0.0..=100e6).contains(&p) || !(273.15..=2273.15).contains(&t) || (t < 1073.15 && 50.0e6 < p) {
+            println!("found an error");
             return Err(IAPWSError::OutOfBounds(t, p));
         }
 
-        let t_sat = tsat97(&p);
         let p_sat = psat97(&t);
 
         let p_boundary_23 = p_boundary_2_3(&t);
 
         if t >= 1073.15 {
+            println!("found region 5");
             return Ok(Region::Region5);
-        } else if t == t_sat && p == p_sat {
+        } else if p == p_sat {
+            println!("found region 4");
             return Ok(Region::Region4);
-        } else if 623.15 <= t && t < 863.15 && p_boundary_23 < p {
+        } else if (623.15..=863.15).contains(&t) && p_boundary_23 < p {
+            println!("found region 3");
             return Ok(Region::Region3);
-        } else if (t <= 623.15 && p < p_sat) || (p <= p_boundary_23 && t <= 863.15) || t < 1073.15 {
+        } else if (t <= 623.15 && p < p_sat) || (p <= p_boundary_23 && (623.15..=863.15).contains(&t)) || (863.15..=1073.15).contains(&t) {
+            println!("found region 2");
             return Ok(Region::Region2);
         } else if t <= 623.15 && p_sat < p {
+            println!("found region 1");
             return Ok(Region::Region1);
         }
 
+        println!("how'd I get here?");
         Err(IAPWSError::OutOfBounds(t, p))
     }
 
@@ -242,7 +248,7 @@ pub mod iapws97 {
         // Calulate additional values
         let theta: f64 = t + REGION_4_SATURATION_COEFFS[8] / (t - REGION_4_SATURATION_COEFFS[9]);
         let coef_a: f64 =
-            theta.powi(2) + REGION_4_SATURATION_COEFFS[0] * theta + REGION_4_SATURATION_COEFFS[0];
+            theta.powi(2) + REGION_4_SATURATION_COEFFS[0] * theta + REGION_4_SATURATION_COEFFS[1];
         let coef_b: f64 = REGION_4_SATURATION_COEFFS[2] * theta.powi(2)
             + REGION_4_SATURATION_COEFFS[3] * theta
             + REGION_4_SATURATION_COEFFS[4];
@@ -266,7 +272,7 @@ pub mod iapws97 {
         let coef_f: f64 = REGION_4_SATURATION_COEFFS[0] * beta.powi(2)
             + REGION_4_SATURATION_COEFFS[3] * beta
             + REGION_4_SATURATION_COEFFS[6];
-        let coef_g: f64 = REGION_4_SATURATION_COEFFS[0] * beta.powi(2)
+        let coef_g: f64 = REGION_4_SATURATION_COEFFS[1] * beta.powi(2)
             + REGION_4_SATURATION_COEFFS[4] * beta
             + REGION_4_SATURATION_COEFFS[7];
         let coef_d: f64 =
