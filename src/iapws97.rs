@@ -50,38 +50,32 @@ pub mod iapws97 {
     /// let region = region(300.0, 101325.0).unwrap();
     /// ```
     fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
-        if !(273.15..=2273.15).contains(&t)
-            || !(0.0..=100e6).contains(&p)
-            || (t < 1073.15 && p > 50e6)
+        if !(0.0..=100.0e6).contains(&p)
+            || !(273.15..=2273.15).contains(&t)
+            || (1073.15 < t && 50.0e6 < p)
         {
             return Err(IAPWSError::OutOfBounds(t, p));
         }
 
         let p_sat = psat97(&t);
-        println!("p_sat is {}", p_sat);
 
         let p_boundary_23 = p_boundary_2_3(&t);
-        println!("p_boundary_23 is {}", p_boundary_23);
 
         if t >= 1073.15 {
-            println!("Found region 5");
             return Ok(Region::Region5);
         } else if p == p_sat {
-            println!("Found region 4");
             return Ok(Region::Region4);
-        } else if (623.15..863.15).contains(&t) && p_boundary_23 < p {
-            println!("Found region 3");
+        } else if (623.15..=863.15).contains(&t) && p_boundary_23 < p {
             return Ok(Region::Region3);
         } else if (t <= 623.15 && p < p_sat)
-            || ((623.15..863.15).contains(&t) && p <= p_boundary_23)
-            || (863.15 < t && t <= 1073.15)
+            || (p <= p_boundary_23 && (623.15..=863.15).contains(&t))
+            || (863.15..=1073.15).contains(&t)
         {
-            println!("Found region 2");
             return Ok(Region::Region2);
         } else if t <= 623.15 && p_sat < p {
-            println!("Found region 1");
             return Ok(Region::Region1);
         }
+
         Err(IAPWSError::OutOfBounds(t, p))
     }
 
