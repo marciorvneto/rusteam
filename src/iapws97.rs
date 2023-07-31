@@ -201,6 +201,7 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(v_tp_1(t, p)),
             Region::Region2 => Ok(v_tp_2(t, p)),
+            //Region::Region3 => Ok(v_tp_3(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
