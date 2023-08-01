@@ -1627,44 +1627,6 @@ fn delta_3(rho: f64) -> f64 {
     rho / constants::RHO_C
 }
 
-/// Returns the region-3 tau
-/// Temperature is assumed to be in K
-fn tau_3(t: f64) -> f64 {
-    constants::T_C / t
-}
-
-fn phi_delta_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
-    let tau = tau_3(t);
-    let delta = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
-        sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
-    }
-    sum + REGION_3_COEFFS[0][2] / delta
-}
-
-#[allow(dead_code)]
-fn phi_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
-    let tau = tau_3(t);
-    let delta = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
-        sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji - 1);
-    }
-    sum
-}
-
-#[allow(dead_code)]
-fn p_rho_t_3(rho: f64, t: f64) -> f64 {
-    rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
-}
-
 #[allow(dead_code)]
 fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
     // Create coefficient Arrays
@@ -1853,6 +1815,122 @@ fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
     Err(iapws97::IAPWSError::NotImplemented())
 }
 
+/// Returns the region-3 tau
+/// Temperature is assumed to be in K
+fn tau_3(t: f64) -> f64 {
+    constants::T_C / t
+}
+
+fn phi_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau: f64 = tau_3(t);
+    let delta: f64 = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii: i32 = coefficient[0] as i32;
+        let ji: i32 = coefficient[1] as i32;
+        let ni: f64 = coefficient[2];
+        sum += ni * delta.powi(ii) * tau.powi(ji);
+    }
+    sum + REGION_3_COEFFS[0][2] * delta_3(rho).ln()
+}
+
+fn phi_delta_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau: f64 = tau_3(t);
+    let delta: f64 = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii: i32 = coefficient[0] as i32;
+        let ji: i32 = coefficient[1] as i32;
+        let ni: f64 = coefficient[2];
+        sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
+    }
+    sum + REGION_3_COEFFS[0][2] / delta
+}
+
+fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau: f64 = tau_3(t);
+    let delta: f64 = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii: i32 = coefficient[0] as i32;
+        let ji: i32 = coefficient[1] as i32;
+        let ni: f64 = coefficient[2];
+        sum += ni * delta.powi(ii - 2) * f64::from(ii) * f64::from(ii - 1) * tau.powi(ji);
+    }
+    sum - REGION_3_COEFFS[0][2] / delta.powi(2)
+}
+
+#[allow(dead_code)]
+fn phi_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau: f64 = tau_3(t);
+    let delta: f64 = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii: i32 = coefficient[0] as i32;
+        let ji: i32 = coefficient[1] as i32;
+        let ni: f64 = coefficient[2];
+        sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji - 1);
+    }
+    sum
+}
+
+fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau: f64 = tau_3(t);
+    let delta: f64 = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii: i32 = coefficient[0] as i32;
+        let ji: i32 = coefficient[1] as i32;
+        let ni: f64 = coefficient[2];
+        sum += ni * delta.powi(ii) * f64::from(ji) * f64::from(ji - 1) * tau.powi(ji - 2);
+    }
+    sum
+}
+
+fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau: f64 = tau_3(t);
+    let delta: f64 = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii: i32 = coefficient[0] as i32;
+        let ji: i32 = coefficient[1] as i32;
+        let ni: f64 = coefficient[2];
+        sum += ni * delta.powi(ii - 1) * f64::from(ii) * f64::from(ji) * tau.powi(ji - 1);
+    }
+    sum
+}
+
+#[allow(dead_code)]
+fn p_rho_t_3(rho: f64, t: f64) -> f64 {
+    rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
+}
+
+fn u_rho_t_3(rho: f64, t: f64) -> f64 {
+    tau_3(t) * phi_tau_3(rho, t) * constants::_R * t
+}
+
+fn s_rho_t_3(rho: f64, t: f64) -> f64 {
+    (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t)) * constants::_R
+}
+
+fn h_rho_t_3(rho: f64, t: f64) -> f64 {
+    (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t)) * constants::_R * t
+}
+
+fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
+    -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * constants::_R
+}
+
+fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
+    (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
+        + ((delta_3(rho) * phi_delta_3(rho, t)
+            - delta_3(rho) * tau_3(t) * phi_delta_tau_3(rho, t))
+        .powi(2)
+            / (2.0 * delta_3(rho) * phi_delta_3(rho, t)
+                + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t))))
+        * constants::_R
+}
+
 pub fn v_tp_3(t: f64, p: f64) -> Result<f64, iapws97::IAPWSError> {
     match subregion(t, p)? {
         Region3::SubregionA => Ok(subregion_a(t, p)),
@@ -1900,6 +1978,66 @@ mod tests {
 
         let p = p_rho_t_3(500.0, 750.0) / 1e8;
         assert!(p.approx_eq(0.783095639, (1e-9, 2)));
+    }
+
+    #[test]
+    fn region_3_u() {
+        let u = u_rho_t_3(500.0, 650.0) / 1000.0;
+        assert!(u.approx_eq(1.812262786196377, (1e-9, 2)));
+
+        let u = u_rho_t_3(200.0, 650.0) / 1000.0;
+        assert!(u.approx_eq(2.263658684165079, (1e-9, 2)));
+
+        let u = u_rho_t_3(500.0, 750.0) / 1000.0;
+        assert!(u.approx_eq(2.102069317626429, (1e-9, 2)));
+    }
+
+    #[test]
+    fn region_3_s() {
+        let s = s_rho_t_3(500.0, 650.0);
+        assert!(s.approx_eq(4.054272733339, (1e-9, 2)));
+
+        let s = s_rho_t_3(200.0, 650.0);
+        assert!(s.approx_eq(4.854387919742, (1e-9, 2)));
+// 
+        let s = s_rho_t_3(500.0, 750.0);
+        assert!(s.approx_eq(4.469719056217, (1e-9, 2)));
+    }
+
+    #[test]
+    fn region_3_h() {
+        let h = h_rho_t_3(500.0, 650.0) / 1000.0;
+        assert!(h.approx_eq(1.863430189833421, (1e-9, 2)));
+
+        let h = h_rho_t_3(200.0, 650.0) / 1000.0;
+        assert!(h.approx_eq(2.375124005448133, (1e-9, 2)));
+ 
+        let h = h_rho_t_3(500.0, 750.0) / 1000.0;
+        assert!(h.approx_eq(2.258688445460262, (1e-9, 2)));
+    }
+
+    #[test]
+    fn region_3_cv() {
+        let cv = cv_rho_t_3(500.0, 650.0);
+        assert!(cv.approx_eq(3.191317871889, (1e-9, 2)));
+
+        let cv = cv_rho_t_3(200.0, 650.0);
+        assert!(cv.approx_eq(4.04118075955, (1e-9, 2)));
+ 
+        let cv = cv_rho_t_3(500.0, 750.0);
+        assert!(cv.approx_eq(2.71701677121, (1e-9, 2)));
+    }
+
+    #[test]
+    fn region_3_cp() {
+        let cp = cp_rho_t_3(500.0, 650.0) / 10.0;
+        assert!(cp.approx_eq(1.3893571744173, (1e-9, 2)));
+
+        let cp = cp_rho_t_3(200.0, 650.0) / 10.0;
+        assert!(cp.approx_eq(4.4657934155581, (1e-9, 2)));
+ 
+        let cp = cp_rho_t_3(500.0, 750.0) / 10.0;
+        assert!(cp.approx_eq(0.6341653594791, (1e-9, 2)));
     }
 
     #[test]
