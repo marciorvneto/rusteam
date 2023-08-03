@@ -365,6 +365,7 @@ mod tests {
     }
 
     ///Test results based on current implementation
+    ///Verify against https://github.com/CoolProp/IF97
     #[test]
     fn cv() {
         let cv1 = cv_tp_1(300.0, 3e6);

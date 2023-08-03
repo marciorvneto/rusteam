@@ -58,6 +58,21 @@ fn tau_3(t: f64) -> f64 {
     constants::T_C / t
 }
 
+fn phi_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = REGION_3_COEFFS[0][2] * delta_3(rho).ln();
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
+        sum += ni * delta.powi(ii) * tau.powi(ji);
+    }
+
+    sum
+}
+
 fn phi_delta_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_3(t);
@@ -71,7 +86,32 @@ fn phi_delta_3(rho: f64, t: f64) -> f64 {
     sum + REGION_3_COEFFS[0][2] / delta
 }
 
-#[allow(dead_code)]
+fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = -REGION_3_COEFFS[0][2] / delta_3(rho).powi(2);
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
+        sum += ni * f64::from(ii * (ii - 1)) * delta.powi(ii - 2) * tau.powi(ji);
+    }
+    sum
+}
+
+fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
+        sum += ni * f64::from(ii) * delta.powi(ii - 1) * f64::from(ji) * tau.powi(ji - 1);
+    }
+    sum
+}
+
 fn phi_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau = tau_3(t);
@@ -85,9 +125,67 @@ fn phi_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
+fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
+    let mut sum: f64 = 0.0;
+    let tau = tau_3(t);
+    let delta = delta_3(rho);
+    for coefficient in REGION_3_COEFFS.iter().skip(1) {
+        let ii = coefficient[0] as i32;
+        let ji = coefficient[1] as i32;
+        let ni = coefficient[2];
+        sum += ni * delta.powi(ii) * f64::from(ji * (ji - 1)) * tau.powi(ji - 2);
+    }
+    sum
+}
+
 #[allow(dead_code)]
-fn p_rho_t_3(rho: f64, t: f64) -> f64 {
+pub(crate) fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
+}
+
+#[allow(dead_code)]
+pub(crate) fn u_rho_t_3(rho: f64, t: f64) -> f64 {
+    (constants::_R) * t * tau_3(t) * phi_tau_3(rho, t)
+}
+
+#[allow(dead_code)]
+pub(crate) fn s_rho_t_3(rho: f64, t: f64) -> f64 {
+    (constants::_R) * (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t))
+}
+
+#[allow(dead_code)]
+pub(crate) fn h_rho_t_3(rho: f64, t: f64) -> f64 {
+    (constants::_R) * t * (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t))
+}
+
+#[allow(dead_code)]
+pub(crate) fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
+    -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * (constants::_R)
+}
+
+#[allow(dead_code)]
+pub(crate) fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
+    (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
+        + ((delta_3(rho) * phi_delta_3(rho, t)
+            - delta_3(rho) * tau_3(t) * phi_delta_tau_3(rho, t))
+        .powi(2)
+            / (2.0 * delta_3(rho) * phi_delta_3(rho, t)
+                + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t))))
+        * (constants::_R)
+}
+
+#[allow(dead_code)]
+pub(crate) fn w_rho_t_3(rho: f64, t: f64) -> f64 {
+    let w = ((2.0 * delta_3(rho) * phi_delta_3(rho, t)
+        + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
+        - ((delta_3(rho) * phi_delta_3(rho, t)
+            - delta_3(rho) * tau_3(t) * phi_delta_tau_3(rho, t))
+        .powi(2)
+            / (tau_3(t).powi(2) * phi_tau_tau_3(rho, t))))
+        * t
+        * (constants::_R))
+        * 1000.0; // Took the times 1000 from https://github.com/CoolProp/IF97 else the test reuslts would not match
+    w.sqrt()
 }
 
 #[cfg(test)]
@@ -106,5 +204,79 @@ mod tests {
 
         let p = p_rho_t_3(500.0, 750.0) / 1e8;
         assert!(p.approx_eq(0.783095639, (1e-9, 2)));
+    }
+
+    #[test]
+    fn internal_energy() {
+        let u = u_rho_t_3(500.0, 650.0) / 1e4;
+        assert!(u.approx_eq(0.181226279, (1e-9, 2)));
+
+        let u = u_rho_t_3(200.0, 650.0) / 1e4;
+        assert!(u.approx_eq(0.226365868, (1e-9, 2)));
+
+        let u = u_rho_t_3(500.0, 750.0) / 1e4;
+        assert!(u.approx_eq(0.210206932, (1e-9, 2)));
+    }
+
+    #[test]
+    fn specific_entropy() {
+        let s = s_rho_t_3(500.0, 650.0) / 1e1;
+        assert!(s.approx_eq(0.405427273, (1e-9, 2)));
+
+        let s = s_rho_t_3(200.0, 650.0) / 1e1;
+        assert!(s.approx_eq(0.485438792, (1e-9, 2)));
+
+        let s = s_rho_t_3(500.0, 750.0) / 1e1;
+        assert!(s.approx_eq(0.446971906, (1e-9, 2)));
+    }
+
+    #[test]
+    fn specific_enthalpy() {
+        let h = h_rho_t_3(500.0, 650.0) / 1e4;
+        assert!(h.approx_eq(0.186343019, (1e-9, 2)));
+
+        let h = h_rho_t_3(200.0, 650.0) / 1e4;
+        assert!(h.approx_eq(0.237512401, (1e-9, 2)));
+
+        let h = h_rho_t_3(500.0, 750.0) / 1e4;
+        assert!(h.approx_eq(0.225868845, (1e-9, 2)));
+    }
+    ///
+    ///Test results based on current implementation
+    ///Verify against https://github.com/CoolProp/IF97
+    #[test]
+    fn cv() {
+        let cv = cv_rho_t_3(500.0, 650.0) / 10.0;
+        assert!(cv.approx_eq(0.3191317871889249, (1e-9, 2)));
+
+        let cv = cv_rho_t_3(200.0, 650.0) / 10.0;
+        assert!(cv.approx_eq(0.4041180759550155, (1e-9, 2)));
+
+        let cv = cv_rho_t_3(500.0, 750.0) / 10.0;
+        assert!(cv.approx_eq(0.2717016771210098, (1e-9, 2)));
+    }
+
+    #[test]
+    fn cp() {
+        let cp = cp_rho_t_3(500.0, 650.0) / 1e2;
+        assert!(cp.approx_eq(0.138935717, (1e-9, 2)));
+
+        let cp = cp_rho_t_3(200.0, 650.0) / 1e2;
+        assert!(cp.approx_eq(0.446579342, (1e-9, 2)));
+
+        let cp = cp_rho_t_3(500.0, 750.0) / 1e1;
+        assert!(cp.approx_eq(0.634165359, (1e-9, 2)));
+    }
+
+    #[test]
+    fn sound_velocity() {
+        let w = w_rho_t_3(500.0, 650.0) / 1e3;
+        assert!(w.approx_eq(0.502005554, (1e-9, 2)));
+
+        let w = w_rho_t_3(200.0, 650.0) / 1e3;
+        assert!(w.approx_eq(0.383444594, (1e-9, 2)));
+
+        let w = w_rho_t_3(500.0, 750.0) / 1e3;
+        assert!(w.approx_eq(0.760696041, (1e-9, 2)));
     }
 }
