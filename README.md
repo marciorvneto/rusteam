@@ -61,14 +61,14 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested | Available via public interface |
 |:---------|:--------------:|:-------:|:-------:|
-|Pressure|:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Specific internal energy|:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Specific entropy|:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Specific enthalpy|:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Specific isochoric heat capacity |:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Speed of sound |:heavy_check_mark:| :heavy_check_mark: | :x: |
-|Phase-equilibrium condition|:heavy_check_mark:| :heavy_check_mark: | :x: |
+|Pressure|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific internal energy|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific entropy|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific enthalpy|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific isochoric heat capacity |:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Speed of sound |:x:| :x: | :x: |
+|Phase-equilibrium condition|:x:| :x: | :x: |
 
 ### Region 4
 
@@ -83,10 +83,10 @@ Here you can find the current status of each of the calculations implemented so 
 
 | Property | Implemented | Tested | Available via public interface |
 |:---------|:--------------:|:-------:|:-------:|
-|Specific volume|:x:| :x: | :x: |
-|Specific internal energy|:x:| :x: | :x: |
-|Specific entropy|:x:| :x: | :x: |
-|Specific enthalpy|:x:| :x: | :x: |
-|Specific isobaric heat capacity |:x:| :x: | :x: |
-|Specific isochoric heat capacity |:x:| :x: | :x: |
-|Speed of sound |:x:| :x: | :x: |
+|Specific volume|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific internal energy|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific entropy|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific enthalpy|:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific isobaric heat capacity |:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Specific isochoric heat capacity |:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
+|Speed of sound |:heavy_check_mark:| :heavy_check_mark: | :heavy_check_mark: |
