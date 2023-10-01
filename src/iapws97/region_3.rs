@@ -133,7 +133,7 @@ fn subregion_a(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p * 1e-8) - 0.085).powi(i[x - 1]) * ((t / 760.0) - 0.817).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0024;
+    v * 0.0024
 }
 
 #[allow(dead_code)]
@@ -191,7 +191,7 @@ fn subregion_b(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p * 1e-8) - 0.280).powi(i[x - 1]) * ((t / 860.0) - 0.779).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0041;
+    v * 0.0041
 }
 
 #[allow(dead_code)]
@@ -253,7 +253,7 @@ fn subregion_c(t: f64, p: f64) -> f64 {
                 * (((p * 2.5e-8) - 0.259).powi(i[x - 1]) * ((t / 690.0) - 0.903).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0022;
+    v * 0.0022
 }
 
 #[allow(dead_code)]
@@ -318,7 +318,7 @@ fn subregion_d(t: f64, p: f64) -> f64 {
                 * (((p * 2.5e-8) - 0.559).powi(i[x - 1]) * ((t / 690.0) - 0.939).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0029;
+    v.powi(4) * 0.0029
 }
 
 #[allow(dead_code)]
@@ -373,7 +373,7 @@ fn subregion_e(t: f64, p: f64) -> f64 {
                 * (((p * 2.5e-8) - 0.587).powi(i[x - 1]) * ((t / 710.0) - 0.918).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0032;
+    v * 0.0032
 }
 
 #[allow(dead_code)]
@@ -443,7 +443,7 @@ fn subregion_f(t: f64, p: f64) -> f64 {
                     * ((t / 730.0) - 0.891).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0064;
+    v.powi(4) * 0.0064
 }
 
 #[allow(dead_code)]
@@ -508,7 +508,7 @@ fn subregion_g(t: f64, p: f64) -> f64 {
                 * (((p * 4.0e-8) - 0.872).powi(i[x - 1]) * ((t / 660.0) - 0.971).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0027;
+    v.powi(4) * 0.0027
 }
 
 #[allow(dead_code)]
@@ -563,7 +563,7 @@ fn subregion_h(t: f64, p: f64) -> f64 {
                 * (((p * 4.0e-8) - 0.898).powi(i[x - 1]) * ((t / 660.0) - 0.983).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0032;
+    v.powi(4) * 0.0032
 }
 
 #[allow(dead_code)]
@@ -633,7 +633,7 @@ fn subregion_i(t: f64, p: f64) -> f64 {
                     * ((t / 660.0) - 0.984).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0041;
+    v.powi(4) * 0.0041
 }
 
 #[allow(dead_code)]
@@ -690,7 +690,7 @@ fn subregion_j(t: f64, p: f64) -> f64 {
                     * ((t / 670.0) - 0.964).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0054;
+    v.powi(4) * 0.0054
 }
 
 #[allow(dead_code)]
@@ -751,7 +751,7 @@ fn subregion_k(t: f64, p: f64) -> f64 {
                 * (((p * 4.0e-8) - 0.802).powi(i[x - 1]) * ((t / 680.0) - 0.935).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0077;
+    v * 0.0077
 }
 
 #[allow(dead_code)]
@@ -821,7 +821,7 @@ fn subregion_l(t: f64, p: f64) -> f64 {
                 * (((p / 24.0e6) - 0.908).powi(i[x - 1]) * ((t / 650.0) - 0.989).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0026;
+    v.powi(4) * 0.0026
 }
 
 #[allow(dead_code)]
@@ -889,7 +889,7 @@ fn subregion_m(t: f64, p: f64) -> f64 {
                     * (((t / 650.0) - 0.997).powf(0.25)).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0028;
+    v * 0.0028
 }
 
 #[allow(dead_code)]
@@ -955,7 +955,7 @@ fn subregion_n(t: f64, p: f64) -> f64 {
                 * (((p / 23.0e6) - 0.976).powi(i[x - 1]) * ((t / 650.0) - 0.997).powi(j[x - 1]))
         })
         .sum();
-    v.exp() * 0.0031;
+    v.exp() * 0.0031
 }
 
 #[allow(dead_code)]
@@ -1006,7 +1006,7 @@ fn subregion_o(t: f64, p: f64) -> f64 {
                     * ((t / 650.0) - 0.996).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0034;
+    v * 0.0034
 }
 
 #[allow(dead_code)]
@@ -1061,7 +1061,7 @@ fn subregion_p(t: f64, p: f64) -> f64 {
                     * ((t / 650.0) - 0.997).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0041;
+    v * 0.0041
 }
 
 #[allow(dead_code)]
@@ -1110,7 +1110,7 @@ fn subregion_q(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.848).powi(i[x - 1]) * ((t / 650.0) - 0.983).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0022;
+    v.powi(4) * 0.0022
 }
 
 #[allow(dead_code)]
@@ -1163,7 +1163,7 @@ fn subregion_r(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.874).powi(i[x - 1]) * ((t / 650.0) - 0.982).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0054;
+    v * 0.0054
 }
 
 #[allow(dead_code)]
@@ -1218,7 +1218,7 @@ fn subregion_s(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 21e6) - 0.886).powi(i[x - 1]) * ((t / 640.0) - 0.990).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0022;
+    v.powi(4) * 0.0022
 }
 
 #[allow(dead_code)]
@@ -1277,7 +1277,7 @@ fn subregion_t(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 20e6) - 0.803).powi(i[x - 1]) * ((t / 650.0) - 1.020).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0088;
+    v * 0.0088
 }
 
 #[allow(dead_code)]
@@ -1341,7 +1341,7 @@ fn subregion_u(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.902).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0026;
+    v * 0.0026
 }
 
 #[allow(dead_code)]
@@ -1406,7 +1406,7 @@ fn subregion_v(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.960).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0031;
+    v * 0.0031
 }
 
 #[allow(dead_code)]
@@ -1467,7 +1467,7 @@ fn subregion_w(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.959).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0039;
+    v.powi(4) * 0.0039
 }
 
 #[allow(dead_code)]
@@ -1529,7 +1529,7 @@ fn subregion_x(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.910).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
         })
         .sum();
-    v * 0.0049;
+    v * 0.0049
 }
 
 #[allow(dead_code)]
@@ -1571,7 +1571,7 @@ fn subregion_y(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 22e6) - 0.996).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0031;
+    v.powi(4) * 0.0031
 }
 
 #[allow(dead_code)]
@@ -1618,7 +1618,7 @@ fn subregion_z(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 22e6) - 0.993).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
         })
         .sum();
-    v.powi(4) * 0.0038;
+    v.powi(4) * 0.0038
 }
 
 /// Returns the region-3 delta
