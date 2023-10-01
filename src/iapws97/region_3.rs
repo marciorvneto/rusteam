@@ -1,5 +1,5 @@
 use crate::iapws97;
-use crate::iapws97::{constants, psat97, IAPWSError};
+use crate::iapws97::{constants, psat97};
 
 use super::tsat97;
 
@@ -1894,6 +1894,7 @@ fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
 /// Returns the pressure given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[allow(dead_code)]
 fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }

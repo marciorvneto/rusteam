@@ -143,7 +143,7 @@ fn gamma_pi_5_res(t: f64, p: f64) -> f64 {
         let ii: f64 = coefficient[0];
         let ji: i32 = coefficient[1] as i32;
         let ni: f64 = coefficient[2];
-        sum += ni * ii as f64 * pi.powi(ii as i32 - 1) * tau.powi(ji);
+        sum += ni * ii * pi.powi(ii as i32 - 1) * tau.powi(ji);
     }
     sum
 }

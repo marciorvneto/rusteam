@@ -418,9 +418,10 @@ pub fn t_ps_2(p: f64, s: f64) -> Result<f64, iapws97::IAPWSError> {
 
         // Calculate T
         let x: [usize; 44] = core::array::from_fn(|i| i + 1);
+        let sigma: f64 = s / 0.7853;
         let t: f64 = x
             .into_iter()
-            .map(|x| n[x - 1] * pi.powi(i[x - 1]) * (10.0 - (s / 0.7853)).powi(j[x - 1]))
+            .map(|x| n[x - 1] * pi.powi(i[x - 1]) * (10.0 - sigma).powi(j[x - 1]))
             .sum();
         return Ok(t);
     } else if (4.0e6..=100.0e6).contains(&p) && s < 5.85 {
