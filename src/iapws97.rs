@@ -29,7 +29,7 @@ pub mod iapws97 {
             0.57254459862746e3,
             0.13918839778870e2,
         ];
-        return 1e6 * (n[0] + n[1] * t + n[2] * t.powi(2));
+        1e6 * (n[0] + n[1] * t + n[2] * t.powi(2))
     }
 
     // ===============     Main API ===================
@@ -257,9 +257,7 @@ pub mod iapws97 {
             + REGION_4_SATURATION_COEFFS[7];
 
         // Return p_sat
-        return (2.0 * coef_c / (-coef_b + (coef_b.powi(2) - 4.0 * coef_a * coef_c).sqrt()))
-            .powi(4)
-            * 1e6;
+        (2.0 * coef_c / (-coef_b + (coef_b.powi(2) - 4.0 * coef_a * coef_c).sqrt())).powi(4) * 1e6
     }
 
     /// Returns the saturation temperature in K
@@ -279,11 +277,11 @@ pub mod iapws97 {
             2.0 * coef_g / (-coef_f - (coef_f.powi(2) - 4.0 * coef_e * coef_g).sqrt());
 
         // Return t_sat
-        return (REGION_4_SATURATION_COEFFS[9] + coef_d
+        (REGION_4_SATURATION_COEFFS[9] + coef_d
             - ((REGION_4_SATURATION_COEFFS[9] + coef_d).powi(2)
                 - 4.0 * (REGION_4_SATURATION_COEFFS[8] + REGION_4_SATURATION_COEFFS[9] * coef_d))
                 .sqrt())
-            * 0.5;
+            * 0.5
     }
 
     #[cfg(test)]

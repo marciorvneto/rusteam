@@ -289,6 +289,7 @@ pub(crate) fn w_tp_2(t: f64, p: f64) -> f64 {
     ((constants::_R * 1000.0 * t) * num / den).sqrt()
 }
 
+#[allow(dead_code)]
 pub fn t_ps_2(p: f64, s: f64) -> Result<f64, iapws97::IAPWSError> {
     let pi = p / 1e6;
     if (0.0..=4.0e6).contains(&p) {
@@ -475,6 +476,7 @@ pub fn t_ps_2(p: f64, s: f64) -> Result<f64, iapws97::IAPWSError> {
     Err(iapws97::IAPWSError::NotImplemented())
 }
 
+#[allow(dead_code)]
 pub fn t_ph_2(p: f64, h: f64) -> Result<f64, iapws97::IAPWSError> {
     let pi = p / 1e6;
     let eta = h / 2.0e3;
@@ -532,7 +534,6 @@ pub fn t_ph_2(p: f64, h: f64) -> Result<f64, iapws97::IAPWSError> {
             .into_iter()
             .map(|x| n[x - 1] * pi.powi(i[x - 1]) * (eta - 2.1).powi(j[x - 1]))
             .sum();
-        print!("{} \n", t);
         return Ok(t);
     } else if (4.0e6..=100.0e6).contains(&p) && p < p_2b2c {
         let i: [i32; 38] = [

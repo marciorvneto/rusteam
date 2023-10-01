@@ -1821,6 +1821,7 @@ fn tau_3(t: f64) -> f64 {
     constants::T_C / t
 }
 
+#[allow(dead_code)]
 fn phi_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1847,6 +1848,7 @@ fn phi_delta_3(rho: f64, t: f64) -> f64 {
     sum + REGION_3_COEFFS[0][2] / delta
 }
 
+#[allow(dead_code)]
 fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1874,6 +1876,7 @@ fn phi_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
+#[allow(dead_code)]
 fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1887,6 +1890,7 @@ fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
+#[allow(dead_code)]
 fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1905,22 +1909,27 @@ fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
 
+#[allow(dead_code)]
 fn u_rho_t_3(rho: f64, t: f64) -> f64 {
     tau_3(t) * phi_tau_3(rho, t) * constants::_R * t
 }
 
+#[allow(dead_code)]
 fn s_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t)) * constants::_R
 }
 
+#[allow(dead_code)]
 fn h_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t)) * constants::_R * t
 }
 
+#[allow(dead_code)]
 fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
     -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * constants::_R
 }
 
+#[allow(dead_code)]
 fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
     (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
         + ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1931,6 +1940,7 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
         * constants::_R
 }
 
+#[allow(dead_code)]
 pub fn v_tp_3(t: f64, p: f64) -> Result<f64, iapws97::IAPWSError> {
     match subregion(t, p)? {
         Region3::SubregionA => Ok(subregion_a(t, p)),
