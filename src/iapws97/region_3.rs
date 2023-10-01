@@ -1,9 +1,8 @@
 use crate::iapws97;
-use crate::iapws97::{constants, psat97};
+use crate::iapws97::{constants, psat97, IAPWSError};
 
 use super::tsat97;
 
-#[allow(dead_code)]
 pub enum Region3 {
     SubregionA,
     SubregionB,
@@ -80,7 +79,6 @@ const REGION_3_COEFFS: [[f64; 3]; 40] = [
 
 // ================    Region 3 ===================
 
-#[allow(dead_code)]
 fn subregion_a(t: f64, p: f64) -> f64 {
     let i: [i32; 30] = [
         -12, -12, -12, -10, -10, -10, -8, -8, -8, -6, -5, -5, -5, -4, -3, -3, -3, -3, -2, -2, -2,
@@ -136,7 +134,6 @@ fn subregion_a(t: f64, p: f64) -> f64 {
     v * 0.0024
 }
 
-#[allow(dead_code)]
 fn subregion_b(t: f64, p: f64) -> f64 {
     let i: [i32; 32] = [
         -12, -12, -10, -10, -8, -6, -6, -6, -5, -5, -5, -4, -4, -4, -3, -3, -3, -3, -3, -2, -2, -2,
@@ -194,7 +191,6 @@ fn subregion_b(t: f64, p: f64) -> f64 {
     v * 0.0041
 }
 
-#[allow(dead_code)]
 fn subregion_c(t: f64, p: f64) -> f64 {
     let i: [i32; 35] = [
         -12, -12, -12, -10, -10, -10, -8, -8, -8, -6, -5, -5, -5, -4, -4, -3, -3, -2, -2, -2, -1,
@@ -256,7 +252,6 @@ fn subregion_c(t: f64, p: f64) -> f64 {
     v * 0.0022
 }
 
-#[allow(dead_code)]
 fn subregion_d(t: f64, p: f64) -> f64 {
     let i: [i32; 38] = [
         -12, -12, -12, -12, -12, -12, -10, -10, -10, -10, -10, -10, -10, -8, -8, -8, -8, -6, -6,
@@ -321,7 +316,6 @@ fn subregion_d(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0029
 }
 
-#[allow(dead_code)]
 fn subregion_e(t: f64, p: f64) -> f64 {
     let i: [i32; 29] = [
         -12, -12, -10, -10, -10, -10, -10, -8, -8, -8, -6, -5, -4, -4, -3, -3, -3, -2, -2, -2, -2,
@@ -376,7 +370,6 @@ fn subregion_e(t: f64, p: f64) -> f64 {
     v * 0.0032
 }
 
-#[allow(dead_code)]
 fn subregion_f(t: f64, p: f64) -> f64 {
     let i: [i32; 42] = [
         0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 4, 5, 5, 6, 7, 7, 10, 12, 12, 12, 14, 14, 14,
@@ -446,7 +439,6 @@ fn subregion_f(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0064
 }
 
-#[allow(dead_code)]
 fn subregion_g(t: f64, p: f64) -> f64 {
     let i: [i32; 38] = [
         -12, -12, -12, -12, -12, -12, -10, -10, -10, -8, -8, -8, -8, -6, -6, -5, -5, -4, -3, -2,
@@ -511,7 +503,6 @@ fn subregion_g(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0027
 }
 
-#[allow(dead_code)]
 fn subregion_h(t: f64, p: f64) -> f64 {
     let i: [i32; 29] = [
         -12, -12, -10, -10, -10, -10, -10, -10, -8, -8, -8, -8, -8, -6, -6, -6, -5, -5, -5, -4, -4,
@@ -566,7 +557,6 @@ fn subregion_h(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0032
 }
 
-#[allow(dead_code)]
 fn subregion_i(t: f64, p: f64) -> f64 {
     let i: [i32; 42] = [
         0, 0, 0, 1, 1, 1, 1, 2, 3, 3, 4, 4, 4, 5, 5, 5, 7, 7, 8, 8, 10, 12, 12, 12, 14, 14, 14, 14,
@@ -636,7 +626,6 @@ fn subregion_i(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0041
 }
 
-#[allow(dead_code)]
 fn subregion_j(t: f64, p: f64) -> f64 {
     let i: [i32; 29] = [
         0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 6, 10, 12, 12, 14, 14, 14, 16, 18, 20, 20, 24,
@@ -693,7 +682,6 @@ fn subregion_j(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0054
 }
 
-#[allow(dead_code)]
 fn subregion_k(t: f64, p: f64) -> f64 {
     let i: [i32; 34] = [
         -2, -2, -1, -1, 0, -0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 5, 5, 5, 6, 6,
@@ -754,7 +742,6 @@ fn subregion_k(t: f64, p: f64) -> f64 {
     v * 0.0077
 }
 
-#[allow(dead_code)]
 fn subregion_l(t: f64, p: f64) -> f64 {
     let i: [i32; 43] = [
         -12, -12, -12, -12, -12, -10, -10, -8, -8, -8, -8, -8, -8, -8, -6, -5, -5, -4, -4, -3, -3,
@@ -824,7 +811,6 @@ fn subregion_l(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0026
 }
 
-#[allow(dead_code)]
 fn subregion_m(t: f64, p: f64) -> f64 {
     let i: [i32; 40] = [
         0, 3, 8, 20, 1, 3, 4, 5, 1, 6, 2, 4, 14, 2, 5, 3, 0, 1, 1, 1, 28, 2, 16, 0, 5, 0, 3, 4, 12,
@@ -892,7 +878,6 @@ fn subregion_m(t: f64, p: f64) -> f64 {
     v * 0.0028
 }
 
-#[allow(dead_code)]
 fn subregion_n(t: f64, p: f64) -> f64 {
     let i: [i32; 39] = [
         0, 3, 4, 6, 7, 10, 12, 14, 18, 0, 3, 5, 6, 8, 12, 0, 3, 7, 12, 2, 3, 4, 2, 4, 7, 4, 3, 5,
@@ -958,7 +943,6 @@ fn subregion_n(t: f64, p: f64) -> f64 {
     v.exp() * 0.0031
 }
 
-#[allow(dead_code)]
 fn subregion_o(t: f64, p: f64) -> f64 {
     let i: [i32; 24] = [
         0, 0, 0, 2, 3, 4, 4, 4, 4, 4, 5, 5, 6, 7, 8, 8, 8, 10, 10, 14, 14, 20, 20, 24,
@@ -1009,7 +993,6 @@ fn subregion_o(t: f64, p: f64) -> f64 {
     v * 0.0034
 }
 
-#[allow(dead_code)]
 fn subregion_p(t: f64, p: f64) -> f64 {
     let i: [i32; 27] = [
         0, 0, 0, 0, 1, 2, 3, 3, 4, 6, 7, 7, 8, 10, 12, 12, 12, 14, 14, 14, 16, 18, 20, 22, 24, 24,
@@ -1064,7 +1047,6 @@ fn subregion_p(t: f64, p: f64) -> f64 {
     v * 0.0041
 }
 
-#[allow(dead_code)]
 fn subregion_q(t: f64, p: f64) -> f64 {
     let i: [i32; 24] = [
         -12, -12, -10, -10, -10, -10, -8, -6, -5, -5, -4, -4, -3, -2, -2, -2, -2, -1, -1, -1, 0, 1,
@@ -1113,7 +1095,6 @@ fn subregion_q(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0022
 }
 
-#[allow(dead_code)]
 fn subregion_r(t: f64, p: f64) -> f64 {
     let i: [i32; 27] = [
         -8, -8, -3, -3, -3, -3, -3, 0, 0, 0, 0, 3, 3, 8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10,
@@ -1166,7 +1147,6 @@ fn subregion_r(t: f64, p: f64) -> f64 {
     v * 0.0054
 }
 
-#[allow(dead_code)]
 fn subregion_s(t: f64, p: f64) -> f64 {
     let i: [i32; 29] = [
         -12, -12, -10, -8, -6, -5, -5, -4, -4, -3, -3, -2, -1, -1, -1, 0, 0, 0, 0, 1, 1, 3, 3, 3,
@@ -1221,7 +1201,6 @@ fn subregion_s(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0022
 }
 
-#[allow(dead_code)]
 fn subregion_t(t: f64, p: f64) -> f64 {
     let i: [i32; 33] = [
         0, 0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 7, 7, 7, 7, 7, 10, 10, 10, 10, 10, 18, 20, 22, 22,
@@ -1280,7 +1259,6 @@ fn subregion_t(t: f64, p: f64) -> f64 {
     v * 0.0088
 }
 
-#[allow(dead_code)]
 fn subregion_u(t: f64, p: f64) -> f64 {
     let i: [i32; 38] = [
         -12, -10, -10, -10, -8, -8, -8, -6, -6, -5, -5, -5, -3, -1, -1, -1, -1, 0, 0, 1, 2, 2, 3,
@@ -1344,7 +1322,6 @@ fn subregion_u(t: f64, p: f64) -> f64 {
     v * 0.0026
 }
 
-#[allow(dead_code)]
 fn subregion_v(t: f64, p: f64) -> f64 {
     let i: [i32; 39] = [
         -10, -8, -6, -6, -6, -6, -6, -6, -5, -5, -5, -5, -5, -5, -4, -4, -4, -4, -3, -3, -3, -2,
@@ -1409,7 +1386,6 @@ fn subregion_v(t: f64, p: f64) -> f64 {
     v * 0.0031
 }
 
-#[allow(dead_code)]
 fn subregion_w(t: f64, p: f64) -> f64 {
     let i: [i32; 35] = [
         -12, -12, -10, -10, -8, -8, -8, -6, -6, -6, -6, -5, -4, -4, -3, -3, -2, -2, -1, -1, -1, 0,
@@ -1470,7 +1446,6 @@ fn subregion_w(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0039
 }
 
-#[allow(dead_code)]
 fn subregion_x(t: f64, p: f64) -> f64 {
     let i: [i32; 36] = [
         -8, -6, -5, -4, -4, -4, -3, -3, -1, 0, 0, 0, 1, 1, 2, 3, 3, 3, 4, 5, 5, 5, 6, 8, 8, 8, 8,
@@ -1532,7 +1507,6 @@ fn subregion_x(t: f64, p: f64) -> f64 {
     v * 0.0049
 }
 
-#[allow(dead_code)]
 fn subregion_y(t: f64, p: f64) -> f64 {
     let i: [i32; 20] = [0, 0, 0, 0, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 8, 8, 10, 12];
 
@@ -1574,7 +1548,6 @@ fn subregion_y(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0031
 }
 
-#[allow(dead_code)]
 fn subregion_z(t: f64, p: f64) -> f64 {
     let i: [i32; 23] = [
         -8, -6, -5, -5, -4, -4, -4, -3, -3, -3, -2, -1, 0, 1, 2, 3, 3, 6, 6, 6, 6, 8, 8,
@@ -1621,13 +1594,8 @@ fn subregion_z(t: f64, p: f64) -> f64 {
     v.powi(4) * 0.0038
 }
 
-/// Returns the region-3 delta
-/// Specific mass is assumed to be in kg/m3
-fn delta_3(rho: f64) -> f64 {
-    rho / constants::RHO_C
-}
-
-#[allow(dead_code)]
+// Returns the subregion that corresponds
+// to the state of water given t and p
 fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
     // Create coefficient Arrays
     let coefficients_ab: [f64; 5] = [
@@ -1815,13 +1783,21 @@ fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
     Err(iapws97::IAPWSError::NotImplemented())
 }
 
+/// Returns the region-3 delta
+/// Specific mass is assumed to be in kg/m3
+fn delta_3(rho: f64) -> f64 {
+    rho / constants::RHO_C
+}
 /// Returns the region-3 tau
 /// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn tau_3(t: f64) -> f64 {
     constants::T_C / t
 }
 
-#[allow(dead_code)]
+/// Returns the region-3 phi
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn phi_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1835,6 +1811,9 @@ fn phi_3(rho: f64, t: f64) -> f64 {
     sum + REGION_3_COEFFS[0][2] * delta_3(rho).ln()
 }
 
+/// Returns the region-3 phi_delta
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn phi_delta_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1848,7 +1827,9 @@ fn phi_delta_3(rho: f64, t: f64) -> f64 {
     sum + REGION_3_COEFFS[0][2] / delta
 }
 
-#[allow(dead_code)]
+/// Returns the region-3 phi_delta_delta
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1862,7 +1843,9 @@ fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
     sum - REGION_3_COEFFS[0][2] / delta.powi(2)
 }
 
-#[allow(dead_code)]
+/// Returns the region-3 phi_tau
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn phi_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1876,7 +1859,9 @@ fn phi_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
-#[allow(dead_code)]
+/// Returns the region-3 phi_tau_tau
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1890,7 +1875,9 @@ fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
-#[allow(dead_code)]
+/// Returns the region-3 phi_delta_tau
+/// Temperature is assumed to be in K
+/// Pressure is assumed to be in Pa
 fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
     let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
@@ -1904,32 +1891,44 @@ fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
     sum
 }
 
-#[allow(dead_code)]
+/// Returns the pressure given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
 fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
 
-#[allow(dead_code)]
+/// Returns the internal energy given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
 fn u_rho_t_3(rho: f64, t: f64) -> f64 {
     tau_3(t) * phi_tau_3(rho, t) * constants::_R * t
 }
 
-#[allow(dead_code)]
+/// Returns the entropy given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
 fn s_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t)) * constants::_R
 }
 
-#[allow(dead_code)]
+/// Returns the enthalpy given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
 fn h_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t)) * constants::_R * t
 }
 
-#[allow(dead_code)]
+/// Returns the isochoric specific heat given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
 fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
     -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * constants::_R
 }
 
-#[allow(dead_code)]
+/// Returns the isobaric specific heat given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
 fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
     (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
         + ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1940,8 +1939,10 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
         * constants::_R
 }
 
-#[allow(dead_code)]
-pub fn v_tp_3(t: f64, p: f64) -> Result<f64, iapws97::IAPWSError> {
+/// Returns the specific volume given t and rho
+/// Temperature is assumed to be in K
+/// density is assumed to be in kg/m^3
+pub(crate) fn v_tp_3(t: f64, p: f64) -> Result<f64, iapws97::IAPWSError> {
     match subregion(t, p)? {
         Region3::SubregionA => Ok(subregion_a(t, p)),
         Region3::SubregionB => Ok(subregion_b(t, p)),
@@ -1970,6 +1971,31 @@ pub fn v_tp_3(t: f64, p: f64) -> Result<f64, iapws97::IAPWSError> {
         Region3::SubregionY => Ok(subregion_y(t, p)),
         Region3::SubregionZ => Ok(subregion_z(t, p)),
     }
+}
+
+pub(crate) fn cv_tp_3(t: f64, p: f64) -> f64 {
+    let rho: f64 = 1.0 / (v_tp_3(t, p).unwrap());
+    cv_rho_t_3(rho, t)
+}
+
+pub(crate) fn cp_tp_3(t: f64, p: f64) -> f64 {
+    let rho: f64 = 1.0 / (v_tp_3(t, p).unwrap());
+    cp_rho_t_3(rho, t)
+}
+
+pub(crate) fn s_tp_3(t: f64, p: f64) -> f64 {
+    let rho: f64 = 1.0 / (v_tp_3(t, p).unwrap());
+    s_rho_t_3(rho, t)
+}
+
+pub(crate) fn u_tp_3(t: f64, p: f64) -> f64 {
+    let rho: f64 = 1.0 / (v_tp_3(t, p).unwrap());
+    u_rho_t_3(rho, t)
+}
+
+pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
+    let rho: f64 = 1.0 / (v_tp_3(t, p).unwrap());
+    h_rho_t_3(rho, t)
 }
 
 #[cfg(test)]
