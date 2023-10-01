@@ -133,7 +133,7 @@ fn subregion_a(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p * 1e-8) - 0.085).powi(i[x - 1]) * ((t / 760.0) - 0.817).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0024;
+    v * 0.0024;
 }
 
 #[allow(dead_code)]
@@ -191,7 +191,7 @@ fn subregion_b(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p * 1e-8) - 0.280).powi(i[x - 1]) * ((t / 860.0) - 0.779).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0041;
+    v * 0.0041;
 }
 
 #[allow(dead_code)]
@@ -253,7 +253,7 @@ fn subregion_c(t: f64, p: f64) -> f64 {
                 * (((p * 2.5e-8) - 0.259).powi(i[x - 1]) * ((t / 690.0) - 0.903).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0022;
+    v * 0.0022;
 }
 
 #[allow(dead_code)]
@@ -318,7 +318,7 @@ fn subregion_d(t: f64, p: f64) -> f64 {
                 * (((p * 2.5e-8) - 0.559).powi(i[x - 1]) * ((t / 690.0) - 0.939).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0029;
+    v.powi(4) * 0.0029;
 }
 
 #[allow(dead_code)]
@@ -373,7 +373,7 @@ fn subregion_e(t: f64, p: f64) -> f64 {
                 * (((p * 2.5e-8) - 0.587).powi(i[x - 1]) * ((t / 710.0) - 0.918).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0032;
+    v * 0.0032;
 }
 
 #[allow(dead_code)]
@@ -443,7 +443,7 @@ fn subregion_f(t: f64, p: f64) -> f64 {
                     * ((t / 730.0) - 0.891).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0064;
+    v.powi(4) * 0.0064;
 }
 
 #[allow(dead_code)]
@@ -508,7 +508,7 @@ fn subregion_g(t: f64, p: f64) -> f64 {
                 * (((p * 4.0e-8) - 0.872).powi(i[x - 1]) * ((t / 660.0) - 0.971).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0027;
+    v.powi(4) * 0.0027;
 }
 
 #[allow(dead_code)]
@@ -563,7 +563,7 @@ fn subregion_h(t: f64, p: f64) -> f64 {
                 * (((p * 4.0e-8) - 0.898).powi(i[x - 1]) * ((t / 660.0) - 0.983).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0032;
+    v.powi(4) * 0.0032;
 }
 
 #[allow(dead_code)]
@@ -633,7 +633,7 @@ fn subregion_i(t: f64, p: f64) -> f64 {
                     * ((t / 660.0) - 0.984).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0041;
+    v.powi(4) * 0.0041;
 }
 
 #[allow(dead_code)]
@@ -690,7 +690,7 @@ fn subregion_j(t: f64, p: f64) -> f64 {
                     * ((t / 670.0) - 0.964).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0054;
+    v.powi(4) * 0.0054;
 }
 
 #[allow(dead_code)]
@@ -751,7 +751,7 @@ fn subregion_k(t: f64, p: f64) -> f64 {
                 * (((p * 4.0e-8) - 0.802).powi(i[x - 1]) * ((t / 680.0) - 0.935).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0077;
+    v * 0.0077;
 }
 
 #[allow(dead_code)]
@@ -821,7 +821,7 @@ fn subregion_l(t: f64, p: f64) -> f64 {
                 * (((p / 24.0e6) - 0.908).powi(i[x - 1]) * ((t / 650.0) - 0.989).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0026;
+    v.powi(4) * 0.0026;
 }
 
 #[allow(dead_code)]
@@ -889,7 +889,7 @@ fn subregion_m(t: f64, p: f64) -> f64 {
                     * (((t / 650.0) - 0.997).powf(0.25)).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0028;
+    v * 0.0028;
 }
 
 #[allow(dead_code)]
@@ -955,7 +955,7 @@ fn subregion_n(t: f64, p: f64) -> f64 {
                 * (((p / 23.0e6) - 0.976).powi(i[x - 1]) * ((t / 650.0) - 0.997).powi(j[x - 1]))
         })
         .sum();
-    return v.exp() * 0.0031;
+    v.exp() * 0.0031;
 }
 
 #[allow(dead_code)]
@@ -1006,7 +1006,7 @@ fn subregion_o(t: f64, p: f64) -> f64 {
                     * ((t / 650.0) - 0.996).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0034;
+    v * 0.0034;
 }
 
 #[allow(dead_code)]
@@ -1061,7 +1061,7 @@ fn subregion_p(t: f64, p: f64) -> f64 {
                     * ((t / 650.0) - 0.997).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0041;
+    v * 0.0041;
 }
 
 #[allow(dead_code)]
@@ -1110,7 +1110,7 @@ fn subregion_q(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.848).powi(i[x - 1]) * ((t / 650.0) - 0.983).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0022;
+    v.powi(4) * 0.0022;
 }
 
 #[allow(dead_code)]
@@ -1163,7 +1163,7 @@ fn subregion_r(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.874).powi(i[x - 1]) * ((t / 650.0) - 0.982).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0054;
+    v * 0.0054;
 }
 
 #[allow(dead_code)]
@@ -1218,7 +1218,7 @@ fn subregion_s(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 21e6) - 0.886).powi(i[x - 1]) * ((t / 640.0) - 0.990).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0022;
+    v.powi(4) * 0.0022;
 }
 
 #[allow(dead_code)]
@@ -1277,7 +1277,7 @@ fn subregion_t(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 20e6) - 0.803).powi(i[x - 1]) * ((t / 650.0) - 1.020).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0088;
+    v * 0.0088;
 }
 
 #[allow(dead_code)]
@@ -1341,7 +1341,7 @@ fn subregion_u(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.902).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0026;
+    v * 0.0026;
 }
 
 #[allow(dead_code)]
@@ -1406,7 +1406,7 @@ fn subregion_v(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.960).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0031;
+    v * 0.0031;
 }
 
 #[allow(dead_code)]
@@ -1467,7 +1467,7 @@ fn subregion_w(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.959).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0039;
+    v.powi(4) * 0.0039;
 }
 
 #[allow(dead_code)]
@@ -1529,7 +1529,7 @@ fn subregion_x(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 23e6) - 0.910).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
         })
         .sum();
-    return v * 0.0049;
+    v * 0.0049;
 }
 
 #[allow(dead_code)]
@@ -1571,7 +1571,7 @@ fn subregion_y(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 22e6) - 0.996).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0031;
+    v.powi(4) * 0.0031;
 }
 
 #[allow(dead_code)]
@@ -1618,7 +1618,7 @@ fn subregion_z(t: f64, p: f64) -> f64 {
             n[x - 1] * (((p / 22e6) - 0.993).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
         })
         .sum();
-    return v.powi(4) * 0.0038;
+    v.powi(4) * 0.0038;
 }
 
 /// Returns the region-3 delta
@@ -1748,69 +1748,69 @@ fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
 
     // Calculate the Density
     if (40.0e6..=100.0e6).contains(&p) && t <= t_ab {
-        return Ok(Region3::SubregionA);
+        Ok(Region3::SubregionA);
     } else if (40.0e6..=100.0e6).contains(&p) && t > t_ab {
-        return Ok(Region3::SubregionB);
+        Ok(Region3::SubregionB);
     } else if ((19.00881189e6..=40.0e6).contains(&p) && t <= t_cd)
         || ((16.52916425e6..=19.008811889e6).contains(&p) && t <= tsat97(&p))
     {
-        return Ok(Region3::SubregionC);
+        Ok(Region3::SubregionC);
     } else if (25.0e6..=40.0e6).contains(&p) && (t_cd..=t_ab).contains(&t) {
-        return Ok(Region3::SubregionD);
+        Ok(Region3::SubregionD);
     } else if (25.0e6..=40.0e6).contains(&p) && (t_ab..=t_ef).contains(&t) {
-        return Ok(Region3::SubregionE);
+        Ok(Region3::SubregionE);
     } else if (25.0e6..=40.0e6).contains(&p) && t_ef < t {
-        return Ok(Region3::SubregionF);
+        Ok(Region3::SubregionF);
     } else if (23.5e6..=25.0e6).contains(&p) && (t_cd..=t_gh).contains(&t) {
-        return Ok(Region3::SubregionG);
+        Ok(Region3::SubregionG);
     } else if (23.0e6..=25.0e6).contains(&p) && (t_gh..=t_ef).contains(&t) {
-        return Ok(Region3::SubregionH);
+        Ok(Region3::SubregionH);
     } else if (23.0e6..=25.0e6).contains(&p) && (t_ef..=t_ij).contains(&t) {
-        return Ok(Region3::SubregionI);
+        Ok(Region3::SubregionI);
     } else if (22.5e6..=25.0e6).contains(&p) && (t_ij..=t_jk).contains(&t) {
-        return Ok(Region3::SubregionJ);
+        Ok(Region3::SubregionJ);
     } else if (20.5e6..=25.0e6).contains(&p) && t_jk < t {
-        return Ok(Region3::SubregionK);
+        Ok(Region3::SubregionK);
     } else if (22.5e6..=23.5e6).contains(&p) && (t_cd..=t_gh).contains(&t) {
-        return Ok(Region3::SubregionL);
+        Ok(Region3::SubregionL);
     } else if (22.5e6..=23.0e6).contains(&p) && (t_gh..=t_mn).contains(&t) {
-        return Ok(Region3::SubregionM);
+        Ok(Region3::SubregionM);
     } else if (22.5e6..=23.0e6).contains(&p) && (t_mn..=t_ef).contains(&t) {
-        return Ok(Region3::SubregionN);
+        Ok(Region3::SubregionN);
     } else if (22.5e6..=23.0e6).contains(&p) && (t_ef..=t_op).contains(&t) {
-        return Ok(Region3::SubregionO);
+        Ok(Region3::SubregionO);
     } else if (22.5e6..=23.0e6).contains(&p) && (t_op..=t_ij).contains(&t) {
-        return Ok(Region3::SubregionP);
+        Ok(Region3::SubregionP);
     } else if (21.04336732e6..=22.5e6).contains(&p) && (t_cd..=t_qu).contains(&t) {
-        return Ok(Region3::SubregionQ);
+        Ok(Region3::SubregionQ);
     } else if ((21.04336732e6..=22.5e6).contains(&p) && (t_rx..=t_jk).contains(&t))
         || ((20.5e6..=21.04336732e6).contains(&p) && (tsat97(&p)..=t_jk).contains(&t))
     {
-        return Ok(Region3::SubregionR);
+        Ok(Region3::SubregionR);
     } else if (19.00881189e6..=21.04336732e6).contains(&p) && (t_cd..=tsat97(&p)).contains(&t) {
-        return Ok(Region3::SubregionS);
+        Ok(Region3::SubregionS);
     } else if (16.52916425e6..=20.5e6).contains(&p) && tsat97(&p) < t {
-        return Ok(Region3::SubregionT);
+        Ok(Region3::SubregionT);
     } else if ((psat97(&t)..=21.04336732e6).contains(&p) && (t_qu..=tsat97(&p)).contains(&t))
         || ((21.04336732e6..=22.5e6).contains(&p) && (t_qu..=t_uv).contains(&t))
     {
-        return Ok(Region3::SubregionU);
+        Ok(Region3::SubregionU);
     } else if (22.11e6..=22.5e6).contains(&p) && (t_uv..=t_ef).contains(&t) {
-        return Ok(Region3::SubregionV);
+        Ok(Region3::SubregionV);
     } else if (22.11e6..=22.5e6).contains(&p) && (t_ef..=t_wx).contains(&t) {
-        return Ok(Region3::SubregionW);
+        Ok(Region3::SubregionW);
     } else if ((21.04336732e6..=22.5e6).contains(&p) && (t_wx..=t_rx).contains(&t))
         || ((psat97(&t)..=21.04336732e6).contains(&p) && (tsat97(&p)..=t_rx).contains(&t))
     {
-        return Ok(Region3::SubregionX);
+        Ok(Region3::SubregionX);
     } else if ((21.93161551e6..=22.11e6).contains(&p) && (t_uv..=t_ef).contains(&t))
         || ((psat97(&t)..=21.93161551e6).contains(&p) && (t_uv..=tsat97(&p)).contains(&t))
     {
-        return Ok(Region3::SubregionY);
+        Ok(Region3::SubregionY);
     } else if ((21.90096265e6..=22.11e6).contains(&p) && (t_ef..=t_wx).contains(&t))
         || ((psat97(&t)..=21.90096265e6).contains(&p) && (tsat97(&p)..=t_wx).contains(&t))
     {
-        return Ok(Region3::SubregionZ);
+        Ok(Region3::SubregionZ);
     };
     Err(iapws97::IAPWSError::NotImplemented())
 }
@@ -1999,7 +1999,7 @@ mod tests {
 
         let s = s_rho_t_3(200.0, 650.0);
         assert!(s.approx_eq(4.854387919742, (1e-9, 2)));
-// 
+        //
         let s = s_rho_t_3(500.0, 750.0);
         assert!(s.approx_eq(4.469719056217, (1e-9, 2)));
     }
@@ -2011,7 +2011,7 @@ mod tests {
 
         let h = h_rho_t_3(200.0, 650.0) / 1000.0;
         assert!(h.approx_eq(2.375124005448133, (1e-9, 2)));
- 
+
         let h = h_rho_t_3(500.0, 750.0) / 1000.0;
         assert!(h.approx_eq(2.258688445460262, (1e-9, 2)));
     }
@@ -2023,7 +2023,7 @@ mod tests {
 
         let cv = cv_rho_t_3(200.0, 650.0);
         assert!(cv.approx_eq(4.04118075955, (1e-9, 2)));
- 
+
         let cv = cv_rho_t_3(500.0, 750.0);
         assert!(cv.approx_eq(2.71701677121, (1e-9, 2)));
     }
@@ -2035,7 +2035,7 @@ mod tests {
 
         let cp = cp_rho_t_3(200.0, 650.0) / 10.0;
         assert!(cp.approx_eq(4.4657934155581, (1e-9, 2)));
- 
+
         let cp = cp_rho_t_3(500.0, 750.0) / 10.0;
         assert!(cp.approx_eq(0.6341653594791, (1e-9, 2)));
     }
