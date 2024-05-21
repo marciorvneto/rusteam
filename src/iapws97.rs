@@ -53,44 +53,39 @@ pub mod iapws97 {
     /// let region = region(300.0, 101325.0).unwrap();
     /// ```
     fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
-        // if !(0.0..=100e6).contains(&p)
-        //     || !(273.15..=2273.15).contains(&t)
-        //     || (1073.15 < t && 50.0e6 < p)
-        // {
-        //     return Err(IAPWSError::OutOfBounds(t, p));
-        // }
-
         let p_sat = psat97(&t);
 
         let p_boundary_23 = p_boundary_2_3(&t);
 
-        return match (t, p) {
-            (temp,pres) if (1073.15..=2273.15).contains(&temp) && (0.0..=50.0e6).contains(&pres) => Ok(Region::Region5),
-            (temp, pres) if (273.15..647.096).contains(&temp) && pres == p_sat => Ok(Region::Region4),
-            (temp, pres) if (623.15..=863.15).contains(&temp) && (p_boundary_23..100e6).contains(&pres) => Ok(Region::Region3),
-            (temp, pres) if ((273.15..=623.15).contains(&temp) && (0.0..=p_sat).contains(&pres)) 
-                || ((623.15..=863.15).contains(&temp) && (0.0..=p_boundary_23).contains(&pres)) 
-                || ((863.15..=1073.15).contains(&temp) && (0.0..100e6).contains(&pres)) => Ok(Region::Region2),
-            (temp, pres) if (273.15..=623.15).contains(&temp) && (p_sat..=100e6).contains(&pres) => Ok(Region::Region1),
+        match (t, p) {
+            (temp, pres)
+                if (1073.15..=2273.15).contains(&temp) && (0.0..=50.0e6).contains(&pres) =>
+            {
+                Ok(Region::Region5)
+            }
+            (temp, pres) if (273.15..647.096).contains(&temp) && pres == p_sat => {
+                Ok(Region::Region4)
+            }
+            (temp, pres)
+                if (623.15..=863.15).contains(&temp) && (p_boundary_23..100e6).contains(&pres) =>
+            {
+                Ok(Region::Region3)
+            }
+            (temp, pres)
+                if ((273.15..=623.15).contains(&temp) && (0.0..=p_sat).contains(&pres))
+                    || ((623.15..=863.15).contains(&temp)
+                        && (0.0..=p_boundary_23).contains(&pres))
+                    || ((863.15..=1073.15).contains(&temp) && (0.0..100e6).contains(&pres)) =>
+            {
+                Ok(Region::Region2)
+            }
+            (temp, pres)
+                if (273.15..=623.15).contains(&temp) && (p_sat..=100e6).contains(&pres) =>
+            {
+                Ok(Region::Region1)
+            }
             _ => Err(IAPWSError::OutOfBounds(t, p)),
         }
-
-        // if t >= 1073.15 {
-        //     return Ok(Region::Region5);
-        // } else if p == p_sat {
-        //     return Ok(Region::Region4);
-        // } else if (623.15..=863.15).contains(&t) && p_boundary_23 < p {
-        //     return Ok(Region::Region3);
-        // } else if (t <= 623.15 && p < p_sat)
-        //     || (p <= p_boundary_23 && (623.15..=863.15).contains(&t))
-        //     || (863.15..=1073.15).contains(&t)
-        // {
-        //     return Ok(Region::Region2);
-        // } else if t <= 623.15 && p_sat < p {
-        //     return Ok(Region::Region1);
-        // }
-
-        // Err(IAPWSError::OutOfBounds(t, p))
     }
 
     /// Calculates the water enthalpy in kJ/kg at a given
@@ -329,7 +324,7 @@ pub mod iapws97 {
 
         #[test]
         fn enthalpy_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -377,7 +372,7 @@ pub mod iapws97 {
 
         #[test]
         fn internal_energy_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -424,7 +419,7 @@ pub mod iapws97 {
 
         #[test]
         fn entropy_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -476,7 +471,7 @@ pub mod iapws97 {
 
         #[test]
         fn isobaric_heat_pressure_temperature() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -529,7 +524,7 @@ pub mod iapws97 {
 
         #[test]
         fn isochoric_heat_pressure_temperature() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -582,7 +577,7 @@ pub mod iapws97 {
 
         #[test]
         fn volume_heat_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -635,7 +630,7 @@ pub mod iapws97 {
 
         #[test]
         fn speed_sound_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,

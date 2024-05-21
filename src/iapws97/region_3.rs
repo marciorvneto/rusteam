@@ -1715,133 +1715,111 @@ fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
     }
 
     // Calculate the Density
-    return match (t, p) {
-        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => Ok(Region3::SubregionA),
-        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab
-            => Ok(Region3::SubregionB),
-        (temp, pres) if ((19.00881189e6..=40.0e6).contains(&pres) && temp <= t_cd)
-            || ((16.52916425e6..=19.008811889e6).contains(&pres) && temp <= tsat97(&pres))
-            => Ok(Region3::SubregionC),
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_cd..=t_ab).contains(&temp)
-            => Ok(Region3::SubregionD),
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_ab..=t_ef).contains(&temp)
-            => Ok(Region3::SubregionE),
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp
-            => Ok(Region3::SubregionF),
-        (temp, pres) if (23.5e6..=25.0e6).contains(&pres) && (t_cd..=t_gh).contains(&temp)
-            => Ok(Region3::SubregionG),
-        (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_gh..=t_ef).contains(&temp)
-            => Ok(Region3::SubregionH),
-        (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_ef..=t_ij).contains(&temp)
-            => Ok(Region3::SubregionI),
-        (temp, pres) if (22.5e6..=25.0e6).contains(&pres) && (t_ij..=t_jk).contains(&temp)
-            => Ok(Region3::SubregionJ),
-        (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp 
-            => Ok(Region3::SubregionK),
-        (temp, pres) if (22.5e6..=23.5e6).contains(&pres) && (t_cd..=t_gh).contains(&temp)
-            => Ok(Region3::SubregionL),
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_gh..=t_mn).contains(&temp)
-            => Ok(Region3::SubregionM),
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_mn..=t_ef).contains(&temp)
-            => Ok(Region3::SubregionN),
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_ef..=t_op).contains(&temp)
-            => Ok(Region3::SubregionO),
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_op..=t_ij).contains(&temp)
-            => Ok(Region3::SubregionP),
-        (temp, pres) if (21.04336732e6..=22.5e6).contains(&pres) && (t_cd..=t_qu).contains(&temp)
-            => Ok(Region3::SubregionQ),
-        (temp, pres) if ((21.04336732e6..=22.5e6).contains(&pres) && (t_rx..=t_jk).contains(&temp))
-            || ((20.5e6..=21.04336732e6).contains(&pres) && (tsat97(&pres)..=t_jk).contains(&temp))
-            => Ok(Region3::SubregionR),
-        (temp, pres) if (19.00881189e6..=21.04336732e6).contains(&pres) && (t_cd..=tsat97(&pres)).contains(&temp)
-            => Ok(Region3::SubregionS),
-        (temp, pres) if (16.52916425e6..=20.5e6).contains(&pres) && tsat97(&pres) < temp
-            => Ok(Region3::SubregionT),
-        (temp, pres) if ((psat97(&temp)..=21.04336732e6).contains(&pres) && (t_qu..=tsat97(&pres)).contains(&temp))
-            || ((21.04336732e6..=22.5e6).contains(&pres) && (t_qu..=t_uv).contains(&temp))
-            => Ok(Region3::SubregionU),
-        (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_uv..=t_ef).contains(&temp)
-            => Ok(Region3::SubregionV),
-        (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_ef..=t_wx).contains(&temp)
-            => Ok(Region3::SubregionW),
-        (temp, pres) if ((21.04336732e6..=22.5e6).contains(&pres) && (t_wx..=t_rx).contains(&temp))
-            || ((psat97(&temp)..=21.04336732e6).contains(&pres) && (tsat97(&pres)..=t_rx).contains(&temp))
-            => Ok(Region3::SubregionX),
-        (temp, pres) if ((21.93161551e6..=22.11e6).contains(&pres) && (t_uv..=t_ef).contains(&temp))
-            || ((psat97(&temp)..=21.93161551e6).contains(&pres) && (t_uv..=tsat97(&pres)).contains(&temp))
-            => Ok(Region3::SubregionY),
-        (temp, pres) if ((21.90096265e6..=22.11e6).contains(&pres) && (t_ef..=t_wx).contains(&temp))
-            || ((psat97(&temp)..=21.90096265e6).contains(&pres) && (tsat97(&pres)..=t_wx).contains(&temp))
-            => Ok(Region3::SubregionZ),
+    match (t, p) {
+        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => {
+            Ok(Region3::SubregionA)
+        }
+        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab => {
+            Ok(Region3::SubregionB)
+        }
+        (temp, pres)
+            if ((19.00881189e6..=40.0e6).contains(&pres) && temp <= t_cd)
+                || ((16.52916425e6..=19.008811889e6).contains(&pres) && temp <= tsat97(&pres)) =>
+        {
+            Ok(Region3::SubregionC)
+        }
+        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_cd..=t_ab).contains(&temp) => {
+            Ok(Region3::SubregionD)
+        }
+        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_ab..=t_ef).contains(&temp) => {
+            Ok(Region3::SubregionE)
+        }
+        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp => Ok(Region3::SubregionF),
+        (temp, pres) if (23.5e6..=25.0e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
+            Ok(Region3::SubregionG)
+        }
+        (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_gh..=t_ef).contains(&temp) => {
+            Ok(Region3::SubregionH)
+        }
+        (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_ef..=t_ij).contains(&temp) => {
+            Ok(Region3::SubregionI)
+        }
+        (temp, pres) if (22.5e6..=25.0e6).contains(&pres) && (t_ij..=t_jk).contains(&temp) => {
+            Ok(Region3::SubregionJ)
+        }
+        (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp => Ok(Region3::SubregionK),
+        (temp, pres) if (22.5e6..=23.5e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
+            Ok(Region3::SubregionL)
+        }
+        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_gh..=t_mn).contains(&temp) => {
+            Ok(Region3::SubregionM)
+        }
+        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_mn..=t_ef).contains(&temp) => {
+            Ok(Region3::SubregionN)
+        }
+        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_ef..=t_op).contains(&temp) => {
+            Ok(Region3::SubregionO)
+        }
+        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_op..=t_ij).contains(&temp) => {
+            Ok(Region3::SubregionP)
+        }
+        (temp, pres)
+            if (21.04336732e6..=22.5e6).contains(&pres) && (t_cd..=t_qu).contains(&temp) =>
+        {
+            Ok(Region3::SubregionQ)
+        }
+        (temp, pres)
+            if ((21.04336732e6..=22.5e6).contains(&pres) && (t_rx..=t_jk).contains(&temp))
+                || ((20.5e6..=21.04336732e6).contains(&pres)
+                    && (tsat97(&pres)..=t_jk).contains(&temp)) =>
+        {
+            Ok(Region3::SubregionR)
+        }
+        (temp, pres)
+            if (19.00881189e6..=21.04336732e6).contains(&pres)
+                && (t_cd..=tsat97(&pres)).contains(&temp) =>
+        {
+            Ok(Region3::SubregionS)
+        }
+        (temp, pres) if (16.52916425e6..=20.5e6).contains(&pres) && tsat97(&pres) < temp => {
+            Ok(Region3::SubregionT)
+        }
+        (temp, pres)
+            if ((psat97(&temp)..=21.04336732e6).contains(&pres)
+                && (t_qu..=tsat97(&pres)).contains(&temp))
+                || ((21.04336732e6..=22.5e6).contains(&pres) && (t_qu..=t_uv).contains(&temp)) =>
+        {
+            Ok(Region3::SubregionU)
+        }
+        (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_uv..=t_ef).contains(&temp) => {
+            Ok(Region3::SubregionV)
+        }
+        (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_ef..=t_wx).contains(&temp) => {
+            Ok(Region3::SubregionW)
+        }
+        (temp, pres)
+            if ((21.04336732e6..=22.5e6).contains(&pres) && (t_wx..=t_rx).contains(&temp))
+                || ((psat97(&temp)..=21.04336732e6).contains(&pres)
+                    && (tsat97(&pres)..=t_rx).contains(&temp)) =>
+        {
+            Ok(Region3::SubregionX)
+        }
+        (temp, pres)
+            if ((21.93161551e6..=22.11e6).contains(&pres) && (t_uv..=t_ef).contains(&temp))
+                || ((psat97(&temp)..=21.93161551e6).contains(&pres)
+                    && (t_uv..=tsat97(&pres)).contains(&temp)) =>
+        {
+            Ok(Region3::SubregionY)
+        }
+        (temp, pres)
+            if ((21.90096265e6..=22.11e6).contains(&pres) && (t_ef..=t_wx).contains(&temp))
+                || ((psat97(&temp)..=21.90096265e6).contains(&pres)
+                    && (tsat97(&pres)..=t_wx).contains(&temp)) =>
+        {
+            Ok(Region3::SubregionZ)
+        }
         _ => Err(iapws97::IAPWSError::NotImplemented()),
-    };
-
-    // if (40.0e6..=100.0e6).contains(&p) && t <= t_ab {
-    //     return Ok(Region3::SubregionA);
-    // } else if (40.0e6..=100.0e6).contains(&p) && t > t_ab {
-    //     return Ok(Region3::SubregionB);
-    // } else if ((19.00881189e6..=40.0e6).contains(&p) && t <= t_cd)
-    //     || ((16.52916425e6..=19.008811889e6).contains(&p) && t <= tsat97(&p))
-    // {
-    //     return Ok(Region3::SubregionC);
-    // } else if (25.0e6..=40.0e6).contains(&p) && (t_cd..=t_ab).contains(&t) {
-    //     return Ok(Region3::SubregionD);
-    // } else if (25.0e6..=40.0e6).contains(&p) && (t_ab..=t_ef).contains(&t) {
-    //     return Ok(Region3::SubregionE);
-    // } else if (25.0e6..=40.0e6).contains(&p) && t_ef < t {
-    //     return Ok(Region3::SubregionF);
-    // } else if (23.5e6..=25.0e6).contains(&p) && (t_cd..=t_gh).contains(&t) {
-    //     return Ok(Region3::SubregionG);
-    // } else if (23.0e6..=25.0e6).contains(&p) && (t_gh..=t_ef).contains(&t) {
-    //     return Ok(Region3::SubregionH);
-    // } else if (23.0e6..=25.0e6).contains(&p) && (t_ef..=t_ij).contains(&t) {
-    //     return Ok(Region3::SubregionI);
-    // } else if (22.5e6..=25.0e6).contains(&p) && (t_ij..=t_jk).contains(&t) {
-    //     return Ok(Region3::SubregionJ);
-    // } else if (20.5e6..=25.0e6).contains(&p) && t_jk < t {
-    //     return Ok(Region3::SubregionK);
-    // } else if (22.5e6..=23.5e6).contains(&p) && (t_cd..=t_gh).contains(&t) {
-    //     return Ok(Region3::SubregionL);
-    // } else if (22.5e6..=23.0e6).contains(&p) && (t_gh..=t_mn).contains(&t) {
-    //     return Ok(Region3::SubregionM);
-    // } else if (22.5e6..=23.0e6).contains(&p) && (t_mn..=t_ef).contains(&t) {
-    //     return Ok(Region3::SubregionN);
-    // } else if (22.5e6..=23.0e6).contains(&p) && (t_ef..=t_op).contains(&t) {
-    //     return Ok(Region3::SubregionO);
-    // } else if (22.5e6..=23.0e6).contains(&p) && (t_op..=t_ij).contains(&t) {
-    //     return Ok(Region3::SubregionP);
-    // } else if (21.04336732e6..=22.5e6).contains(&p) && (t_cd..=t_qu).contains(&t) {
-    //     return Ok(Region3::SubregionQ);
-    // } else if ((21.04336732e6..=22.5e6).contains(&p) && (t_rx..=t_jk).contains(&t))
-    //     || ((20.5e6..=21.04336732e6).contains(&p) && (tsat97(&p)..=t_jk).contains(&t))
-    // {
-    //     return Ok(Region3::SubregionR);
-    // } else if (19.00881189e6..=21.04336732e6).contains(&p) && (t_cd..=tsat97(&p)).contains(&t) {
-    //     return Ok(Region3::SubregionS);
-    // } else if (16.52916425e6..=20.5e6).contains(&p) && tsat97(&p) < t {
-    //     return Ok(Region3::SubregionT);
-    // } else if ((psat97(&t)..=21.04336732e6).contains(&p) && (t_qu..=tsat97(&p)).contains(&t))
-    //     || ((21.04336732e6..=22.5e6).contains(&p) && (t_qu..=t_uv).contains(&t))
-    // {
-    //     return Ok(Region3::SubregionU);
-    // } else if (22.11e6..=22.5e6).contains(&p) && (t_uv..=t_ef).contains(&t) {
-    //     return Ok(Region3::SubregionV);
-    // } else if (22.11e6..=22.5e6).contains(&p) && (t_ef..=t_wx).contains(&t) {
-    //     return Ok(Region3::SubregionW);
-    // } else if ((21.04336732e6..=22.5e6).contains(&p) && (t_wx..=t_rx).contains(&t))
-    //     || ((psat97(&t)..=21.04336732e6).contains(&p) && (tsat97(&p)..=t_rx).contains(&t))
-    // {
-    //     return Ok(Region3::SubregionX);
-    // } else if ((21.93161551e6..=22.11e6).contains(&p) && (t_uv..=t_ef).contains(&t))
-    //     || ((psat97(&t)..=21.93161551e6).contains(&p) && (t_uv..=tsat97(&p)).contains(&t))
-    // {
-    //     return Ok(Region3::SubregionY);
-    // } else if ((21.90096265e6..=22.11e6).contains(&p) && (t_ef..=t_wx).contains(&t))
-    //     || ((psat97(&t)..=21.90096265e6).contains(&p) && (tsat97(&p)..=t_wx).contains(&t))
-    // {
-    //     return Ok(Region3::SubregionZ);
-    // };
-    // Err(iapws97::IAPWSError::NotImplemented())
+    }
 }
 
 /// Returns the region-3 delta
