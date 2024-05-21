@@ -226,7 +226,7 @@ pub mod iapws97 {
         }
     }
 
-    /// Calculates the speed of sound in m^3/kg at a given
+    /// Calculates the speed of sound in m/s at a given
     /// temperature and pressure.
     ///
     /// Temperature is assumed to be in K
