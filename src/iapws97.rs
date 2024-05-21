@@ -35,6 +35,18 @@ pub mod iapws97 {
         1e6 * (n[0] + n[1] * t + n[2] * t.powi(2))
     }
 
+    #[allow(dead_code)]
+    fn t_boundary_2_3(p: &f64) -> f64 {
+        let n: [f64; 5] = [
+            0.34805185628969e3,
+            -0.11671859879975e1,
+            0.10192970039326e-2,
+            0.57254459862746e3,
+            0.13918839778870e2,
+        ];
+        n[3] + (((p*1e-6)-n[4])/n[2]).sqrt()
+    }
+
     // ===============     Main API ===================
 
     /// Determines which region of the pT chart
@@ -307,6 +319,8 @@ pub mod iapws97 {
 
     #[cfg(test)]
     mod tests {
+
+        use crate::iapws97::t_boundary_2_3;
 
         use super::{
             cpmass_tp, cvmass_tp, hmass_tp, p_boundary_2_3, psat97, smass_tp, speed_sound_tp,
@@ -683,7 +697,7 @@ pub mod iapws97 {
 
         #[test]
         fn saturation_pressure() {
-            let ps = psat97(&300.0) / 10000.0;
+            let ps = psat97(&300.0) / 1e4;
             assert!(ps.approx_eq(0.353658941, (1e-9, 2)));
 
             let ps = psat97(&500.0) / 1e7;
@@ -695,13 +709,13 @@ pub mod iapws97 {
 
         #[test]
         fn saturation_temperature() {
-            let ts = tsat97(&0.1e6) / 1000.0;
+            let ts = tsat97(&0.1e6) / 1e3;
             assert!(ts.approx_eq(0.372755919, (1e-9, 2)));
 
-            let ts = tsat97(&1e6) / 1000.0;
+            let ts = tsat97(&1e6) / 1e3;
             assert!(ts.approx_eq(0.453035632, (1e-9, 2)));
 
-            let ts = tsat97(&10e6) / 1000.0;
+            let ts = tsat97(&10e6) / 1e3;
             assert!(ts.approx_eq(0.584149488, (1e-9, 2)));
         }
 
@@ -709,6 +723,10 @@ pub mod iapws97 {
         fn region_2_3_auxiliary_boundary() {
             let p = p_boundary_2_3(&623.15) * 1e-8;
             assert!(p.approx_eq(0.165291643, (1e-9, 2)));
+
+
+            let t = t_boundary_2_3(&16.5291643e6) / 1e3;
+            assert!(t.approx_eq(0.623150000, (1e-9, 2)));
         }
     }
 }

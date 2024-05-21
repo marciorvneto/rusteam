@@ -315,113 +315,113 @@ mod tests {
     use float_cmp::ApproxEq;
 
     #[test]
+    fn specific_volume() {
+        let v = v_tp_1(300.0, 3e6) * 1e2;
+        assert!(v.approx_eq(0.100215168, (1e-9, 2)));
+
+        let v = v_tp_1(300.0, 80e6) * 1e3;
+        assert!(v.approx_eq(0.971180894, (1e-9, 2)));
+
+        let v = v_tp_1(500.0, 3e6) * 1e2;
+        assert!(v.approx_eq(0.120241800, (1e-9, 2)));
+    }
+
+    #[test]
     fn enthalpy() {
-        let h1 = h_tp_1(300.0, 3e6) / 1000.0;
+        let h = h_tp_1(300.0, 3e6) / 1e3;
 
-        assert!(h1.approx_eq(0.115331273, (1e-9, 2)));
+        assert!(h.approx_eq(0.115331273, (1e-9, 2)));
 
-        let h1 = h_tp_1(300.0, 80e6) / 1000.0;
-        assert!(h1.approx_eq(0.184142828, (1e-9, 2)));
+        let h = h_tp_1(300.0, 80e6) / 1e3;
+        assert!(h.approx_eq(0.184142828, (1e-9, 2)));
 
-        let h1 = h_tp_1(500.0, 3e6) / 1000.0;
-        assert!(h1.approx_eq(0.975542239, (1e-9, 2)));
+        let h = h_tp_1(500.0, 3e6) / 1e3;
+        assert!(h.approx_eq(0.975542239, (1e-9, 2)));
     }
 
     #[test]
     fn internal_energy() {
-        let u1 = u_tp_1(300.0, 3e6) / 1000.0;
-        assert!(u1.approx_eq(0.112324818, (1e-9, 2)));
+        let u = u_tp_1(300.0, 3e6) / 1e3;
+        assert!(u.approx_eq(0.112324818, (1e-9, 2)));
 
-        let u1 = u_tp_1(300.0, 80e6) / 1000.0;
-        assert!(u1.approx_eq(0.106448356, (1e-9, 2)));
+        let u = u_tp_1(300.0, 80e6) / 1e3;
+        assert!(u.approx_eq(0.106448356, (1e-9, 2)));
 
-        let u1 = u_tp_1(500.0, 3e6) / 1000.0;
-        assert!(u1.approx_eq(0.971934985, (1e-9, 2)));
+        let u = u_tp_1(500.0, 3e6) / 1e3;
+        assert!(u.approx_eq(0.971934985, (1e-9, 2)));
     }
 
     #[test]
     fn entropy() {
-        let s1 = s_tp_1(300.0, 3e6);
-        assert!(s1.approx_eq(0.392294792, (1e-9, 2)));
+        let s = s_tp_1(300.0, 3e6);
+        assert!(s.approx_eq(0.392294792, (1e-9, 2)));
 
-        let s1 = s_tp_1(300.0, 80e6);
-        assert!(s1.approx_eq(0.368563852, (1e-9, 2)));
+        let s = s_tp_1(300.0, 80e6);
+        assert!(s.approx_eq(0.368563852, (1e-9, 2)));
 
-        let s1 = s_tp_1(500.0, 3e6);
-        assert!(s1.approx_eq(0.258041912e1, (1e-9, 2)));
+        let s = s_tp_1(500.0, 3e6);
+        assert!(s.approx_eq(0.258041912e1, (1e-9, 2)));
     }
 
     #[test]
     fn cp() {
-        let cp1 = cp_tp_1(300.0, 3e6) / 10.0;
-        assert!(cp1.approx_eq(0.417301218, (1e-9, 2)));
+        let cp = cp_tp_1(300.0, 3e6) / 1e1;
+        assert!(cp.approx_eq(0.417301218, (1e-9, 2)));
 
-        let cp1 = cp_tp_1(300.0, 80e6) / 10.0;
-        print!("{}", cp1);
-        assert!(cp1.approx_eq(0.401008987, (1e-9, 2)));
+        let cp = cp_tp_1(300.0, 80e6) / 1e1;
+        print!("{}", cp);
+        assert!(cp.approx_eq(0.401008987, (1e-9, 2)));
 
-        let cp1 = cp_tp_1(500.0, 3e6) / 10.0;
-        assert!(cp1.approx_eq(0.465580682, (1e-9, 2)));
-    }
-
-    ///Test results based on current implementation
-    #[test]
-    fn cv() {
-        let cv1 = cv_tp_1(300.0, 3e6);
-        assert!(cv1.approx_eq(4.121201603, (1e-9, 2)));
-
-        let cv1 = cv_tp_1(300.0, 80e6);
-        assert!(cv1.approx_eq(3.917366061, (1e-9, 2)));
-
-        let cv1 = cv_tp_1(500.0, 3e6);
-        assert!(cv1.approx_eq(3.221392229, (1e-9, 2)));
+        let cp = cp_tp_1(500.0, 3e6) / 1e1;
+        assert!(cp.approx_eq(0.465580682, (1e-9, 2)));
     }
 
     #[test]
     fn sound_velocity() {
-        let w1 = w_tp_1(300.0, 3e6) / 10000.0;
-        assert!(w1.approx_eq(0.150773921, (1e-9, 2)));
+        let w = w_tp_1(300.0, 3e6) / 1e4;
+        assert!(w.approx_eq(0.150773921, (1e-9, 2)));
 
-        let w1 = w_tp_1(300.0, 80e6) / 10000.0;
-        assert!(w1.approx_eq(0.163469054, (1e-9, 2)));
+        let w = w_tp_1(300.0, 80e6) / 1e4;
+        assert!(w.approx_eq(0.163469054, (1e-9, 2)));
 
-        let w1 = w_tp_1(500.0, 3e6) / 10000.0;
-        assert!(w1.approx_eq(0.124071337, (1e-9, 2)));
+        let w = w_tp_1(500.0, 3e6) / 1e4;
+        assert!(w.approx_eq(0.124071337, (1e-9, 2)));
     }
 
+    // Extra test based on calculations from IAPWS Online Calculator
     #[test]
-    fn specific_volume() {
-        let v1 = v_tp_1(300.0, 3e6) * 100.0;
-        assert!(v1.approx_eq(0.100215168, (1e-9, 2)));
+    fn cv() {
+        let cv = cv_tp_1(300.0, 3e6);
+        assert!(cv.approx_eq(4.121201603, (1e-9, 2)));
 
-        let v1 = v_tp_1(300.0, 80e6) * 1000.0;
-        assert!(v1.approx_eq(0.971180894, (1e-9, 2)));
+        let cv = cv_tp_1(300.0, 80e6);
+        assert!(cv.approx_eq(3.917366061, (1e-9, 2)));
 
-        let v1 = v_tp_1(500.0, 3e6) * 100.0;
-        assert!(v1.approx_eq(0.120241800, (1e-9, 2)));
+        let cv = cv_tp_1(500.0, 3e6);
+        assert!(cv.approx_eq(3.221392229, (1e-9, 2)));
     }
 
     #[test]
     fn backwards_t_ph() {
-        let t = t_ph_1(3e6, 500.0) / 1000.0;
+        let t = t_ph_1(3e6, 500.0) / 1e3;
         assert!(t.approx_eq(0.391798509, (1e-9, 2)));
 
-        let t = t_ph_1(80e6, 500.0) / 1000.0;
+        let t = t_ph_1(80e6, 500.0) / 1e3;
         assert!(t.approx_eq(0.378108626, (1e-9, 2)));
 
-        let t = t_ph_1(80e6, 1500.0) / 1000.0;
+        let t = t_ph_1(80e6, 1500.0) / 1e3;
         assert!(t.approx_eq(0.611041229, (1e-9, 2)));
     }
 
     #[test]
     fn backwards_t_ps() {
-        let t = t_ps_1(3e6, 0.5) / 1000.0;
+        let t = t_ps_1(3e6, 0.5) / 1e3;
         assert!(t.approx_eq(0.307842258, (1e-9, 2)));
 
-        let t = t_ps_1(80e6, 0.5) / 1000.0;
+        let t = t_ps_1(80e6, 0.5) / 1e3;
         assert!(t.approx_eq(0.309979785, (1e-9, 2)));
 
-        let t = t_ps_1(80e6, 3.0) / 1000.0;
+        let t = t_ps_1(80e6, 3.0) / 1e3;
         assert!(t.approx_eq(0.565899909, (1e-9, 2)));
     }
 }
