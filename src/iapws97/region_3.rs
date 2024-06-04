@@ -1,9 +1,8 @@
-use crate::iapws97;
 use crate::iapws97::{constants, psat97};
 
 use super::tsat97;
 
-pub enum Region3 {
+enum Region3 {
     SubregionA,
     SubregionB,
     SubregionC,
@@ -1596,7 +1595,7 @@ fn subregion_z(t: f64, p: f64) -> f64 {
 
 // Returns the subregion that corresponds
 // to the state of water given t and p
-fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
+fn subregion(t: f64, p: f64) -> Region3 {
     // Create coefficient Arrays
     let coefficients_ab: [f64; 5] = [
         0.154793642129415e4,
@@ -1716,109 +1715,98 @@ fn subregion(t: f64, p: f64) -> Result<Region3, iapws97::IAPWSError> {
 
     // Calculate the Density
     match (t, p) {
-        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => {
-            Ok(Region3::SubregionA)
-        }
-        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab => {
-            Ok(Region3::SubregionB)
-        }
+        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => Region3::SubregionA,
+        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab => Region3::SubregionB,
         (temp, pres)
             if ((19.00881189e6..=40.0e6).contains(&pres) && temp <= t_cd)
                 || ((16.52916425e6..=19.008811889e6).contains(&pres) && temp <= tsat97(&pres)) =>
         {
-            Ok(Region3::SubregionC)
+            Region3::SubregionC
         }
         (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_cd..=t_ab).contains(&temp) => {
-            Ok(Region3::SubregionD)
+            Region3::SubregionD
         }
         (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_ab..=t_ef).contains(&temp) => {
-            Ok(Region3::SubregionE)
+            Region3::SubregionE
         }
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp => Ok(Region3::SubregionF),
+        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp => Region3::SubregionF,
         (temp, pres) if (23.5e6..=25.0e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
-            Ok(Region3::SubregionG)
+            Region3::SubregionG
         }
         (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_gh..=t_ef).contains(&temp) => {
-            Ok(Region3::SubregionH)
+            Region3::SubregionH
         }
         (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_ef..=t_ij).contains(&temp) => {
-            Ok(Region3::SubregionI)
+            Region3::SubregionI
         }
         (temp, pres) if (22.5e6..=25.0e6).contains(&pres) && (t_ij..=t_jk).contains(&temp) => {
-            Ok(Region3::SubregionJ)
+            Region3::SubregionJ
         }
-        (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp => Ok(Region3::SubregionK),
+        (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp => Region3::SubregionK,
         (temp, pres) if (22.5e6..=23.5e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
-            Ok(Region3::SubregionL)
+            Region3::SubregionL
         }
         (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_gh..=t_mn).contains(&temp) => {
-            Ok(Region3::SubregionM)
+            Region3::SubregionM
         }
         (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_mn..=t_ef).contains(&temp) => {
-            Ok(Region3::SubregionN)
+            Region3::SubregionN
         }
         (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_ef..=t_op).contains(&temp) => {
-            Ok(Region3::SubregionO)
+            Region3::SubregionO
         }
         (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_op..=t_ij).contains(&temp) => {
-            Ok(Region3::SubregionP)
+            Region3::SubregionP
         }
         (temp, pres)
             if (21.04336732e6..=22.5e6).contains(&pres) && (t_cd..=t_qu).contains(&temp) =>
         {
-            Ok(Region3::SubregionQ)
+            Region3::SubregionQ
         }
         (temp, pres)
             if ((21.04336732e6..=22.5e6).contains(&pres) && (t_rx..=t_jk).contains(&temp))
                 || ((20.5e6..=21.04336732e6).contains(&pres)
                     && (tsat97(&pres)..=t_jk).contains(&temp)) =>
         {
-            Ok(Region3::SubregionR)
+            Region3::SubregionR
         }
         (temp, pres)
             if (19.00881189e6..=21.04336732e6).contains(&pres)
                 && (t_cd..=tsat97(&pres)).contains(&temp) =>
         {
-            Ok(Region3::SubregionS)
+            Region3::SubregionS
         }
         (temp, pres) if (16.52916425e6..=20.5e6).contains(&pres) && tsat97(&pres) < temp => {
-            Ok(Region3::SubregionT)
+            Region3::SubregionT
         }
         (temp, pres)
             if ((psat97(&temp)..=21.04336732e6).contains(&pres)
                 && (t_qu..=tsat97(&pres)).contains(&temp))
                 || ((21.04336732e6..=22.5e6).contains(&pres) && (t_qu..=t_uv).contains(&temp)) =>
         {
-            Ok(Region3::SubregionU)
+            Region3::SubregionU
         }
         (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_uv..=t_ef).contains(&temp) => {
-            Ok(Region3::SubregionV)
+            Region3::SubregionV
         }
         (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_ef..=t_wx).contains(&temp) => {
-            Ok(Region3::SubregionW)
+            Region3::SubregionW
         }
         (temp, pres)
             if ((21.04336732e6..=22.5e6).contains(&pres) && (t_wx..=t_rx).contains(&temp))
                 || ((psat97(&temp)..=21.04336732e6).contains(&pres)
                     && (tsat97(&pres)..=t_rx).contains(&temp)) =>
         {
-            Ok(Region3::SubregionX)
+            Region3::SubregionX
         }
         (temp, pres)
             if ((21.93161551e6..=22.11e6).contains(&pres) && (t_uv..=t_ef).contains(&temp))
                 || ((psat97(&temp)..=21.93161551e6).contains(&pres)
                     && (t_uv..=tsat97(&pres)).contains(&temp)) =>
         {
-            Ok(Region3::SubregionY)
+            Region3::SubregionY
         }
-        (temp, pres)
-            if ((21.90096265e6..=22.11e6).contains(&pres) && (t_ef..=t_wx).contains(&temp))
-                || ((psat97(&temp)..=21.90096265e6).contains(&pres)
-                    && (tsat97(&pres)..=t_wx).contains(&temp)) =>
-        {
-            Ok(Region3::SubregionZ)
-        }
-        _ => Err(iapws97::IAPWSError::NotImplemented()),
+        _ => Region3::SubregionZ,
     }
 }
 
@@ -1981,77 +1969,79 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
 
 #[allow(dead_code)]
 fn w_rho_t_3(rho: f64, t: f64) -> f64 {
-    ((
-        2.0 * delta_3(rho) * phi_delta_3(rho, t)
-        + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
-        - ((delta_3(rho) * phi_delta_3(rho, t) - delta_3(rho) * tau_3(t) * phi_delta_tau_3(rho, t)).powi(2)
-        / (tau_3(t).powi(2) * phi_tau_tau_3(rho, t)))
-    ) * constants::_R * 1000.0 * t)
+    ((2.0 * delta_3(rho) * phi_delta_3(rho, t) + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
+        - ((delta_3(rho) * phi_delta_3(rho, t)
+            - delta_3(rho) * tau_3(t) * phi_delta_tau_3(rho, t))
+        .powi(2)
+            / (tau_3(t).powi(2) * phi_tau_tau_3(rho, t))))
+        * constants::_R
+        * 1000.0
+        * t)
         .sqrt()
 }
 
 /// Returns the specific volume given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
-pub(crate) fn v_tp_3(t: f64, p: f64) -> Result<f64, iapws97::IAPWSError> {
-    match subregion(t, p)? {
-        Region3::SubregionA => Ok(subregion_a(t, p)),
-        Region3::SubregionB => Ok(subregion_b(t, p)),
-        Region3::SubregionC => Ok(subregion_c(t, p)),
-        Region3::SubregionD => Ok(subregion_d(t, p)),
-        Region3::SubregionE => Ok(subregion_e(t, p)),
-        Region3::SubregionF => Ok(subregion_f(t, p)),
-        Region3::SubregionG => Ok(subregion_g(t, p)),
-        Region3::SubregionH => Ok(subregion_h(t, p)),
-        Region3::SubregionI => Ok(subregion_i(t, p)),
-        Region3::SubregionJ => Ok(subregion_j(t, p)),
-        Region3::SubregionK => Ok(subregion_k(t, p)),
-        Region3::SubregionL => Ok(subregion_l(t, p)),
-        Region3::SubregionM => Ok(subregion_m(t, p)),
-        Region3::SubregionN => Ok(subregion_n(t, p)),
-        Region3::SubregionO => Ok(subregion_o(t, p)),
-        Region3::SubregionP => Ok(subregion_p(t, p)),
-        Region3::SubregionQ => Ok(subregion_q(t, p)),
-        Region3::SubregionR => Ok(subregion_r(t, p)),
-        Region3::SubregionS => Ok(subregion_s(t, p)),
-        Region3::SubregionT => Ok(subregion_t(t, p)),
-        Region3::SubregionU => Ok(subregion_u(t, p)),
-        Region3::SubregionV => Ok(subregion_v(t, p)),
-        Region3::SubregionW => Ok(subregion_w(t, p)),
-        Region3::SubregionX => Ok(subregion_x(t, p)),
-        Region3::SubregionY => Ok(subregion_y(t, p)),
-        Region3::SubregionZ => Ok(subregion_z(t, p)),
+pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
+    match subregion(t, p) {
+        Region3::SubregionA => subregion_a(t, p),
+        Region3::SubregionB => subregion_b(t, p),
+        Region3::SubregionC => subregion_c(t, p),
+        Region3::SubregionD => subregion_d(t, p),
+        Region3::SubregionE => subregion_e(t, p),
+        Region3::SubregionF => subregion_f(t, p),
+        Region3::SubregionG => subregion_g(t, p),
+        Region3::SubregionH => subregion_h(t, p),
+        Region3::SubregionI => subregion_i(t, p),
+        Region3::SubregionJ => subregion_j(t, p),
+        Region3::SubregionK => subregion_k(t, p),
+        Region3::SubregionL => subregion_l(t, p),
+        Region3::SubregionM => subregion_m(t, p),
+        Region3::SubregionN => subregion_n(t, p),
+        Region3::SubregionO => subregion_o(t, p),
+        Region3::SubregionP => subregion_p(t, p),
+        Region3::SubregionQ => subregion_q(t, p),
+        Region3::SubregionR => subregion_r(t, p),
+        Region3::SubregionS => subregion_s(t, p),
+        Region3::SubregionT => subregion_t(t, p),
+        Region3::SubregionU => subregion_u(t, p),
+        Region3::SubregionV => subregion_v(t, p),
+        Region3::SubregionW => subregion_w(t, p),
+        Region3::SubregionX => subregion_x(t, p),
+        Region3::SubregionY => subregion_y(t, p),
+        _ => subregion_z(t, p),
     }
 }
 
 pub(crate) fn cv_tp_3(t: f64, p: f64) -> f64 {
-    let rho: f64 = (v_tp_3(t, p).unwrap()).powi(-1);
+    let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cv_rho_t_3(rho, t)
 }
 
 pub(crate) fn cp_tp_3(t: f64, p: f64) -> f64 {
-    let rho: f64 = (v_tp_3(t, p).unwrap()).powi(-1);
+    let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cp_rho_t_3(rho, t)
 }
 
 pub(crate) fn s_tp_3(t: f64, p: f64) -> f64 {
-    let rho: f64 = (v_tp_3(t, p).unwrap()).powi(-1);
+    let rho: f64 = (v_tp_3(t, p)).powi(-1);
     s_rho_t_3(rho, t)
 }
 
 pub(crate) fn u_tp_3(t: f64, p: f64) -> f64 {
-    let rho: f64 = (v_tp_3(t, p).unwrap()).powi(-1);
+    let rho: f64 = (v_tp_3(t, p)).powi(-1);
     u_rho_t_3(rho, t)
 }
 
 pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
-    let rho: f64 = (v_tp_3(t, p).unwrap()).powi(-1);
+    let rho: f64 = (v_tp_3(t, p)).powi(-1);
     h_rho_t_3(rho, t)
 }
 
 #[allow(dead_code)]
 fn w_tp_3(t: f64, p: f64) -> f64 {
-    let rho: f64 = (v_tp_3(t, p).unwrap()).powi(-1);
+    let rho: f64 = (v_tp_3(t, p)).powi(-1);
     w_rho_t_3(rho, t)
 }
 
@@ -2133,7 +2123,6 @@ mod tests {
         assert!(w.approx_eq(0.760696040, (1e-9, 2)));
     }
 
-
     // Extra test based on calculations from IAPWS Online Calculator
     #[test]
     fn cv() {
@@ -2150,146 +2139,146 @@ mod tests {
     #[test]
     fn backwards_v_tp() {
         // Subegion A test
-        let v = v_tp_3(630.0, 50.0e6).unwrap() * 1e2;
+        let v = v_tp_3(630.0, 50.0e6) * 1e2;
         assert!(v.approx_eq(0.14708531, (1e-9, 2)));
 
         // Subregion B test
-        let v = v_tp_3(740.0, 50.0e6).unwrap() * 1e2;
+        let v = v_tp_3(740.0, 50.0e6) * 1e2;
         assert!(v.approx_eq(0.29365993, (1e-9, 2)));
 
         // Subregion C tests
-        let v = v_tp_3(630.0, 30.0e6).unwrap() * 1e2;
+        let v = v_tp_3(630.0, 30.0e6) * 1e2;
         assert!(v.approx_eq(0.1602067254, (1e-9, 2)));
 
-        let v = v_tp_3(640.0, 30.0e6).unwrap() * 1e2;
+        let v = v_tp_3(640.0, 30.0e6) * 1e2;
         assert!(v.approx_eq(0.1692176329, (1e-9, 2)));
 
-        let v = v_tp_3(640.0, 24.0e6).unwrap() * 1e2;
+        let v = v_tp_3(640.0, 24.0e6) * 1e2;
         assert!(v.approx_eq(0.1822352453, (1e-9, 2)));
 
-        let v = v_tp_3(640.0, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(640.0, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.1870122779, (1e-9, 2)));
 
-        let v = v_tp_3(640.0, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(640.0, 22e6) * 1e2;
         assert!(v.approx_eq(0.1907865057, (1e-9, 2)));
 
-        let v = v_tp_3(625.0, 17.5e6).unwrap() * 1e2;
+        let v = v_tp_3(625.0, 17.5e6) * 1e2;
         assert!(v.approx_eq(0.1745127939, (1e-9, 2)));
 
-        let v = v_tp_3(635.0, 20.75e6).unwrap() * 1e2;
+        let v = v_tp_3(635.0, 20.75e6) * 1e2;
         assert!(v.approx_eq(0.1836821575, (1e-9, 2)));
 
         // Subregion D test
-        let v = v_tp_3(670.0, 30e6).unwrap() * 1e2;
+        let v = v_tp_3(670.0, 30e6) * 1e2;
         assert!(v.approx_eq(0.2506897702, (1e-9, 2)));
 
         // Subregion E test
-        let v = v_tp_3(675.0, 30e6).unwrap() * 1e2;
+        let v = v_tp_3(675.0, 30e6) * 1e2;
         assert!(v.approx_eq(0.3004627086, (1e-9, 2)));
 
         // Subregion F test
-        let v = v_tp_3(680.0, 30.0e6).unwrap() * 1e2;
+        let v = v_tp_3(680.0, 30.0e6) * 1e2;
         assert!(v.approx_eq(0.3619812577, (1e-9, 2)));
 
         // Subregion G test
-        let v = v_tp_3(650.0, 24e6).unwrap() * 1e2;
+        let v = v_tp_3(650.0, 24e6) * 1e2;
         assert!(v.approx_eq(0.2166044161, (1e-9, 2)));
 
         // Subregion H tests
-        let v = v_tp_3(653.5, 24e6).unwrap() * 1e2;
+        let v = v_tp_3(653.5, 24e6) * 1e2;
         assert!(v.approx_eq(0.2734218468, (1e-9, 2)));
 
-        let v = v_tp_3(651.0, 23.25e6).unwrap() * 1e2;
+        let v = v_tp_3(651.0, 23.25e6) * 1e2;
         assert!(v.approx_eq(0.2715012566, (1e-9, 2)));
 
         // Subregion I test
-        let v = v_tp_3(652.0, 23.25e6).unwrap() * 1e2;
+        let v = v_tp_3(652.0, 23.25e6) * 1e2;
         assert!(v.approx_eq(0.3598900584, (1e-9, 2)));
 
         // Subregion J tests
-        let v = v_tp_3(653.5, 23.25e6).unwrap() * 1e2;
+        let v = v_tp_3(653.5, 23.25e6) * 1e2;
         assert!(v.approx_eq(0.4456606146, (1e-9, 2)));
 
-        let v = v_tp_3(653.0, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(653.0, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.5132799909, (1e-9, 2)));
 
         // Subregion K test
-        let v = v_tp_3(657.5, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(657.5, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.5998461683, (1e-9, 2)));
 
-        let v = v_tp_3(655.0, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(655.0, 22e6) * 1e2;
         assert!(v.approx_eq(0.6412579743, (1e-9, 2)));
 
-        let v = v_tp_3(645.0, 20.75e6).unwrap() * 1e2;
+        let v = v_tp_3(645.0, 20.75e6) * 1e2;
         assert!(v.approx_eq(0.6208025869, (1e-9, 2)));
 
         // Subregion L tests
-        let v = v_tp_3(647.5, 23.25e6).unwrap() * 1e2;
+        let v = v_tp_3(647.5, 23.25e6) * 1e2;
         assert!(v.approx_eq(0.2116699735, (1e-9, 2)));
 
-        let v = v_tp_3(645.0, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(645.0, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.2039416468, (1e-9, 2)));
 
         // Subregion M test
-        let v = v_tp_3(649.2, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(649.2, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.2604853689, (1e-9, 2)));
 
         // Subregion N test
-        let v = v_tp_3(649.5, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(649.5, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.2880343273, (1e-9, 2)));
 
         // Subregion O test
-        let v = v_tp_3(649.7, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(649.7, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.3203437461, (1e-9, 2)));
 
         // Subregion P test
-        let v = v_tp_3(650.0, 22.75e6).unwrap() * 1e2;
+        let v = v_tp_3(650.0, 22.75e6) * 1e2;
         assert!(v.approx_eq(0.3675714221, (1e-9, 2)));
 
         // Subregion Q test
-        let v = v_tp_3(644.0, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(644.0, 22e6) * 1e2;
         assert!(v.approx_eq(0.2076721104, (1e-9, 2)));
 
         // Subregion R test
-        let v = v_tp_3(648.5, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(648.5, 22e6) * 1e2;
         assert!(v.approx_eq(0.5039124713, (1e-9, 2)));
 
-        let v = v_tp_3(642.1, 20.75e6).unwrap() * 1e2;
+        let v = v_tp_3(642.1, 20.75e6) * 1e2;
         assert!(v.approx_eq(0.5287979986, (1e-9, 2)));
 
         // Subregion S test
-        let v = v_tp_3(640.0, 20.75e6).unwrap() * 1e2;
+        let v = v_tp_3(640.0, 20.75e6) * 1e2;
         assert!(v.approx_eq(0.2005732219, (1e-9, 2)));
 
         // Subregion T test
-        let v = v_tp_3(645.0, 20e6).unwrap() * 1e2;
+        let v = v_tp_3(645.0, 20e6) * 1e2;
         assert!(v.approx_eq(0.7231975247, (1e-9, 2)));
 
-        let v = v_tp_3(630.0, 17.5e6).unwrap() * 1e2;
+        let v = v_tp_3(630.0, 17.5e6) * 1e2;
         assert!(v.approx_eq(0.8362616763, (1e-9, 2)));
 
         // Subregion U test
-        let v = v_tp_3(646.0, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(646.0, 22e6) * 1e2;
         assert!(v.approx_eq(0.2278462874, (1e-9, 2)));
 
         // Subregion V test
-        let v = v_tp_3(647.85, 22.3e6).unwrap() * 1e2;
+        let v = v_tp_3(647.85, 22.3e6) * 1e2;
         assert!(v.approx_eq(0.2706687501, (1e-9, 2)));
 
         // Subregion W test
-        let v = v_tp_3(648.1, 22.3e6).unwrap() * 1e2;
+        let v = v_tp_3(648.1, 22.3e6) * 1e2;
         assert!(v.approx_eq(0.3622226305, (1e-9, 2)));
 
         // Subregion X test
-        let v = v_tp_3(647.0, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(647.0, 22e6) * 1e2;
         assert!(v.approx_eq(0.4056951148, (1e-9, 2)));
 
         // Subregion Y test
-        let v = v_tp_3(646.83, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(646.83, 22e6) * 1e2;
         assert!(v.approx_eq(0.2682280026, (1e-9, 2)));
 
         // Subregion Z test
-        let v = v_tp_3(646.88, 22e6).unwrap() * 1e2;
+        let v = v_tp_3(646.88, 22e6) * 1e2;
         assert!(v.approx_eq(0.3697545447, (1e-9, 2)));
     }
 }

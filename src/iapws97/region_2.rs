@@ -1,5 +1,4 @@
 // Region 2
-use crate::iapws97;
 use crate::iapws97::constants;
 
 const REGION_2_COEFFS_RES: [[f64; 3]; 43] = [
@@ -472,14 +471,13 @@ fn t_ps_2c(pi: f64, s: f64) -> f64 {
 }
 
 #[allow(dead_code)]
-pub fn t_ps_2(p: f64, s: f64) -> Result<f64, iapws97::IAPWSError> {
+pub fn t_ps_2(p: f64, s: f64) -> f64 {
     let pi = p / 1e6;
 
     match (p, s) {
-        (pres, ..) if (0.0..=4e6).contains(&pres) => Ok(t_ps_2a(pi, s)),
-        (pres, ent) if (4e6..=100e6).contains(&pres) && ent >= 5.85 => Ok(t_ps_2b(pi, s)),
-        (pres, ent) if (4e6..=100e6).contains(&pres) && ent < 5.85 => Ok(t_ps_2c(pi, s)),
-        _ => Err(iapws97::IAPWSError::NotImplemented()),
+        (pres, ..) if (0.0..=4e6).contains(&pres) => t_ps_2a(pi, s),
+        (pres, ent) if (4e6..=100e6).contains(&pres) && ent >= 5.85 => t_ps_2b(pi, s),
+        _ => t_ps_2c(pi, s),
     }
 }
 
@@ -638,17 +636,16 @@ fn t_ph_2c(pi: f64, eta: f64) -> f64 {
 }
 
 #[allow(dead_code)]
-pub fn t_ph_2(p: f64, h: f64) -> Result<f64, iapws97::IAPWSError> {
+pub fn t_ph_2(p: f64, h: f64) -> f64 {
     let pi = p / 1e6;
     let eta = h / 2.0e3;
     let p_2b2c =
         (0.90584278514723e3 + -0.67955786399241 * h + 0.12809002730136e-3 * h.powi(2)) * 1e6;
 
     match p {
-        pres if (0.0..=4.0e6).contains(&pres) => Ok(t_ph_2a(pi, eta)),
-        pres if (4.0e6..=100.0e6).contains(&pres) && pres < p_2b2c => Ok(t_ph_2b(pi, eta)),
-        pres if (4.0e6..=100.0e6).contains(&pres) && pres >= p_2b2c => Ok(t_ph_2c(pi, eta)),
-        _ => Err(iapws97::IAPWSError::NotImplemented()),
+        pres if (0.0..=4.0e6).contains(&pres) => t_ph_2a(pi, eta),
+        pres if (4.0e6..=100.0e6).contains(&pres) && pres < p_2b2c => t_ph_2b(pi, eta),
+        _ => t_ph_2c(pi, eta),
     }
 }
 
@@ -746,68 +743,68 @@ mod tests {
     #[test]
     fn backwards_t_ph() {
         // Equation 22 tests
-        let t = t_ph_2(0.001e6, 3000.0).unwrap() / 1e3;
+        let t = t_ph_2(0.001e6, 3000.0) / 1e3;
         assert!(t.approx_eq(0.534433241, (1e-9, 2)));
 
-        let t = t_ph_2(3e6, 3000.0).unwrap() / 1e3;
+        let t = t_ph_2(3e6, 3000.0) / 1e3;
         assert!(t.approx_eq(0.575373370, (1e-9, 2)));
 
-        let t = t_ph_2(3e6, 4000.0).unwrap() / 1e4;
+        let t = t_ph_2(3e6, 4000.0) / 1e4;
         println!("{t}");
         assert!(t.approx_eq(0.101077577, (1e-9, 2)));
 
         // Equation 23 tests
-        let t = t_ph_2(5e6, 3500.0).unwrap() / 1e3;
+        let t = t_ph_2(5e6, 3500.0) / 1e3;
         assert!(t.approx_eq(0.801299102, (1e-9, 2)));
 
-        let t = t_ph_2(5e6, 4000.0).unwrap() / 1e4;
+        let t = t_ph_2(5e6, 4000.0) / 1e4;
         assert!(t.approx_eq(0.101531583, (1e-9, 2)));
 
-        let t = t_ph_2(25e6, 3500.0).unwrap() / 1e3;
+        let t = t_ph_2(25e6, 3500.0) / 1e3;
         assert!(t.approx_eq(0.875279054, (1e-9, 2)));
 
         // Equation 24 tests
-        let t = t_ph_2(40e6, 2700.0).unwrap() / 1e3;
+        let t = t_ph_2(40e6, 2700.0) / 1e3;
         assert!(t.approx_eq(0.743056411, (1e-9, 2)));
 
-        let t = t_ph_2(60e6, 2700.0).unwrap() / 1e3;
+        let t = t_ph_2(60e6, 2700.0) / 1e3;
         assert!(t.approx_eq(0.791137067, (1e-9, 2)));
 
-        let t = t_ph_2(60e6, 3200.0).unwrap() / 1e3;
+        let t = t_ph_2(60e6, 3200.0) / 1e3;
         assert!(t.approx_eq(0.882756860, (1e-9, 2)));
     }
 
     #[test]
     fn backwards_t_ps() {
         // Equation 25 tests
-        let t = t_ps_2(0.1e6, 7.5).unwrap() / 1e3;
+        let t = t_ps_2(0.1e6, 7.5) / 1e3;
         assert!(t.approx_eq(0.399517097, (1e-9, 2)));
 
-        let t = t_ps_2(0.1e6, 8.0).unwrap() / 1e3;
+        let t = t_ps_2(0.1e6, 8.0) / 1e3;
         assert!(t.approx_eq(0.514127081, (1e-9, 2)));
 
-        let t = t_ps_2(2.5e6, 8.0).unwrap() / 1e4;
+        let t = t_ps_2(2.5e6, 8.0) / 1e4;
         println!("{t}");
         assert!(t.approx_eq(0.103984917, (1e-9, 2)));
 
         // Equation 26 tests
-        let t = t_ps_2(8e6, 6.0).unwrap() / 1e3;
+        let t = t_ps_2(8e6, 6.0) / 1e3;
         assert!(t.approx_eq(0.600484040, (1e-9, 2)));
 
-        let t = t_ps_2(8e6, 7.5).unwrap() / 1e4;
+        let t = t_ps_2(8e6, 7.5) / 1e4;
         assert!(t.approx_eq(0.106495556, (1e-9, 2)));
 
-        let t = t_ps_2(90e6, 6.0).unwrap() / 1e4;
+        let t = t_ps_2(90e6, 6.0) / 1e4;
         assert!(t.approx_eq(0.103801126, (1e-9, 2)));
 
         // Equation 27 tests
-        let t = t_ps_2(20e6, 5.75).unwrap() / 1e3;
+        let t = t_ps_2(20e6, 5.75) / 1e3;
         assert!(t.approx_eq(0.697992849, (1e-9, 2)));
 
-        let t = t_ps_2(80e6, 5.25).unwrap() / 1e3;
+        let t = t_ps_2(80e6, 5.25) / 1e3;
         assert!(t.approx_eq(0.854011484, (1e-9, 2)));
 
-        let t = t_ps_2(80e6, 5.75).unwrap() / 1e3;
+        let t = t_ps_2(80e6, 5.75) / 1e3;
         assert!(t.approx_eq(0.949017998, (1e-9, 2)));
     }
 }

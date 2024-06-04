@@ -44,7 +44,7 @@ pub mod iapws97 {
             0.57254459862746e3,
             0.13918839778870e2,
         ];
-        n[3] + (((p*1e-6)-n[4])/n[2]).sqrt()
+        n[3] + (((p * 1e-6) - n[4]) / n[2]).sqrt()
     }
 
     // ===============     Main API ===================
@@ -232,7 +232,7 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(v_tp_1(t, p)),
             Region::Region2 => Ok(v_tp_2(t, p)),
-            Region::Region3 => Ok(v_tp_3(t, p).unwrap()),
+            Region::Region3 => Ok(v_tp_3(t, p)),
             Region::Region5 => Ok(v_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
@@ -723,7 +723,6 @@ pub mod iapws97 {
         fn region_2_3_auxiliary_boundary() {
             let p = p_boundary_2_3(&623.15) * 1e-8;
             assert!(p.approx_eq(0.165291643, (1e-9, 2)));
-
 
             let t = t_boundary_2_3(&16.5291643e6) / 1e3;
             assert!(t.approx_eq(0.623150000, (1e-9, 2)));

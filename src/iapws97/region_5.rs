@@ -220,7 +220,7 @@ pub(crate) fn s_tp_5(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 pub(crate) fn cp_tp_5(t: f64, p: f64) -> f64 {
-    - constants::_R * tau_5(t).powi(2) * (gamma_tau_tau_5_ideal(t, p) + gamma_tau_tau_5_res(t, p))
+    -constants::_R * tau_5(t).powi(2) * (gamma_tau_tau_5_ideal(t, p) + gamma_tau_tau_5_res(t, p))
 }
 
 /// Returns the region-5 isochoric specific heat
