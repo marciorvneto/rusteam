@@ -4,8 +4,11 @@ pub mod iapws97 {
     mod region_1;
     mod region_2;
     mod region_3;
+    mod region_5;
     use crate::iapws97::region_1::{cp_tp_1, cv_tp_1, h_tp_1, s_tp_1, u_tp_1, v_tp_1, w_tp_1};
     use crate::iapws97::region_2::{cp_tp_2, cv_tp_2, h_tp_2, s_tp_2, u_tp_2, v_tp_2, w_tp_2};
+    use crate::iapws97::region_3::{cp_tp_3, cv_tp_3, h_tp_3, s_tp_3, u_tp_3, v_tp_3};
+    use crate::iapws97::region_5::{cp_tp_5, cv_tp_5, h_tp_5, s_tp_5, u_tp_5, v_tp_5, w_tp_5};
 
     pub enum Region {
         Region1,
@@ -21,13 +24,27 @@ pub mod iapws97 {
         NotImplemented(),
     }
 
-    fn p_boundary_2_3(t: f64) -> f64 {
-        let p_star = 1e6;
-        let theta = t / 1.0;
-        let n1 = 0.34805185628969e3;
-        let n2 = -0.11671859879975e1;
-        let n3 = 0.10192970039326e-2;
-        p_star * (n1 + n2 * theta + n3 * theta * theta)
+    fn p_boundary_2_3(t: &f64) -> f64 {
+        let n: [f64; 5] = [
+            0.34805185628969e3,
+            -0.11671859879975e1,
+            0.10192970039326e-2,
+            0.57254459862746e3,
+            0.13918839778870e2,
+        ];
+        1e6 * (n[0] + n[1] * t + n[2] * t.powi(2))
+    }
+
+    #[allow(dead_code)]
+    fn t_boundary_2_3(p: &f64) -> f64 {
+        let n: [f64; 5] = [
+            0.34805185628969e3,
+            -0.11671859879975e1,
+            0.10192970039326e-2,
+            0.57254459862746e3,
+            0.13918839778870e2,
+        ];
+        n[3] + (((p * 1e-6) - n[4]) / n[2]).sqrt()
     }
 
     // ===============     Main API ===================
@@ -48,43 +65,39 @@ pub mod iapws97 {
     /// let region = region(300.0, 101325.0).unwrap();
     /// ```
     fn region(t: f64, p: f64) -> Result<Region, IAPWSError> {
-        if !(273.15..=2273.15).contains(&t) {
-            return Err(IAPWSError::OutOfBounds(t, p));
-        }
-        if !(0.0..=100e6).contains(&p) {
-            return Err(IAPWSError::OutOfBounds(t, p));
-        }
+        let p_sat = psat97(&t);
 
-        if t <= 623.15 {
-            if p > psat97(t) {
-                return Ok(Region::Region1);
-            } else if p < psat97(t) {
-                return Ok(Region::Region2);
+        let p_boundary_23 = p_boundary_2_3(&t);
+
+        match (t, p) {
+            (temp, pres)
+                if (1073.15..=2273.15).contains(&temp) && (0.0..=50.0e6).contains(&pres) =>
+            {
+                Ok(Region::Region5)
             }
-            return Ok(Region::Region4);
-        }
-
-        if t <= 863.15 {
-            if p > p_boundary_2_3(t) {
-                return Ok(Region::Region3);
-            } else if p < p_boundary_2_3(t) {
-                return Ok(Region::Region2);
+            (temp, pres) if (273.15..647.096).contains(&temp) && pres == p_sat => {
+                Ok(Region::Region4)
             }
-            return Ok(Region::Region4);
-        }
-
-        if t < 1073.15 {
-            return Ok(Region::Region2);
-        }
-
-        if t >= 1073.15 {
-            if p > 50e6 {
-                return Err(IAPWSError::OutOfBounds(t, p));
+            (temp, pres)
+                if (623.15..=863.15).contains(&temp) && (p_boundary_23..100e6).contains(&pres) =>
+            {
+                Ok(Region::Region3)
             }
-            return Ok(Region::Region5);
+            (temp, pres)
+                if ((273.15..=623.15).contains(&temp) && (0.0..=p_sat).contains(&pres))
+                    || ((623.15..=863.15).contains(&temp)
+                        && (0.0..=p_boundary_23).contains(&pres))
+                    || ((863.15..=1073.15).contains(&temp) && (0.0..100e6).contains(&pres)) =>
+            {
+                Ok(Region::Region2)
+            }
+            (temp, pres)
+                if (273.15..=623.15).contains(&temp) && (p_sat..=100e6).contains(&pres) =>
+            {
+                Ok(Region::Region1)
+            }
+            _ => Err(IAPWSError::OutOfBounds(t, p)),
         }
-
-        Err(IAPWSError::OutOfBounds(t, p))
     }
 
     /// Calculates the water enthalpy in kJ/kg at a given
@@ -104,6 +117,8 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(h_tp_1(t, p)),
             Region::Region2 => Ok(h_tp_2(t, p)),
+            Region::Region3 => Ok(h_tp_3(t, p)),
+            Region::Region5 => Ok(h_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
@@ -125,6 +140,8 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(u_tp_1(t, p)),
             Region::Region2 => Ok(u_tp_2(t, p)),
+            Region::Region3 => Ok(u_tp_3(t, p)),
+            Region::Region5 => Ok(u_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
@@ -146,6 +163,8 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(s_tp_1(t, p)),
             Region::Region2 => Ok(s_tp_2(t, p)),
+            Region::Region3 => Ok(s_tp_3(t, p)),
+            Region::Region5 => Ok(s_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
@@ -167,6 +186,8 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(cp_tp_1(t, p)),
             Region::Region2 => Ok(cp_tp_2(t, p)),
+            Region::Region3 => Ok(cp_tp_3(t, p)),
+            Region::Region5 => Ok(cp_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
@@ -188,6 +209,8 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(cv_tp_1(t, p)),
             Region::Region2 => Ok(cv_tp_2(t, p)),
+            Region::Region3 => Ok(cv_tp_3(t, p)),
+            Region::Region5 => Ok(cv_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
@@ -209,11 +232,13 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(v_tp_1(t, p)),
             Region::Region2 => Ok(v_tp_2(t, p)),
+            Region::Region3 => Ok(v_tp_3(t, p)),
+            Region::Region5 => Ok(v_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
 
-    /// Calculates the mass volume in m^3/kg at a given
+    /// Calculates the speed of sound in m/s at a given
     /// temperature and pressure.
     ///
     /// Temperature is assumed to be in K
@@ -230,6 +255,7 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(w_tp_1(t, p)),
             Region::Region2 => Ok(w_tp_2(t, p)),
+            Region::Region5 => Ok(w_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
     }
@@ -251,53 +277,50 @@ pub mod iapws97 {
 
     /// Returns the saturation pressure in Pa
     /// Temperature is assumed to be in K
-    pub fn psat97(t: f64) -> f64 {
-        let n1 = REGION_4_SATURATION_COEFFS[0];
-        let n2 = REGION_4_SATURATION_COEFFS[1];
-        let n3 = REGION_4_SATURATION_COEFFS[2];
-        let n4 = REGION_4_SATURATION_COEFFS[3];
-        let n5 = REGION_4_SATURATION_COEFFS[4];
-        let n6 = REGION_4_SATURATION_COEFFS[5];
-        let n7 = REGION_4_SATURATION_COEFFS[6];
-        let n8 = REGION_4_SATURATION_COEFFS[7];
-        let n9 = REGION_4_SATURATION_COEFFS[8];
-        let n10 = REGION_4_SATURATION_COEFFS[9];
+    pub fn psat97(t: &f64) -> f64 {
+        // Calulate additional values
+        let theta: f64 = t + REGION_4_SATURATION_COEFFS[8] / (t - REGION_4_SATURATION_COEFFS[9]);
+        let coef_a: f64 =
+            theta.powi(2) + REGION_4_SATURATION_COEFFS[0] * theta + REGION_4_SATURATION_COEFFS[1];
+        let coef_b: f64 = REGION_4_SATURATION_COEFFS[2] * theta.powi(2)
+            + REGION_4_SATURATION_COEFFS[3] * theta
+            + REGION_4_SATURATION_COEFFS[4];
+        let coef_c: f64 = REGION_4_SATURATION_COEFFS[5] * theta.powi(2)
+            + REGION_4_SATURATION_COEFFS[6] * theta
+            + REGION_4_SATURATION_COEFFS[7];
 
-        let theta = t + n9 / (t - n10);
-
-        let coef_a = theta * theta + n1 * theta + n2;
-        let coef_b = n3 * theta * theta + n4 * theta + n5;
-        let coef_c = n6 * theta * theta + n7 * theta + n8;
-        (2.0 * coef_c / (-coef_b + (coef_b * coef_b - 4.0 * coef_a * coef_c).sqrt())).powi(4) * 1e6
+        // Return p_sat
+        (2.0 * coef_c / (-coef_b + (coef_b.powi(2) - 4.0 * coef_a * coef_c).sqrt())).powi(4) * 1e6
     }
 
     /// Returns the saturation temperature in K
     /// Pressure is assumed to be in Pa
-    pub fn tsat97(p: f64) -> f64 {
-        let n1 = REGION_4_SATURATION_COEFFS[0];
-        let n2 = REGION_4_SATURATION_COEFFS[1];
-        let n3 = REGION_4_SATURATION_COEFFS[2];
-        let n4 = REGION_4_SATURATION_COEFFS[3];
-        let n5 = REGION_4_SATURATION_COEFFS[4];
-        let n6 = REGION_4_SATURATION_COEFFS[5];
-        let n7 = REGION_4_SATURATION_COEFFS[6];
-        let n8 = REGION_4_SATURATION_COEFFS[7];
-        let n9 = REGION_4_SATURATION_COEFFS[8];
-        let n10 = REGION_4_SATURATION_COEFFS[9];
+    pub fn tsat97(p: &f64) -> f64 {
+        // Calulate additional values
+        let beta: f64 = (p * 1e-6).powf(0.25);
+        let coef_e: f64 =
+            beta.powi(2) + REGION_4_SATURATION_COEFFS[2] * beta + REGION_4_SATURATION_COEFFS[5];
+        let coef_f: f64 = REGION_4_SATURATION_COEFFS[0] * beta.powi(2)
+            + REGION_4_SATURATION_COEFFS[3] * beta
+            + REGION_4_SATURATION_COEFFS[6];
+        let coef_g: f64 = REGION_4_SATURATION_COEFFS[1] * beta.powi(2)
+            + REGION_4_SATURATION_COEFFS[4] * beta
+            + REGION_4_SATURATION_COEFFS[7];
+        let coef_d: f64 =
+            2.0 * coef_g / (-coef_f - (coef_f.powi(2) - 4.0 * coef_e * coef_g).sqrt());
 
-        let beta = (p / 1e6).powf(0.25);
-
-        let coef_e = beta * beta + n3 * beta + n6;
-        let coef_f = n1 * beta * beta + n4 * beta + n7;
-        let coef_g = n2 * beta * beta + n5 * beta + n8;
-
-        let coef_d = 2.0 * coef_g / (-coef_f - (coef_f * coef_f - 4.0 * coef_e * coef_g).sqrt());
-
-        (n10 + coef_d - ((n10 + coef_d).powi(2) - 4.0 * (n9 + n10 * coef_d)).sqrt()) / 2.0
+        // Return t_sat
+        (REGION_4_SATURATION_COEFFS[9] + coef_d
+            - ((REGION_4_SATURATION_COEFFS[9] + coef_d).powi(2)
+                - 4.0 * (REGION_4_SATURATION_COEFFS[8] + REGION_4_SATURATION_COEFFS[9] * coef_d))
+                .sqrt())
+            * 0.5
     }
 
     #[cfg(test)]
     mod tests {
+
+        use crate::iapws97::t_boundary_2_3;
 
         use super::{
             cpmass_tp, cvmass_tp, hmass_tp, p_boundary_2_3, psat97, smass_tp, speed_sound_tp,
@@ -315,7 +338,7 @@ pub mod iapws97 {
 
         #[test]
         fn enthalpy_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -363,7 +386,7 @@ pub mod iapws97 {
 
         #[test]
         fn internal_energy_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -410,7 +433,7 @@ pub mod iapws97 {
 
         #[test]
         fn entropy_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -462,7 +485,7 @@ pub mod iapws97 {
 
         #[test]
         fn isobaric_heat_pressure_temperature() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -515,7 +538,7 @@ pub mod iapws97 {
 
         #[test]
         fn isochoric_heat_pressure_temperature() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -568,7 +591,7 @@ pub mod iapws97 {
 
         #[test]
         fn volume_heat_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -621,7 +644,7 @@ pub mod iapws97 {
 
         #[test]
         fn speed_sound_temperature_pressure() {
-            let test_set = vec![
+            let test_set = [
                 TestData {
                     temperature: 300.0,
                     pressure: 3e6,
@@ -674,32 +697,35 @@ pub mod iapws97 {
 
         #[test]
         fn saturation_pressure() {
-            let ps = psat97(300.0) / 10000.0;
+            let ps = psat97(&300.0) / 1e4;
             assert!(ps.approx_eq(0.353658941, (1e-9, 2)));
 
-            let ps = psat97(500.0) / 1e7;
+            let ps = psat97(&500.0) / 1e7;
             assert!(ps.approx_eq(0.263889776, (1e-9, 2)));
 
-            let ps = psat97(600.0) / 1e8;
+            let ps = psat97(&600.0) / 1e8;
             assert!(ps.approx_eq(0.123443146, (1e-9, 2)));
         }
 
         #[test]
         fn saturation_temperature() {
-            let ts = tsat97(0.1e6) / 1000.0;
+            let ts = tsat97(&0.1e6) / 1e3;
             assert!(ts.approx_eq(0.372755919, (1e-9, 2)));
 
-            let ts = tsat97(1e6) / 1000.0;
+            let ts = tsat97(&1e6) / 1e3;
             assert!(ts.approx_eq(0.453035632, (1e-9, 2)));
 
-            let ts = tsat97(10e6) / 1000.0;
+            let ts = tsat97(&10e6) / 1e3;
             assert!(ts.approx_eq(0.584149488, (1e-9, 2)));
         }
 
         #[test]
         fn region_2_3_auxiliary_boundary() {
-            let p = p_boundary_2_3(623.15) / 1e8;
+            let p = p_boundary_2_3(&623.15) * 1e-8;
             assert!(p.approx_eq(0.165291643, (1e-9, 2)));
+
+            let t = t_boundary_2_3(&16.5291643e6) / 1e3;
+            assert!(t.approx_eq(0.623150000, (1e-9, 2)));
         }
     }
 }
