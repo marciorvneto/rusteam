@@ -295,7 +295,7 @@ fn t_ps_1(p: f64, s: f64) -> f64 {
 /// Enthalpy is assumed to be in kJ/kg
 /// Pressure is assumed to be in Pa
 #[allow(dead_code)]
-fn t_ph_1(p: f64, h: f64) -> f64 {
+pub fn t_ph_1(p: f64, h: f64) -> f64 {
     let eta = eta_1_back(h);
     let pi = pi_1_back(p);
     let mut sum = 0.0;
