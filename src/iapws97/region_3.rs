@@ -2040,7 +2040,7 @@ pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
 }
 
 #[allow(dead_code)]
-fn w_tp_3(t: f64, p: f64) -> f64 {
+pub fn w_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     w_rho_t_3(rho, t)
 }

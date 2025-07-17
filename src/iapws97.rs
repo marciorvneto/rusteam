@@ -7,7 +7,7 @@ pub mod iapws97 {
     mod region_5;
     use crate::iapws97::region_1::{cp_tp_1, cv_tp_1, h_tp_1, s_tp_1, u_tp_1, v_tp_1, w_tp_1};
     use crate::iapws97::region_2::{cp_tp_2, cv_tp_2, h_tp_2, s_tp_2, u_tp_2, v_tp_2, w_tp_2};
-    use crate::iapws97::region_3::{cp_tp_3, cv_tp_3, h_tp_3, s_tp_3, u_tp_3, v_tp_3};
+    use crate::iapws97::region_3::{cp_tp_3, cv_tp_3, h_tp_3, s_tp_3, u_tp_3, v_tp_3, w_tp_3};
     use crate::iapws97::region_5::{cp_tp_5, cv_tp_5, h_tp_5, s_tp_5, u_tp_5, v_tp_5, w_tp_5};
 
     pub enum Region {
@@ -255,6 +255,7 @@ pub mod iapws97 {
         match region {
             Region::Region1 => Ok(w_tp_1(t, p)),
             Region::Region2 => Ok(w_tp_2(t, p)),
+            Region::Region3 => Ok(w_tp_3(t, p)),
             Region::Region5 => Ok(w_tp_5(t, p)),
             _ => Err(IAPWSError::NotImplemented()),
         }
