@@ -31,8 +31,8 @@ have been implemented, but not thoroughly tested, so use them at your own risk.
 
 | Equation |    Implemented     |       Tested       | Available via public interface |
 | :------- | :----------------: | :----------------: | :----------------------------: |
-| T(p,h)   | :heavy_check_mark: | :heavy_check_mark: |              :x:               |
-| T(p,s)   | :heavy_check_mark: | :heavy_check_mark: |              :x:               |
+| T(p,h)   | :heavy_check_mark: | :heavy_check_mark: |      :heavy_check_mark:        |
+| T(p,s)   | :heavy_check_mark: | :heavy_check_mark: |      :heavy_check_mark:        |
 
 ### Region 2
 
@@ -52,8 +52,8 @@ have been implemented, but not thoroughly tested, so use them at your own risk.
 
 | Equation |    Implemented     |       Tested       | Available via public interface |
 | :------- | :----------------: | :----------------: | :----------------------------: |
-| T(p,h)   | :heavy_check_mark: | :heavy_check_mark: |              :x:               |
-| T(p,s)   | :heavy_check_mark: | :heavy_check_mark: |              :x:               |
+| T(p,h)   | :heavy_check_mark: | :heavy_check_mark: |      :heavy_check_mark:        |
+| T(p,s)   | :heavy_check_mark: | :heavy_check_mark: |      :heavy_check_mark:        |
 
 ### Region 3
 
