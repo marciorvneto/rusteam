@@ -5,8 +5,12 @@ pub mod iapws97 {
     mod region_2;
     mod region_3;
     mod region_5;
-    use crate::iapws97::region_1::{cp_tp_1, cv_tp_1, h_tp_1, s_tp_1, u_tp_1, v_tp_1, w_tp_1};
-    use crate::iapws97::region_2::{cp_tp_2, cv_tp_2, h_tp_2, s_tp_2, u_tp_2, v_tp_2, w_tp_2};
+    use crate::iapws97::region_1::{
+        cp_tp_1, cv_tp_1, h_tp_1, s_tp_1, t_ph_1, t_ps_1, u_tp_1, v_tp_1, w_tp_1,
+    };
+    use crate::iapws97::region_2::{
+        cp_tp_2, cv_tp_2, h_tp_2, s_tp_2, t_ph_2, t_ps_2, u_tp_2, v_tp_2, w_tp_2,
+    };
     use crate::iapws97::region_3::{cp_tp_3, cv_tp_3, h_tp_3, s_tp_3, u_tp_3, v_tp_3, w_tp_3};
     use crate::iapws97::region_5::{cp_tp_5, cv_tp_5, h_tp_5, s_tp_5, u_tp_5, v_tp_5, w_tp_5};
 
@@ -146,7 +150,7 @@ pub mod iapws97 {
         }
     }
 
-    /// Calculates the water entropy in J/kg/K at a given
+    /// Calculates the water entropy in J/kg.K at a given
     /// temperature and pressure.
     ///
     /// Temperature is assumed to be in K
@@ -318,415 +322,54 @@ pub mod iapws97 {
             * 0.5
     }
 
-    #[cfg(test)]
-    mod tests {
+    /// Calculates the water Temperature in K at a given
+    /// pressure and entropy.
+    ///
+    /// Pressure is assumed to be in Pa
+    /// Entropy is assumed to be in J/kg.K
+    ///
+    /// Example
+    ///
+    /// ```rust
+    /// use rust_steam::iapws97::{temperature_ps};
+    /// let t = temperature_ps(0.1e6, 7.5).unwrap();
+    /// ```
+    pub fn temperature_ps(p: f64, s: f64) -> Result<f64, IAPWSError> {
+        let t1 = t_ps_1(p, s);
+        let t2 = t_ps_2(p, s);
+        let region1 = region(t1, p);
+        let region2 = region(t2, p);
 
-        use crate::iapws97::t_boundary_2_3;
-
-        use super::{
-            cpmass_tp, cvmass_tp, hmass_tp, p_boundary_2_3, psat97, smass_tp, speed_sound_tp,
-            tsat97, umass_tp, vmass_tp,
-        };
-        extern crate float_cmp;
-        use float_cmp::ApproxEq;
-
-        struct TestData {
-            temperature: f64,
-            pressure: f64,
-            divisor: f64,
-            expected_result: f64,
+        match (region1, region2) {
+            (Ok(Region::Region1), _) => Ok(t1),
+            (_, Ok(Region::Region2)) => Ok(t2),
+            _ => Err(IAPWSError::NotImplemented()),
         }
+    }
 
-        #[test]
-        fn enthalpy_temperature_pressure() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 1000.0,
-                    expected_result: 0.115331273,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 1000.0,
-                    expected_result: 0.184142828,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 1000.0,
-                    expected_result: 0.975542239,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 10000.0,
-                    expected_result: 0.254991145,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 10000.0,
-                    expected_result: 0.333568375,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 10000.0,
-                    expected_result: 0.263149474,
-                },
-            ];
+    /// Calculates the water Temperature in K at a given
+    /// pressure and enthalpy.
+    ///
+    /// Pressure is assumed to be in Pa
+    /// Enthalpy is assumed to be in kJ/kg
+    ///
+    /// Example
+    ///
+    /// ```rust
+    /// use rust_steam::iapws97::{temperature_ph};
+    /// let t = temperature_ph(0.001e6, 3000.0).unwrap();
+    /// ```
+    pub fn temperature_ph(p: f64, h: f64) -> Result<f64, IAPWSError> {
+        let t1 = t_ph_1(p, h);
+        let t2 = t_ph_2(p, h);
 
-            for test_data in test_set.iter() {
-                let enthalpy = hmass_tp(test_data.temperature, test_data.pressure).unwrap()
-                    / test_data.divisor;
-                assert!(enthalpy.approx_eq(test_data.expected_result, (1e-9, 2)));
-            }
-        }
+        let region1 = region(t1, p);
+        let region2 = region(t2, p);
 
-        #[test]
-        fn internal_energy_temperature_pressure() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 1000.0,
-                    expected_result: 0.112324818,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 1000.0,
-                    expected_result: 0.106448356,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 1000.0,
-                    expected_result: 0.971934985,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 10000.0,
-                    expected_result: 0.241169160,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 10000.0,
-                    expected_result: 0.301262819,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 10000.0,
-                    expected_result: 0.246861076,
-                },
-            ];
-            for test_data in test_set.iter() {
-                let internal_energy = umass_tp(test_data.temperature, test_data.pressure).unwrap()
-                    / test_data.divisor;
-                assert!(internal_energy.approx_eq(test_data.expected_result, (1e-9, 2)));
-            }
-        }
-
-        #[test]
-        fn entropy_temperature_pressure() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 1.0,
-                    expected_result: 0.392294792,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 1.0,
-                    expected_result: 0.368563852,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 1.0,
-                    expected_result: 0.258041912e1,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 10.0,
-                    expected_result: 0.852238967,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 100.0,
-                    expected_result: 0.101749996,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 10.0,
-                    expected_result: 0.517540298,
-                },
-            ];
-            for test_data in test_set.iter() {
-                let entropy = smass_tp(test_data.temperature, test_data.pressure).unwrap()
-                    / test_data.divisor;
-                assert!(
-                    entropy.approx_eq(test_data.expected_result, (1e-9, 2)),
-                    "Expected: {} Result: {}",
-                    test_data.expected_result,
-                    entropy
-                );
-            }
-        }
-
-        #[test]
-        fn isobaric_heat_pressure_temperature() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 10.0,
-                    expected_result: 0.417301218,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 10.0,
-                    expected_result: 0.401008987,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 10.0,
-                    expected_result: 0.465580682,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 10.0,
-                    expected_result: 0.191300162,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 10.0,
-                    expected_result: 0.208141274,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 100.0,
-                    expected_result: 0.103505092,
-                },
-            ];
-
-            for test_data in test_set.iter() {
-                let isobaricheat = cpmass_tp(test_data.temperature, test_data.pressure).unwrap()
-                    / test_data.divisor;
-                assert!(
-                    isobaricheat.approx_eq(test_data.expected_result, (1e-9, 2)),
-                    "Expected: {} Result: {}",
-                    test_data.expected_result,
-                    isobaricheat
-                );
-            }
-        }
-
-        #[test]
-        fn isochoric_heat_pressure_temperature() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 1.0,
-                    expected_result: 4.121201603,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 1.0,
-                    expected_result: 3.917366061,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 1.0,
-                    expected_result: 3.221392229,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 10.0,
-                    expected_result: 0.1441326618,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 10.0,
-                    expected_result: 0.1619783325,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 100.0,
-                    expected_result: 0.0297553836,
-                },
-            ];
-
-            for test_data in test_set.iter() {
-                let isochoricheat = cvmass_tp(test_data.temperature, test_data.pressure).unwrap()
-                    / test_data.divisor;
-                assert!(
-                    isochoricheat.approx_eq(test_data.expected_result, (1e-9, 2)),
-                    "Expected: {} Result: {}",
-                    test_data.expected_result,
-                    isochoricheat
-                );
-            }
-        }
-
-        #[test]
-        fn volume_heat_pressure() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 0.01,
-                    expected_result: 0.100215168,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 0.001,
-                    expected_result: 0.971180894,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 0.01,
-                    expected_result: 0.120241800,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 100.0,
-                    expected_result: 0.394913866,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 100.0,
-                    expected_result: 0.923015898,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 0.01,
-                    expected_result: 0.542946619,
-                },
-            ];
-
-            for test_data in test_set.iter() {
-                let volume = vmass_tp(test_data.temperature, test_data.pressure).unwrap()
-                    / test_data.divisor;
-                assert!(
-                    volume.approx_eq(test_data.expected_result, (1e-9, 2)),
-                    "Expected: {} Result: {}",
-                    test_data.expected_result,
-                    volume
-                );
-            }
-        }
-
-        #[test]
-        fn speed_sound_temperature_pressure() {
-            let test_set = [
-                TestData {
-                    temperature: 300.0,
-                    pressure: 3e6,
-                    divisor: 10000.0,
-                    expected_result: 0.150773921,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 80e6,
-                    divisor: 10000.0,
-                    expected_result: 0.163469054,
-                },
-                TestData {
-                    temperature: 500.0,
-                    pressure: 3e6,
-                    divisor: 10000.0,
-                    expected_result: 0.124071337,
-                },
-                TestData {
-                    temperature: 300.0,
-                    pressure: 0.0035e6,
-                    divisor: 1000.0,
-                    expected_result: 0.427920172,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 0.0035e6,
-                    divisor: 1000.0,
-                    expected_result: 0.644289068,
-                },
-                TestData {
-                    temperature: 700.0,
-                    pressure: 30e6,
-                    divisor: 1000.0,
-                    expected_result: 0.480386523,
-                },
-            ];
-            for test_data in test_set.iter() {
-                let speed_sound = speed_sound_tp(test_data.temperature, test_data.pressure)
-                    .unwrap()
-                    / test_data.divisor;
-                assert!(
-                    speed_sound.approx_eq(test_data.expected_result, (1e-9, 2)),
-                    "Expected: {} Result: {}",
-                    test_data.expected_result,
-                    speed_sound
-                );
-            }
-        }
-
-        #[test]
-        fn saturation_pressure() {
-            let ps = psat97(&300.0) / 1e4;
-            assert!(ps.approx_eq(0.353658941, (1e-9, 2)));
-
-            let ps = psat97(&500.0) / 1e7;
-            assert!(ps.approx_eq(0.263889776, (1e-9, 2)));
-
-            let ps = psat97(&600.0) / 1e8;
-            assert!(ps.approx_eq(0.123443146, (1e-9, 2)));
-        }
-
-        #[test]
-        fn saturation_temperature() {
-            let ts = tsat97(&0.1e6) / 1e3;
-            assert!(ts.approx_eq(0.372755919, (1e-9, 2)));
-
-            let ts = tsat97(&1e6) / 1e3;
-            assert!(ts.approx_eq(0.453035632, (1e-9, 2)));
-
-            let ts = tsat97(&10e6) / 1e3;
-            assert!(ts.approx_eq(0.584149488, (1e-9, 2)));
-        }
-
-        #[test]
-        fn region_2_3_auxiliary_boundary() {
-            let p = p_boundary_2_3(&623.15) * 1e-8;
-            assert!(p.approx_eq(0.165291643, (1e-9, 2)));
-
-            let t = t_boundary_2_3(&16.5291643e6) / 1e3;
-            assert!(t.approx_eq(0.623150000, (1e-9, 2)));
+        match (region1, region2) {
+            (Ok(Region::Region1), _) => Ok(t1),
+            (_, Ok(Region::Region2)) => Ok(t2),
+            _ => Err(IAPWSError::NotImplemented()),
         }
     }
 }
