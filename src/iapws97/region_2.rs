@@ -470,6 +470,9 @@ fn t_ps_2c(pi: f64, s: f64) -> f64 {
         .sum()
 }
 
+/// Returns the region-1 backward correlation for T(p,s)
+/// Entropy is assumed to be in kJ/kg.K
+/// Pressure is assumed to be in Pa
 #[allow(dead_code)]
 pub fn t_ps_2(p: f64, s: f64) -> f64 {
     let pi = p / 1e6;
@@ -635,6 +638,9 @@ fn t_ph_2c(pi: f64, eta: f64) -> f64 {
         .sum()
 }
 
+/// Returns the region-2 back calculated T(p,h)
+/// Pressure is assumed to be in Pa
+/// Enthalpy is assumed to be in kJ/kg
 #[allow(dead_code)]
 pub fn t_ph_2(p: f64, h: f64) -> f64 {
     let pi = p / 1e6;
@@ -646,165 +652,5 @@ pub fn t_ph_2(p: f64, h: f64) -> f64 {
         pres if (0.0..=4.0e6).contains(&pres) => t_ph_2a(pi, eta),
         pres if (4.0e6..=100.0e6).contains(&pres) && pres < p_2b2c => t_ph_2b(pi, eta),
         _ => t_ph_2c(pi, eta),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    extern crate float_cmp;
-    use float_cmp::ApproxEq;
-
-    #[test]
-    fn specific_volume() {
-        let v = v_tp_2(300.0, 0.0035e6) / 1e2;
-        assert!(v.approx_eq(0.394913866, (1e-9, 2)));
-
-        let v = v_tp_2(700.0, 0.0035e6) / 1e2;
-        assert!(v.approx_eq(0.923015898, (1e-9, 2)));
-
-        let v = v_tp_2(700.0, 30e6) / 1e-2;
-        assert!(v.approx_eq(0.542946619, (1e-9, 2)));
-    }
-
-    #[test]
-    fn enthalpy() {
-        let h = h_tp_2(300.0, 0.0035e6) / 1e4;
-        assert!(h.approx_eq(0.254991145, (1e-9, 2)));
-
-        let h = h_tp_2(700.0, 0.0035e6) / 1e4;
-        assert!(h.approx_eq(0.333568375, (1e-9, 2)));
-
-        let h = h_tp_2(700.0, 30e6) / 1e4;
-        assert!(h.approx_eq(0.263149474, (1e-9, 2)));
-    }
-
-    #[test]
-    fn internal_energy() {
-        let u = u_tp_2(300.0, 0.0035e6) / 1e4;
-        assert!(u.approx_eq(0.241169160, (1e-9, 2)));
-
-        let u = u_tp_2(700.0, 0.0035e6) / 1e4;
-        assert!(u.approx_eq(0.301262819, (1e-9, 2)));
-
-        let u = u_tp_2(700.0, 30e6) / 1e4;
-        assert!(u.approx_eq(0.246861076, (1e-9, 2)));
-    }
-
-    #[test]
-    fn entropy() {
-        let s = s_tp_2(300.0, 0.0035e6) / 1e1;
-        assert!(s.approx_eq(0.852238967, (1e-9, 2)));
-
-        let s = s_tp_2(700.0, 0.0035e6) / 1e2;
-        assert!(s.approx_eq(0.101749996, (1e-9, 2)));
-
-        let s = s_tp_2(700.0, 30e6) / 1e1;
-        assert!(s.approx_eq(0.517540298, (1e-9, 2)));
-    }
-
-    #[test]
-    fn cp() {
-        let cp = cp_tp_2(300.0, 0.0035e6) / 1e1;
-        assert!(cp.approx_eq(0.191300162, (1e-9, 2)));
-
-        let cp = cp_tp_2(700.0, 0.0035e6) / 1e1;
-        assert!(cp.approx_eq(0.208141274, (1e-9, 2)));
-
-        let cp = cp_tp_2(700.0, 30e6) / 1e2;
-        assert!(cp.approx_eq(0.103505092, (1e-9, 2)));
-    }
-
-    #[test]
-    fn sound_velocity() {
-        let w = w_tp_2(300.0, 0.0035e6) / 1e3;
-        assert!(w.approx_eq(0.427920172, (1e-9, 2)));
-
-        let w = w_tp_2(700.0, 0.0035e6) / 1e3;
-        assert!(w.approx_eq(0.644289068, (1e-9, 2)));
-
-        let w = w_tp_2(700.0, 30e6) / 1e3;
-        assert!(w.approx_eq(0.480386523, (1e-9, 2)));
-    }
-
-    // Extra test based on calculations from IAPWS Online Calculator
-    #[test]
-    fn cv() {
-        let cv = cv_tp_2(300.0, 0.0035e6) / 1e1;
-        assert!(cv.approx_eq(0.1441326618, (1e-9, 2)));
-
-        let cv = cv_tp_2(700.0, 0.0035e6) / 1e1;
-        assert!(cv.approx_eq(0.1619783325, (1e-9, 2)));
-
-        let cv = cv_tp_2(700.0, 30e6) / 1e2;
-        assert!(cv.approx_eq(0.0297553836, (1e-9, 2)));
-    }
-
-    #[test]
-    fn backwards_t_ph() {
-        // Equation 22 tests
-        let t = t_ph_2(0.001e6, 3000.0) / 1e3;
-        assert!(t.approx_eq(0.534433241, (1e-9, 2)));
-
-        let t = t_ph_2(3e6, 3000.0) / 1e3;
-        assert!(t.approx_eq(0.575373370, (1e-9, 2)));
-
-        let t = t_ph_2(3e6, 4000.0) / 1e4;
-        println!("{t}");
-        assert!(t.approx_eq(0.101077577, (1e-9, 2)));
-
-        // Equation 23 tests
-        let t = t_ph_2(5e6, 3500.0) / 1e3;
-        assert!(t.approx_eq(0.801299102, (1e-9, 2)));
-
-        let t = t_ph_2(5e6, 4000.0) / 1e4;
-        assert!(t.approx_eq(0.101531583, (1e-9, 2)));
-
-        let t = t_ph_2(25e6, 3500.0) / 1e3;
-        assert!(t.approx_eq(0.875279054, (1e-9, 2)));
-
-        // Equation 24 tests
-        let t = t_ph_2(40e6, 2700.0) / 1e3;
-        assert!(t.approx_eq(0.743056411, (1e-9, 2)));
-
-        let t = t_ph_2(60e6, 2700.0) / 1e3;
-        assert!(t.approx_eq(0.791137067, (1e-9, 2)));
-
-        let t = t_ph_2(60e6, 3200.0) / 1e3;
-        assert!(t.approx_eq(0.882756860, (1e-9, 2)));
-    }
-
-    #[test]
-    fn backwards_t_ps() {
-        // Equation 25 tests
-        let t = t_ps_2(0.1e6, 7.5) / 1e3;
-        assert!(t.approx_eq(0.399517097, (1e-9, 2)));
-
-        let t = t_ps_2(0.1e6, 8.0) / 1e3;
-        assert!(t.approx_eq(0.514127081, (1e-9, 2)));
-
-        let t = t_ps_2(2.5e6, 8.0) / 1e4;
-        println!("{t}");
-        assert!(t.approx_eq(0.103984917, (1e-9, 2)));
-
-        // Equation 26 tests
-        let t = t_ps_2(8e6, 6.0) / 1e3;
-        assert!(t.approx_eq(0.600484040, (1e-9, 2)));
-
-        let t = t_ps_2(8e6, 7.5) / 1e4;
-        assert!(t.approx_eq(0.106495556, (1e-9, 2)));
-
-        let t = t_ps_2(90e6, 6.0) / 1e4;
-        assert!(t.approx_eq(0.103801126, (1e-9, 2)));
-
-        // Equation 27 tests
-        let t = t_ps_2(20e6, 5.75) / 1e3;
-        assert!(t.approx_eq(0.697992849, (1e-9, 2)));
-
-        let t = t_ps_2(80e6, 5.25) / 1e3;
-        assert!(t.approx_eq(0.854011484, (1e-9, 2)));
-
-        let t = t_ps_2(80e6, 5.75) / 1e3;
-        assert!(t.approx_eq(0.949017998, (1e-9, 2)));
     }
 }

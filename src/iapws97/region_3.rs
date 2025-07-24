@@ -1812,12 +1812,14 @@ fn subregion(t: f64, p: f64) -> Region3 {
 
 /// Returns the region-3 delta
 /// Specific mass is assumed to be in kg/m3
+#[inline(always)]
 fn delta_3(rho: f64) -> f64 {
     rho / constants::RHO_C
 }
 /// Returns the region-3 tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn tau_3(t: f64) -> f64 {
     constants::T_C / t
 }
@@ -2040,101 +2042,16 @@ pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
 }
 
 #[allow(dead_code)]
-fn w_tp_3(t: f64, p: f64) -> f64 {
+pub fn w_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     w_rho_t_3(rho, t)
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
+mod v_tp_3_tests {
     extern crate float_cmp;
+    use crate::iapws97::v_tp_3;
     use float_cmp::ApproxEq;
-
-    #[test]
-    fn pressure() {
-        let p = p_rho_t_3(500.0, 650.0) / 1e8;
-        assert!(p.approx_eq(0.255837018, (1e-9, 2)));
-
-        let p = p_rho_t_3(200.0, 650.0) / 1e8;
-        assert!(p.approx_eq(0.222930643, (1e-9, 2)));
-
-        let p = p_rho_t_3(500.0, 750.0) / 1e8;
-        assert!(p.approx_eq(0.783095639, (1e-9, 2)));
-    }
-
-    #[test]
-    fn enthalpy() {
-        let h = h_rho_t_3(500.0, 650.0) / 1e4;
-        assert!(h.approx_eq(0.186343019, (1e-9, 2)));
-
-        let h = h_rho_t_3(200.0, 650.0) / 1e4;
-        assert!(h.approx_eq(0.237512401, (1e-9, 2)));
-
-        let h = h_rho_t_3(500.0, 750.0) / 1e4;
-        assert!(h.approx_eq(0.225868845, (1e-9, 2)));
-    }
-
-    #[test]
-    fn internal_energy() {
-        let u = u_rho_t_3(500.0, 650.0) / 1e4;
-        assert!(u.approx_eq(0.181226279, (1e-9, 2)));
-
-        let u = u_rho_t_3(200.0, 650.0) / 1e4;
-        assert!(u.approx_eq(0.226365868, (1e-9, 2)));
-
-        let u = u_rho_t_3(500.0, 750.0) / 1e4;
-        assert!(u.approx_eq(0.210206932, (1e-9, 2)));
-    }
-
-    #[test]
-    fn entropy() {
-        let s = s_rho_t_3(500.0, 650.0) / 1e1;
-        assert!(s.approx_eq(0.405427273, (1e-9, 2)));
-
-        let s = s_rho_t_3(200.0, 650.0) / 1e1;
-        assert!(s.approx_eq(0.485438792, (1e-9, 2)));
-        //
-        let s = s_rho_t_3(500.0, 750.0) / 1e1;
-        assert!(s.approx_eq(0.446971906, (1e-9, 2)));
-    }
-
-    #[test]
-    fn cp() {
-        let cp = cp_rho_t_3(500.0, 650.0) / 1e2;
-        assert!(cp.approx_eq(0.138935717, (1e-9, 2)));
-
-        let cp = cp_rho_t_3(200.0, 650.0) / 1e2;
-        assert!(cp.approx_eq(0.446579342, (1e-9, 2)));
-
-        let cp = cp_rho_t_3(500.0, 750.0) / 1e1;
-        assert!(cp.approx_eq(0.6341653594791, (1e-9, 2)));
-    }
-
-    #[test]
-    fn speed_sound() {
-        let w = w_rho_t_3(500.0, 650.0) / 1e3;
-        assert!(w.approx_eq(0.502005554, (1e-9, 2)));
-
-        let w = w_rho_t_3(200.0, 650.0) / 1e3;
-        assert!(w.approx_eq(0.383444594, (1e-9, 2)));
-
-        let w = w_rho_t_3(500.0, 750.0) / 1e3;
-        assert!(w.approx_eq(0.760696040, (1e-9, 2)));
-    }
-
-    // Extra test based on calculations from IAPWS Online Calculator
-    #[test]
-    fn cv() {
-        let cv = cv_rho_t_3(500.0, 650.0);
-        assert!(cv.approx_eq(3.191317871889, (1e-9, 2)));
-
-        let cv = cv_rho_t_3(200.0, 650.0);
-        assert!(cv.approx_eq(4.04118075955, (1e-9, 2)));
-
-        let cv = cv_rho_t_3(500.0, 750.0);
-        assert!(cv.approx_eq(2.71701677121, (1e-9, 2)));
-    }
 
     #[test]
     fn backwards_v_tp() {

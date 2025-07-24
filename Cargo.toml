@@ -6,9 +6,42 @@ description = "A Rust implementation of the IAPWS-IF97 steam tables"
 repository = "https://github.com/marciorvneto/rusteam"
 license = "MIT"
 
-[dependencies]
-float-cmp = "0.9.0"
+[dev-dependencies]
+float-cmp = "0.10.0"
+criterion = { version = "3.0.4", package = "codspeed-criterion-compat" }
 
 [lib]
 name = "rust_steam"
 path = "src/iapws97.rs"
+
+[profile.bench]
+codegen-units = 1
+lto = true
+opt-level = 3
+strip = "debuginfo"
+
+[[bench]]
+name = "region1"
+path = "benches/region1.rs"
+harness = false
+
+[[bench]]
+name = "region2"
+path = "benches/region2.rs"
+harness = false
+
+[[bench]]
+name = "region3"
+path = "benches/region3.rs"
+harness = false
+
+[[bench]]
+name = "region4"
+path = "benches/region4.rs"
+harness = false
+
+
+[[bench]]
+name = "region5"
+path = "benches/region5.rs"
+harness = false
