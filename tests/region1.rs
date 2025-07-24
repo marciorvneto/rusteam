@@ -9,12 +9,19 @@ mod region1_tests {
     extern crate float_cmp;
     use float_cmp::ApproxEq;
     use rust_steam::iapws97::{
-        cpmass_tp, cvmass_tp, hmass_tp, smass_tp, speed_sound_tp, umass_tp, vmass_tp,
+        cpmass_tp, cvmass_tp, hmass_tp, smass_tp, speed_sound_tp, temperature_ph, temperature_ps,
+        umass_tp, vmass_tp,
     };
 
     struct TestData {
         temperature: f64,
         pressure: f64,
+        divisor: f64,
+        expected_result: f64,
+    }
+    struct BackTestData {
+        pressure: f64,
+        value: f64,
         divisor: f64,
         expected_result: f64,
     }
@@ -251,27 +258,73 @@ mod region1_tests {
         }
     }
 
-    // #[test]
-    // fn backwards_t_ph() {
-    //     let t = t_ph_1(3e6, 500.0) / 1e3;
-    //     assert!(t.approx_eq(0.391798509, (1e-9, 2)));
+    #[test]
+    fn backwards_t_ph() {
+        let test_set = [
+            BackTestData {
+                pressure: 3e6,
+                value: 500.0,
+                divisor: 1e3,
+                expected_result: 0.391798509,
+            },
+            BackTestData {
+                pressure: 80e6,
+                value: 500.0,
+                divisor: 1e3,
+                expected_result: 0.378108626,
+            },
+            BackTestData {
+                pressure: 80e6,
+                value: 1500.0,
+                divisor: 1e3,
+                expected_result: 0.611041229,
+            },
+        ];
 
-    //     let t = t_ph_1(80e6, 500.0) / 1e3;
-    //     assert!(t.approx_eq(0.378108626, (1e-9, 2)));
+        for test_data in test_set.iter() {
+            let temperature =
+                temperature_ph(test_data.pressure, test_data.value).unwrap() / test_data.divisor;
+            assert!(
+                temperature.approx_eq(test_data.expected_result, (1e-9, 2)),
+                "Expected: {} Result: {}",
+                test_data.expected_result,
+                temperature
+            );
+        }
+    }
 
-    //     let t = t_ph_1(80e6, 1500.0) / 1e3;
-    //     assert!(t.approx_eq(0.611041229, (1e-9, 2)));
-    // }
+    #[test]
+    fn backwards_t_ps() {
+        let test_set = [
+            BackTestData {
+                pressure: 3e6,
+                value: 0.5,
+                divisor: 1e3,
+                expected_result: 0.307842258,
+            },
+            BackTestData {
+                pressure: 80e6,
+                value: 0.5,
+                divisor: 1e3,
+                expected_result: 0.309979785,
+            },
+            BackTestData {
+                pressure: 80e6,
+                value: 3.0,
+                divisor: 1e3,
+                expected_result: 0.565899909,
+            },
+        ];
 
-    // #[test]
-    // fn backwards_t_ps() {
-    //     let t = t_ps_1(3e6, 0.5) / 1e3;
-    //     assert!(t.approx_eq(0.307842258, (1e-9, 2)));
-
-    //     let t = t_ps_1(80e6, 0.5) / 1e3;
-    //     assert!(t.approx_eq(0.309979785, (1e-9, 2)));
-
-    //     let t = t_ps_1(80e6, 3.0) / 1e3;
-    //     assert!(t.approx_eq(0.565899909, (1e-9, 2)));
-    // }
+        for test_data in test_set.iter() {
+            let temperature =
+                temperature_ps(test_data.pressure, test_data.value).unwrap() / test_data.divisor;
+            assert!(
+                temperature.approx_eq(test_data.expected_result, (1e-9, 2)),
+                "Expected: {} Result: {}",
+                test_data.expected_result,
+                temperature
+            );
+        }
+    }
 }
