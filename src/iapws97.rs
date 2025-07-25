@@ -1,5 +1,7 @@
+#![no_std]
+#![allow(unused_imports)]
+use intrinsics;
 pub mod iapws97 {
-
     mod constants;
     mod region_1;
     mod region_2;
