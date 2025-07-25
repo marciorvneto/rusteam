@@ -10,6 +10,9 @@ license = "MIT"
 float-cmp = "0.10.0"
 criterion = { version = "3.0.4", package = "codspeed-criterion-compat" }
 
+[dependencies]
+intrinsics = "0.1.0"
+
 [lib]
 name = "rust_steam"
 path = "src/iapws97.rs"

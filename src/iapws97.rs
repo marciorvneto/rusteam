@@ -1,5 +1,9 @@
-pub mod iapws97 {
+#![no_std]
+#[allow(unused_imports)]
+#[allow(clippy::single_component_path_imports)]
+use intrinsics;
 
+pub mod iapws97 {
     mod constants;
     mod region_1;
     mod region_2;
