@@ -1,6 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#[allow(unused_imports)]
-#[allow(clippy::single_component_path_imports)]
 
 pub mod iapws97 {
     #[cfg(not(feature = "std"))]
