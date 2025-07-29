@@ -1924,6 +1924,7 @@ fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
 #[allow(dead_code)]
+#[inline]
 fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
@@ -1931,6 +1932,7 @@ fn p_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the internal energy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn u_rho_t_3(rho: f64, t: f64) -> f64 {
     tau_3(t) * phi_tau_3(rho, t) * constants::_R * t
 }
@@ -1938,6 +1940,7 @@ fn u_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the entropy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn s_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t)) * constants::_R
 }
@@ -1945,6 +1948,7 @@ fn s_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the enthalpy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn h_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t)) * constants::_R * t
 }
@@ -1952,6 +1956,7 @@ fn h_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the isochoric specific heat given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
     -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * constants::_R
 }
@@ -1959,6 +1964,7 @@ fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the isobaric specific heat given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
     (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
         + ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1969,7 +1975,7 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
         * constants::_R
 }
 
-#[allow(dead_code)]
+#[inline]
 fn w_rho_t_3(rho: f64, t: f64) -> f64 {
     ((2.0 * delta_3(rho) * phi_delta_3(rho, t) + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
         - ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1985,6 +1991,7 @@ fn w_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the specific volume given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
     match subregion(t, p) {
         Region3::SubregionA => subregion_a(t, p),
@@ -2016,32 +2023,37 @@ pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
     }
 }
 
+#[inline]
 pub(crate) fn cv_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cv_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn cp_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cp_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn s_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     s_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn u_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     u_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     h_rho_t_3(rho, t)
 }
 
-#[allow(dead_code)]
+#[inline]
 pub fn w_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     w_rho_t_3(rho, t)

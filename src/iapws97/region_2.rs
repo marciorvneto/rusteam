@@ -227,6 +227,7 @@ fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
 /// Returns the region-2 specific volume
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn v_tp_2(t: f64, p: f64) -> f64 {
     ((constants::_R * 1000.0) * t / p) * pi_2(p) * (gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p))
 }
@@ -234,6 +235,7 @@ pub(crate) fn v_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 enthalpy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn h_tp_2(t: f64, p: f64) -> f64 {
     constants::_R * t * tau_2(t) * (gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p))
 }
@@ -241,6 +243,7 @@ pub(crate) fn h_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn u_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
@@ -252,6 +255,7 @@ pub(crate) fn u_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 entropy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn s_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let tau_term = gamma_tau_2_ideal(t, p) + gamma_tau_2_res(t, p);
@@ -262,6 +266,7 @@ pub(crate) fn s_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 isobaric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn cp_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     -constants::_R * tau.powi(2) * (gamma_tau_tau_2_ideal(t, p) + gamma_tau_tau_2_res(t, p))
@@ -270,6 +275,7 @@ pub(crate) fn cp_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 isochoric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn cv_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
@@ -281,6 +287,7 @@ pub(crate) fn cv_tp_2(t: f64, p: f64) -> f64 {
 /// Returns the region-2 sound velocity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn w_tp_2(t: f64, p: f64) -> f64 {
     let tau = tau_2(t);
     let pi = pi_2(p);
@@ -291,7 +298,6 @@ pub(crate) fn w_tp_2(t: f64, p: f64) -> f64 {
     ((constants::_R * 1000.0 * t) * num / den).sqrt()
 }
 
-#[allow(dead_code)]
 fn t_ps_2a(pi: f64, s: f64) -> f64 {
     let i: [f64; 46] = [
         -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.25, -1.25, -1.25, -1.0, -1.0, -1.0, -1.0, -1.0,
@@ -360,7 +366,6 @@ fn t_ps_2a(pi: f64, s: f64) -> f64 {
         .sum()
 }
 
-#[allow(dead_code)]
 fn t_ps_2b(pi: f64, s: f64) -> f64 {
     let i: [i32; 44] = [
         -6, -6, -5, -5, -4, -4, -4, -3, -3, -3, -3, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0,
@@ -425,7 +430,6 @@ fn t_ps_2b(pi: f64, s: f64) -> f64 {
         .sum()
 }
 
-#[allow(dead_code)]
 fn t_ps_2c(pi: f64, s: f64) -> f64 {
     let i: [i32; 30] = [
         -2, -2, -1, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 7, 7, 7,
@@ -476,7 +480,7 @@ fn t_ps_2c(pi: f64, s: f64) -> f64 {
 /// Returns the region-1 backward correlation for T(p,s)
 /// Entropy is assumed to be in kJ/kg.K
 /// Pressure is assumed to be in Pa
-#[allow(dead_code)]
+#[inline]
 pub fn t_ps_2(p: f64, s: f64) -> f64 {
     let pi = p / 1e6;
 
@@ -487,7 +491,6 @@ pub fn t_ps_2(p: f64, s: f64) -> f64 {
     }
 }
 
-#[allow(dead_code)]
 fn t_ph_2a(pi: f64, eta: f64) -> f64 {
     let i: [i32; 34] = [
         0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5,
@@ -541,7 +544,6 @@ fn t_ph_2a(pi: f64, eta: f64) -> f64 {
         .sum()
 }
 
-#[allow(dead_code)]
 fn t_ph_2b(pi: f64, eta: f64) -> f64 {
     let i: [i32; 38] = [
         0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4,
@@ -600,7 +602,6 @@ fn t_ph_2b(pi: f64, eta: f64) -> f64 {
         .sum()
 }
 
-#[allow(dead_code)]
 fn t_ph_2c(pi: f64, eta: f64) -> f64 {
     let i: [i32; 23] = [
         -7, -7, -6, -6, -5, -5, -2, -2, -1, -1, 0, 0, 1, 1, 2, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -644,7 +645,7 @@ fn t_ph_2c(pi: f64, eta: f64) -> f64 {
 /// Returns the region-2 back calculated T(p,h)
 /// Pressure is assumed to be in Pa
 /// Enthalpy is assumed to be in kJ/kg
-#[allow(dead_code)]
+#[inline]
 pub fn t_ph_2(p: f64, h: f64) -> f64 {
     let pi = p / 1e6;
     let eta = h / 2.0e3;

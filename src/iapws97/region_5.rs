@@ -186,6 +186,7 @@ fn gamma_pi_tau_5_res(t: f64, p: f64) -> f64 {
 /// Returns the region-5 specific volume
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn v_tp_5(t: f64, p: f64) -> f64 {
     ((constants::_R * 1000.0) * t / p) * pi_5(p) * (gamma_pi_5_ideal(t, p) + gamma_pi_5_res(t, p))
 }
@@ -193,6 +194,7 @@ pub(crate) fn v_tp_5(t: f64, p: f64) -> f64 {
 /// Returns the region-5 enthalpy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn h_tp_5(t: f64, p: f64) -> f64 {
     constants::_R * t * tau_5(t) * (gamma_tau_5_ideal(t, p) + gamma_tau_5_res(t, p))
 }
@@ -200,6 +202,7 @@ pub(crate) fn h_tp_5(t: f64, p: f64) -> f64 {
 /// Returns the region-5 internal energy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn u_tp_5(t: f64, p: f64) -> f64 {
     let tau: f64 = tau_5(t);
     let pi: f64 = pi_5(p);
@@ -212,6 +215,7 @@ pub(crate) fn u_tp_5(t: f64, p: f64) -> f64 {
 /// Returns the region-5 entropy
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn s_tp_5(t: f64, p: f64) -> f64 {
     let tau = tau_5(t);
     constants::_R
@@ -229,6 +233,7 @@ pub(crate) fn cp_tp_5(t: f64, p: f64) -> f64 {
 /// Returns the region-5 isochoric specific heat
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn cv_tp_5(t: f64, p: f64) -> f64 {
     let pi: f64 = pi_5(p);
     cp_tp_5(t, p)
@@ -241,6 +246,7 @@ pub(crate) fn cv_tp_5(t: f64, p: f64) -> f64 {
 /// Returns the region-5 sound velocity
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline]
 pub(crate) fn w_tp_5(t: f64, p: f64) -> f64 {
     let tau: f64 = tau_5(t);
     let pi: f64 = pi_5(p);
