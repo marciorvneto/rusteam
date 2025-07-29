@@ -10,8 +10,14 @@ license = "MIT"
 float-cmp = "0.10.0"
 criterion = { version = "3.0.4", package = "codspeed-criterion-compat" }
 
-[dependencies]
-intrinsics = "0.1.0"
+[features]
+alloc = []
+std = ["intrinsics"]
+default = ["std"]
+
+[dependencies.intrinsics]
+version = "0.1.0"
+optional = true
 
 [lib]
 name = "rust_steam"
