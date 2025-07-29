@@ -183,6 +183,7 @@ fn gamma_pi_tau_1(t: f64, p: f64) -> f64 {
 /// Returns the region-1 tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn tau_1(t: f64) -> f64 {
     1386.0 / t
 }
@@ -190,6 +191,7 @@ fn tau_1(t: f64) -> f64 {
 /// Returns the region-1 pi
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn pi_1(p: f64) -> f64 {
     p / (16.53e6)
 }
@@ -258,18 +260,21 @@ pub(crate) fn w_tp_1(t: f64, p: f64) -> f64 {
 
 /// Returns the region-1 eta for backwards calculations
 /// Enthalpy is assumed to be in kJ/kg
+#[inline(always)]
 fn eta_1_back(h: f64) -> f64 {
     h / 2500.0
 }
 
 /// Returns the region-1 pi for backwards calculations
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn pi_1_back(p: f64) -> f64 {
     p / 1e6
 }
 
 /// Returns the region-1 sigma for backwards calculations
 /// Entropy is assumed to be in kJ/kg.K
+#[inline(always)]
 fn sigma_1_back(s: f64) -> f64 {
     s
 }

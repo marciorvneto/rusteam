@@ -23,6 +23,7 @@ const REGION_5_COEFFS_IDEAL: [[f64; 2]; 6] = [
 /// Returns the region-5 tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn tau_5(t: f64) -> f64 {
     1000.0 / t
 }
@@ -30,6 +31,7 @@ fn tau_5(t: f64) -> f64 {
 /// Returns the region-5 pi
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn pi_5(p: f64) -> f64 {
     p / 1e6
 }
@@ -96,6 +98,7 @@ fn gamma_tau_tau_5_ideal(t: f64, _: f64) -> f64 {
 /// Returns the region-5 ideal gamma_pi
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn gamma_pi_5_ideal(_: f64, p: f64) -> f64 {
     1.0 / pi_5(p)
 }

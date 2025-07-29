@@ -64,6 +64,7 @@ const REGION_2_COEFFS_IDEAL: [[f64; 2]; 9] = [
 /// Returns the region-2 tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn tau_2(t: f64) -> f64 {
     540.0 / t
 }
@@ -71,6 +72,7 @@ fn tau_2(t: f64) -> f64 {
 /// Returns the region-2 pi
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn pi_2(p: f64) -> f64 {
     p / 1e6
 }
@@ -137,6 +139,7 @@ fn gamma_tau_tau_2_ideal(t: f64, _: f64) -> f64 {
 /// Returns the region-2 ideal gamma_pi
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
+#[inline(always)]
 fn gamma_pi_2_ideal(_: f64, p: f64) -> f64 {
     1.0 / pi_2(p)
 }
