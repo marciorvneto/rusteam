@@ -1,5 +1,22 @@
-pub mod iapws97 {
+#![cfg_attr(not(feature = "std"), no_std)]
 
+pub mod iapws97 {
+    #[cfg(not(feature = "std"))]
+    #[allow(unused_imports)]
+    pub mod std {
+        pub use core::*;
+        // Optionally, use intrinsics if needed:
+        #[cfg(feature = "intrinsics")]
+        pub use intrinsics::*;
+    }
+
+    #[cfg(feature = "std")]
+    #[allow(unused_imports)]
+    pub mod std {
+        pub use std::*;
+    }
+
+    //
     mod constants;
     mod region_1;
     mod region_2;

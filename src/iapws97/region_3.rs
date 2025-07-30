@@ -123,12 +123,10 @@ fn subregion_a(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 30] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 30] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p * 1e-8) - 0.085).powi(i[x - 1]) * ((t / 760.0) - 0.817).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 1e-8) - 0.085).powi(i[x]) * ((t / 760.0) - 0.817).powi(j[x])))
         .sum();
     v * 0.0024
 }
@@ -180,12 +178,10 @@ fn subregion_b(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 32] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 32] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p * 1e-8) - 0.280).powi(i[x - 1]) * ((t / 860.0) - 0.779).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 1e-8) - 0.280).powi(i[x]) * ((t / 860.0) - 0.779).powi(j[x])))
         .sum();
     v * 0.0041
 }
@@ -240,13 +236,10 @@ fn subregion_c(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 35] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 35] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 2.5e-8) - 0.259).powi(i[x - 1]) * ((t / 690.0) - 0.903).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 2.5e-8) - 0.259).powi(i[x]) * ((t / 690.0) - 0.903).powi(j[x])))
         .sum();
     v * 0.0022
 }
@@ -304,13 +297,10 @@ fn subregion_d(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 38] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 38] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 2.5e-8) - 0.559).powi(i[x - 1]) * ((t / 690.0) - 0.939).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 2.5e-8) - 0.559).powi(i[x]) * ((t / 690.0) - 0.939).powi(j[x])))
         .sum();
     v.powi(4) * 0.0029
 }
@@ -358,13 +348,10 @@ fn subregion_e(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 29] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 2.5e-8) - 0.587).powi(i[x - 1]) * ((t / 710.0) - 0.918).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 2.5e-8) - 0.587).powi(i[x]) * ((t / 710.0) - 0.918).powi(j[x])))
         .sum();
     v * 0.0032
 }
@@ -426,13 +413,12 @@ fn subregion_f(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 42] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 42] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
         .map(|x| {
-            n[x - 1]
-                * ((((p * 002.5e-8) - 0.587).powf(0.5)).powi(i[x - 1])
-                    * ((t / 730.0) - 0.891).powi(j[x - 1]))
+            n[x] * ((((p * 002.5e-8) - 0.587).powf(0.5)).powi(i[x])
+                * ((t / 730.0) - 0.891).powi(j[x]))
         })
         .sum();
     v.powi(4) * 0.0064
@@ -491,13 +477,10 @@ fn subregion_g(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 38] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 38] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 4.0e-8) - 0.872).powi(i[x - 1]) * ((t / 660.0) - 0.971).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 4.0e-8) - 0.872).powi(i[x]) * ((t / 660.0) - 0.971).powi(j[x])))
         .sum();
     v.powi(4) * 0.0027
 }
@@ -545,13 +528,10 @@ fn subregion_h(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 29] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 4.0e-8) - 0.898).powi(i[x - 1]) * ((t / 660.0) - 0.983).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 4.0e-8) - 0.898).powi(i[x]) * ((t / 660.0) - 0.983).powi(j[x])))
         .sum();
     v.powi(4) * 0.0032
 }
@@ -613,13 +593,12 @@ fn subregion_i(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 42] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 42] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
         .map(|x| {
-            n[x - 1]
-                * ((((p * 4.0e-8) - 0.910).powf(0.5)).powi(i[x - 1])
-                    * ((t / 660.0) - 0.984).powi(j[x - 1]))
+            n[x] * ((((p * 4.0e-8) - 0.910).powf(0.5)).powi(i[x])
+                * ((t / 660.0) - 0.984).powi(j[x]))
         })
         .sum();
     v.powi(4) * 0.0041
@@ -669,13 +648,12 @@ fn subregion_j(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 29] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
         .map(|x| {
-            n[x - 1]
-                * ((((p * 4.0e-8) - 0.875).powf(0.5)).powi(i[x - 1])
-                    * ((t / 670.0) - 0.964).powi(j[x - 1]))
+            n[x] * ((((p * 4.0e-8) - 0.875).powf(0.5)).powi(i[x])
+                * ((t / 670.0) - 0.964).powi(j[x]))
         })
         .sum();
     v.powi(4) * 0.0054
@@ -730,13 +708,10 @@ fn subregion_k(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 34] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 34] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 4.0e-8) - 0.802).powi(i[x - 1]) * ((t / 680.0) - 0.935).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p * 4.0e-8) - 0.802).powi(i[x]) * ((t / 680.0) - 0.935).powi(j[x])))
         .sum();
     v * 0.0077
 }
@@ -799,13 +774,10 @@ fn subregion_l(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 43] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 43] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p / 24.0e6) - 0.908).powi(i[x - 1]) * ((t / 650.0) - 0.989).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 24.0e6) - 0.908).powi(i[x]) * ((t / 650.0) - 0.989).powi(j[x])))
         .sum();
     v.powi(4) * 0.0026
 }
@@ -865,13 +837,11 @@ fn subregion_m(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 40] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 40] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
         .map(|x| {
-            n[x - 1]
-                * (((p / 23.0e6) - 1.0).powi(i[x - 1])
-                    * (((t / 650.0) - 0.997).powf(0.25)).powi(j[x - 1]))
+            n[x] * (((p / 23.0e6) - 1.0).powi(i[x]) * (((t / 650.0) - 0.997).powf(0.25)).powi(j[x]))
         })
         .sum();
     v * 0.0028
@@ -931,13 +901,10 @@ fn subregion_n(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 39] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 39] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p / 23.0e6) - 0.976).powi(i[x - 1]) * ((t / 650.0) - 0.997).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23.0e6) - 0.976).powi(i[x]) * ((t / 650.0) - 0.997).powi(j[x])))
         .sum();
     v.exp() * 0.0031
 }
@@ -980,13 +947,12 @@ fn subregion_o(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 24] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 24] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
         .map(|x| {
-            n[x - 1]
-                * ((((p / 23.0e6) - 0.974).powf(0.5)).powi(i[x - 1])
-                    * ((t / 650.0) - 0.996).powi(j[x - 1]))
+            n[x] * ((((p / 23.0e6) - 0.974).powf(0.5)).powi(i[x])
+                * ((t / 650.0) - 0.996).powi(j[x]))
         })
         .sum();
     v * 0.0034
@@ -1034,13 +1000,12 @@ fn subregion_p(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 27] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 27] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
         .map(|x| {
-            n[x - 1]
-                * ((((p / 23.0e6) - 0.972).powf(0.5)).powi(i[x - 1])
-                    * ((t / 650.0) - 0.997).powi(j[x - 1]))
+            n[x] * ((((p / 23.0e6) - 0.972).powf(0.5)).powi(i[x])
+                * ((t / 650.0) - 0.997).powi(j[x]))
         })
         .sum();
     v * 0.0041
@@ -1084,12 +1049,10 @@ fn subregion_q(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 24] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 24] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.848).powi(i[x - 1]) * ((t / 650.0) - 0.983).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23e6) - 0.848).powi(i[x]) * ((t / 650.0) - 0.983).powi(j[x])))
         .sum();
     v.powi(4) * 0.0022
 }
@@ -1136,12 +1099,10 @@ fn subregion_r(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 27] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 27] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.874).powi(i[x - 1]) * ((t / 650.0) - 0.982).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23e6) - 0.874).powi(i[x]) * ((t / 650.0) - 0.982).powi(j[x])))
         .sum();
     v * 0.0054
 }
@@ -1190,12 +1151,10 @@ fn subregion_s(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 29] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 21e6) - 0.886).powi(i[x - 1]) * ((t / 640.0) - 0.990).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 21e6) - 0.886).powi(i[x]) * ((t / 640.0) - 0.990).powi(j[x])))
         .sum();
     v.powi(4) * 0.0022
 }
@@ -1248,12 +1207,10 @@ fn subregion_t(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 33] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 33] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 20e6) - 0.803).powi(i[x - 1]) * ((t / 650.0) - 1.020).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 20e6) - 0.803).powi(i[x]) * ((t / 650.0) - 1.020).powi(j[x])))
         .sum();
     v * 0.0088
 }
@@ -1311,12 +1268,10 @@ fn subregion_u(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 38] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 38] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.902).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23e6) - 0.902).powi(i[x]) * ((t / 650.0) - 0.988).powi(j[x])))
         .sum();
     v * 0.0026
 }
@@ -1375,12 +1330,10 @@ fn subregion_v(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 39] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 39] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.960).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23e6) - 0.960).powi(i[x]) * ((t / 650.0) - 0.995).powi(j[x])))
         .sum();
     v * 0.0031
 }
@@ -1435,12 +1388,10 @@ fn subregion_w(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 35] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 35] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.959).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23e6) - 0.959).powi(i[x]) * ((t / 650.0) - 0.995).powi(j[x])))
         .sum();
     v.powi(4) * 0.0039
 }
@@ -1496,12 +1447,10 @@ fn subregion_x(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 36] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 36] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.910).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 23e6) - 0.910).powi(i[x]) * ((t / 650.0) - 0.988).powi(j[x])))
         .sum();
     v * 0.0049
 }
@@ -1537,12 +1486,10 @@ fn subregion_y(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 20] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 20] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 22e6) - 0.996).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 22e6) - 0.996).powi(i[x]) * ((t / 650.0) - 0.994).powi(j[x])))
         .sum();
     v.powi(4) * 0.0031
 }
@@ -1583,12 +1530,10 @@ fn subregion_z(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 23] = core::array::from_fn(|i| i + 1);
+    let x: [usize; 23] = core::array::from_fn(|i| i);
     let v: f64 = x
         .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 22e6) - 0.993).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
-        })
+        .map(|x| n[x] * (((p / 22e6) - 0.993).powi(i[x]) * ((t / 650.0) - 0.994).powi(j[x])))
         .sum();
     v.powi(4) * 0.0038
 }
@@ -1924,6 +1869,7 @@ fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
 #[allow(dead_code)]
+#[inline]
 fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
@@ -1931,6 +1877,7 @@ fn p_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the internal energy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn u_rho_t_3(rho: f64, t: f64) -> f64 {
     tau_3(t) * phi_tau_3(rho, t) * constants::_R * t
 }
@@ -1938,6 +1885,7 @@ fn u_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the entropy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn s_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t)) * constants::_R
 }
@@ -1945,6 +1893,7 @@ fn s_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the enthalpy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn h_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t)) * constants::_R * t
 }
@@ -1952,6 +1901,7 @@ fn h_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the isochoric specific heat given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
     -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * constants::_R
 }
@@ -1959,6 +1909,7 @@ fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the isobaric specific heat given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
     (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
         + ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1969,7 +1920,7 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
         * constants::_R
 }
 
-#[allow(dead_code)]
+#[inline]
 fn w_rho_t_3(rho: f64, t: f64) -> f64 {
     ((2.0 * delta_3(rho) * phi_delta_3(rho, t) + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
         - ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1985,6 +1936,7 @@ fn w_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the specific volume given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
     match subregion(t, p) {
         Region3::SubregionA => subregion_a(t, p),
@@ -2016,32 +1968,37 @@ pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
     }
 }
 
+#[inline]
 pub(crate) fn cv_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cv_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn cp_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cp_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn s_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     s_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn u_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     u_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     h_rho_t_3(rho, t)
 }
 
-#[allow(dead_code)]
+#[inline]
 pub fn w_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     w_rho_t_3(rho, t)
