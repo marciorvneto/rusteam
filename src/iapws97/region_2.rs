@@ -1,62 +1,74 @@
 // Region 2
 use crate::iapws97::constants;
 
-const REGION_2_COEFFS_RES: [[f64; 3]; 43] = [
-    [1.0, 0.0, -0.0017731742473213],
-    [1.0, 1.0, -0.017834862292358],
-    [1.0, 2.0, -0.045996013696365],
-    [1.0, 3.0, -0.057581259083432],
-    [1.0, 6.0, -0.05032527872793],
-    [2.0, 1.0, -0.000033032641670203],
-    [2.0, 2.0, -0.00018948987516315],
-    [2.0, 4.0, -0.0039392777243355],
-    [2.0, 7.0, -0.043797295650573],
-    [2.0, 36.0, -0.000026674547914087],
-    [3.0, 0.0, 2.0481737692309E-08],
-    [3.0, 1.0, 4.3870667284435E-07],
-    [3.0, 3.0, -0.00003227767723857],
-    [3.0, 6.0, -0.0015033924542148],
-    [3.0, 35.0, -0.040668253562649],
-    [4.0, 1.0, -7.8847309559367E-10],
-    [4.0, 2.0, 1.2790717852285E-08],
-    [4.0, 3.0, 4.8225372718507E-07],
-    [5.0, 7.0, 2.2922076337661E-06],
-    [6.0, 3.0, -1.6714766451061E-11],
-    [6.0, 16.0, -0.0021171472321355],
-    [6.0, 35.0, -23.895741934104],
-    [7.0, 0.0, -5.905956432427E-18],
-    [7.0, 11.0, -1.2621808899101E-06],
-    [7.0, 25.0, -0.038946842435739],
-    [8.0, 8.0, 1.1256211360459E-11],
-    [8.0, 36.0, -8.2311340897998],
-    [9.0, 13.0, 1.9809712802088E-08],
-    [10.0, 4.0, 1.0406965210174E-19],
-    [10.0, 10.0, -1.0234747095929E-13],
-    [10.0, 14.0, -1.0018179379511E-09],
-    [16.0, 29.0, -8.0882908646985E-11],
-    [16.0, 50.0, 0.10693031879409],
-    [18.0, 57.0, -0.33662250574171],
-    [20.0, 20.0, 8.9185845355421E-25],
-    [20.0, 35.0, 3.0629316876232E-13],
-    [20.0, 48.0, -4.2002467698208E-06],
-    [21.0, 21.0, -5.9056029685639E-26],
-    [22.0, 53.0, 3.7826947613457E-06],
-    [23.0, 39.0, -1.2768608934681E-15],
-    [24.0, 26.0, 7.3087610595061E-29],
-    [24.0, 40.0, 5.5414715350778E-17],
-    [24.0, 58.0, -9.436970724121E-07],
+const REGION_2_COEFFS_II_RES: [i32; 43] = [
+    1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 10, 10, 10,
+    16, 16, 18, 20, 20, 20, 21, 22, 23, 24, 24, 24,
 ];
 
-const REGION_2_COEFFS_IDEAL: [[f64; 2]; 9] = [
-    [0.0, -0.96927686500217e1],
-    [1.0, 0.10086655968018e2],
-    [-5.0, -0.56087911283020e-2],
-    [-4.0, 0.71452738081455e-1],
-    [-3.0, -0.40710498223928],
-    [-2.0, 0.14240819171444e1],
-    [-1.0, -0.43839511319450e1],
-    [2.0, -0.28408632460772],
-    [3.0, 0.21268463753307e-1],
+const REGION_2_COEFFS_JI_RES: [i32; 43] = [
+    0, 1, 2, 3, 6, 1, 2, 4, 7, 36, 0, 1, 3, 6, 35, 1, 2, 3, 7, 3, 16, 35, 0, 11, 25, 8, 36, 13, 4,
+    10, 14, 29, 50, 57, 20, 35, 48, 21, 53, 39, 26, 40, 58,
+];
+
+const REGION_2_COEFFS_NI_RES: [f64; 43] = [
+    -0.0017731742473213,
+    -0.017834862292358,
+    -0.045996013696365,
+    -0.057581259083432,
+    -0.05032527872793,
+    -0.000033032641670203,
+    -0.00018948987516315,
+    -0.0039392777243355,
+    -0.043797295650573,
+    -0.000026674547914087,
+    2.0481737692309E-08,
+    4.3870667284435E-07,
+    -0.00003227767723857,
+    -0.0015033924542148,
+    -0.040668253562649,
+    -7.8847309559367E-10,
+    1.2790717852285E-08,
+    4.8225372718507E-07,
+    2.2922076337661E-06,
+    -1.6714766451061E-11,
+    -0.0021171472321355,
+    -23.895741934104,
+    -5.905956432427E-18,
+    -1.2621808899101E-06,
+    -0.038946842435739,
+    1.1256211360459E-11,
+    -8.2311340897998,
+    1.9809712802088E-08,
+    1.0406965210174E-19,
+    -1.0234747095929E-13,
+    -1.0018179379511E-09,
+    -8.0882908646985E-11,
+    0.10693031879409,
+    -0.33662250574171,
+    8.9185845355421E-25,
+    3.0629316876232E-13,
+    -4.2002467698208E-06,
+    -5.9056029685639E-26,
+    3.7826947613457E-06,
+    -1.2768608934681E-15,
+    7.3087610595061E-29,
+    5.5414715350778E-17,
+    -9.436970724121E-07,
+];
+
+const REGION_2_COEFFS_JI_IDEAL: [i32; 9] = [0, 1, -5, -4, -3, -2, -1, 2, 3];
+
+const REGION_2_COEFFS_NI_IDEAL: [f64; 9] = [
+    -0.96927686500217e1,
+    0.10086655968018e2,
+    -0.56087911283020e-2,
+    0.71452738081455e-1,
+    -0.40710498223928,
+    0.14240819171444e1,
+    -0.43839511319450e1,
+    -0.28408632460772,
+    0.21268463753307e-1,
 ];
 
 // ================    Region 2 ===================
@@ -66,7 +78,7 @@ const REGION_2_COEFFS_IDEAL: [[f64; 2]; 9] = [
 /// Pressure is assumed to be in Pa
 #[inline(always)]
 fn tau_2(t: f64) -> f64 {
-    540.0 / t
+    540.0_f64 / t
 }
 
 /// Returns the region-2 pi
@@ -81,13 +93,13 @@ fn pi_2(p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_2_ideal(t: f64, p: f64) -> f64 {
-    let pi = pi_2(p);
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for coefficient in REGION_2_COEFFS_IDEAL {
-        let ji = coefficient[0];
-        let ni = coefficient[1];
-        sum += ni * tau.powf(ji);
+    let pi = pi_2(p);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_JI_IDEAL.len() {
+        let ji = REGION_2_COEFFS_JI_IDEAL[x];
+        let ni = REGION_2_COEFFS_NI_IDEAL[x];
+        sum += ni * tau.powi(ji);
     }
     pi.ln() + sum
 }
@@ -96,13 +108,13 @@ fn gamma_2_ideal(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_2_res(t: f64, p: f64) -> f64 {
-    let pi = pi_2(p);
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for coefficient in REGION_2_COEFFS_RES {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
+    let pi = pi_2(p);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_II_RES.len() {
+        let ii = REGION_2_COEFFS_II_RES[x];
+        let ji = REGION_2_COEFFS_JI_RES[x];
+        let ni = REGION_2_COEFFS_NI_RES[x];
         sum += ni * pi.powi(ii) * (tau - 0.5).powi(ji);
     }
     sum
@@ -112,12 +124,12 @@ fn gamma_2_res(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_tau_2_ideal(t: f64, _: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for coefficient in REGION_2_COEFFS_IDEAL {
-        let ji = coefficient[0];
-        let ni = coefficient[1];
-        sum += ni * ji * tau.powf(ji - 1.0);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_JI_IDEAL.len() {
+        let ji = REGION_2_COEFFS_JI_IDEAL[x];
+        let ni = REGION_2_COEFFS_NI_IDEAL[x];
+        sum += ni * ji as f64 * tau.powi(ji - 1);
     }
     sum
 }
@@ -126,12 +138,12 @@ fn gamma_tau_2_ideal(t: f64, _: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_tau_tau_2_ideal(t: f64, _: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
-    for coefficient in REGION_2_COEFFS_IDEAL {
-        let ji = coefficient[0];
-        let ni = coefficient[1];
-        sum += ni * ji * (ji - 1.0) * tau.powf(ji - 2.0);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_JI_IDEAL.len() {
+        let ji = REGION_2_COEFFS_JI_IDEAL[x];
+        let ni = REGION_2_COEFFS_NI_IDEAL[x];
+        sum += ni * (ji * (ji - 1)) as f64 * tau.powi(ji - 2);
     }
     sum
 }
@@ -141,20 +153,20 @@ fn gamma_tau_tau_2_ideal(t: f64, _: f64) -> f64 {
 /// Pressure is assumed to be in Pa
 #[inline(always)]
 fn gamma_pi_2_ideal(_: f64, p: f64) -> f64 {
-    1.0 / pi_2(p)
+    1.0_f64 / pi_2(p)
 }
 
 /// Returns the region-2 residual gamma_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_tau_2_res(t: f64, p: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for coefficient in REGION_2_COEFFS_RES {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_II_RES.len() {
+        let ii = REGION_2_COEFFS_II_RES[x];
+        let ji = REGION_2_COEFFS_JI_RES[x];
+        let ni = REGION_2_COEFFS_NI_RES[x];
         sum += ni * pi.powi(ii) * f64::from(ji) * (tau - 0.5).powi(ji - 1);
     }
     sum
@@ -164,14 +176,14 @@ fn gamma_tau_2_res(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_tau_tau_2_res(t: f64, p: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for coefficient in REGION_2_COEFFS_RES {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
-        sum += ni * pi.powi(ii) * f64::from(ji * (ji - 1)) * (tau - 0.5).powi(ji - 2);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_II_RES.len() {
+        let ii = REGION_2_COEFFS_II_RES[x];
+        let ji = REGION_2_COEFFS_JI_RES[x];
+        let ni = REGION_2_COEFFS_NI_RES[x];
+        sum += ni * pi.powi(ii) * (ji * (ji - 1)) as f64 * (tau - 0.5).powi(ji - 2);
     }
     sum
 }
@@ -180,14 +192,14 @@ fn gamma_tau_tau_2_res(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_pi_2_res(t: f64, p: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for coefficient in REGION_2_COEFFS_RES {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
-        sum += ni * pi.powi(ii - 1) * f64::from(ii) * (tau - 0.5).powi(ji);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_II_RES.len() {
+        let ii = REGION_2_COEFFS_II_RES[x];
+        let ji = REGION_2_COEFFS_JI_RES[x];
+        let ni = REGION_2_COEFFS_NI_RES[x];
+        sum += ni * pi.powi(ii - 1) * ii as f64 * (tau - 0.5).powi(ji);
     }
     sum
 }
@@ -196,14 +208,14 @@ fn gamma_pi_2_res(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_pi_pi_2_res(t: f64, p: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for coefficient in REGION_2_COEFFS_RES {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
-        sum += ni * pi.powi(ii - 2) * f64::from(ii * (ii - 1)) * (tau - 0.5).powi(ji);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_II_RES.len() {
+        let ii = REGION_2_COEFFS_II_RES[x];
+        let ji = REGION_2_COEFFS_JI_RES[x];
+        let ni = REGION_2_COEFFS_NI_RES[x];
+        sum += ni * pi.powi(ii - 2) * (ii * (ii - 1)) as f64 * (tau - 0.5).powi(ji);
     }
     sum
 }
@@ -212,14 +224,14 @@ fn gamma_pi_pi_2_res(t: f64, p: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau = tau_2(t);
     let pi = pi_2(p);
-    for coefficient in REGION_2_COEFFS_RES {
-        let ii = coefficient[0] as i32;
-        let ji = coefficient[1] as i32;
-        let ni = coefficient[2];
-        sum += ni * pi.powi(ii - 1) * f64::from(ii * ji) * (tau - 0.5).powi(ji - 1);
+    let mut sum = 0.0_f64;
+    for x in 0..REGION_2_COEFFS_II_RES.len() {
+        let ii = REGION_2_COEFFS_II_RES[x];
+        let ji = REGION_2_COEFFS_JI_RES[x];
+        let ni = REGION_2_COEFFS_NI_RES[x];
+        sum += ni * pi.powi(ii - 1) * (ii * ji) as f64 * (tau - 0.5).powi(ji - 1);
     }
     sum
 }
@@ -229,7 +241,9 @@ fn gamma_pi_tau_2_res(t: f64, p: f64) -> f64 {
 /// Pressure is assumed to be in Pa
 #[inline]
 pub(crate) fn v_tp_2(t: f64, p: f64) -> f64 {
-    ((constants::_R * 1000.0) * t / p) * pi_2(p) * (gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p))
+    ((constants::_R * 1000.0_f64) * t / p)
+        * pi_2(p)
+        * (gamma_pi_2_ideal(t, p) + gamma_pi_2_res(t, p))
 }
 
 /// Returns the region-2 enthalpy

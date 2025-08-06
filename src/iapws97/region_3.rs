@@ -33,47 +33,57 @@ enum Region3 {
 
 // Region 3
 
-const REGION_3_COEFFS: [[f64; 3]; 40] = [
-    [0.0, 0.0, 0.10658070028513e1],
-    [0.0, 0.0, -0.15732845290239e2],
-    [0.0, 1.0, 0.20944396974307e2],
-    [0.0, 2.0, -0.76867707878716e1],
-    [0.0, 7.0, 0.26185947787954e1],
-    [0.0, 10.0, -0.28080781148620e1],
-    [0.0, 12.0, 0.12053369696517e1],
-    [0.0, 23.0, -0.84566812812502e-2],
-    [1.0, 2.0, -0.12654315477714e1],
-    [1.0, 6.0, -0.11524407806681e1],
-    [1.0, 15.0, 0.88521043984318],
-    [1.0, 17.0, -0.64207765181607],
-    [2.0, 0.0, 0.38493460186671],
-    [2.0, 2.0, -0.85214708824206],
-    [2.0, 6.0, 0.48972281541877e1],
-    [2.0, 7.0, -0.30502617256965e1],
-    [2.0, 22.0, 0.39420536879154e-1],
-    [2.0, 26.0, 0.12558408424308],
-    [3.0, 0.0, -0.27999329698710],
-    [3.0, 2.0, 0.13899799569460e1],
-    [3.0, 4.0, -0.20189915023570e1],
-    [3.0, 16.0, -0.82147637173963e-2],
-    [3.0, 26.0, -0.47596035734923],
-    [4.0, 0.0, 0.43984074473500e-1],
-    [4.0, 2.0, -0.44476435428739],
-    [4.0, 4.0, 0.90572070719733],
-    [4.0, 26.0, 0.70522450087967],
-    [5.0, 1.0, 0.10770512626332],
-    [5.0, 3.0, -0.32913623258954],
-    [5.0, 26.0, -0.50871062041158],
-    [6.0, 0.0, -0.22175400873096e-1],
-    [6.0, 2.0, 0.94260751665092e-1],
-    [6.0, 26.0, 0.16436278447961],
-    [7.0, 2.0, -0.13503372241348e-1],
-    [8.0, 26.0, -0.14834345352472e-1],
-    [9.0, 2.0, 0.57922953628084e-3],
-    [9.0, 26.0, 0.32308904703711e-2],
-    [10.0, 0.0, 0.80964802996215e-4],
-    [10.0, 1.0, -0.16557679795037e-3],
-    [11.0, 26.0, -0.44923899061815e-4],
+const REGION_3_COEFFS_II: [i32; 40] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6,
+    6, 7, 8, 9, 9, 10, 10, 11,
+];
+
+const REGION_3_COEFFS_JI: [i32; 40] = [
+    0, 0, 1, 2, 7, 10, 12, 23, 2, 6, 15, 17, 0, 2, 6, 7, 22, 26, 0, 2, 4, 16, 26, 0, 2, 4, 26, 1,
+    3, 26, 0, 2, 26, 2, 26, 2, 26, 0, 1, 26,
+];
+
+const REGION_3_COEFFS_NI: [f64; 40] = [
+    0.10658070028513e1,
+    -0.15732845290239e2,
+    0.20944396974307e2,
+    -0.76867707878716e1,
+    0.26185947787954e1,
+    -0.28080781148620e1,
+    0.12053369696517e1,
+    -0.84566812812502e-2,
+    -0.12654315477714e1,
+    -0.11524407806681e1,
+    0.88521043984318,
+    -0.64207765181607,
+    0.38493460186671,
+    -0.85214708824206,
+    0.48972281541877e1,
+    -0.30502617256965e1,
+    0.39420536879154e-1,
+    0.12558408424308,
+    -0.27999329698710,
+    0.13899799569460e1,
+    -0.20189915023570e1,
+    -0.82147637173963e-2,
+    -0.47596035734923,
+    0.43984074473500e-1,
+    -0.44476435428739,
+    0.90572070719733,
+    0.70522450087967,
+    0.10770512626332,
+    -0.32913623258954,
+    -0.50871062041158,
+    -0.22175400873096e-1,
+    0.94260751665092e-1,
+    0.16436278447961,
+    -0.13503372241348e-1,
+    -0.14834345352472e-1,
+    0.57922953628084e-3,
+    0.32308904703711e-2,
+    0.80964802996215e-4,
+    -0.16557679795037e-3,
+    -0.44923899061815e-4,
 ];
 
 // ================    Region 3 ===================
@@ -1773,62 +1783,62 @@ fn tau_3(t: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
+    let mut sum: f64 = 0.0_f64;
+    for x in 1..REGION_3_COEFFS_II.len() {
+        let ii = REGION_3_COEFFS_II[x];
+        let ji = REGION_3_COEFFS_JI[x];
+        let ni = REGION_3_COEFFS_NI[x];
         sum += ni * delta.powi(ii) * tau.powi(ji);
     }
-    sum + REGION_3_COEFFS[0][2] * delta_3(rho).ln()
+    sum + REGION_3_COEFFS_NI[0] * delta_3(rho).ln()
 }
 
 /// Returns the region-3 phi_delta
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_delta_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
+    let mut sum: f64 = 0.0_f64;
+    for x in 1..REGION_3_COEFFS_II.len() {
+        let ii = REGION_3_COEFFS_II[x];
+        let ji = REGION_3_COEFFS_JI[x];
+        let ni = REGION_3_COEFFS_NI[x];
+        sum += ni * delta.powi(ii - 1) * ii as f64 * tau.powi(ji);
     }
-    sum + REGION_3_COEFFS[0][2] / delta
+    sum + REGION_3_COEFFS_NI[0] / delta
 }
 
 /// Returns the region-3 phi_delta_delta
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii - 2) * f64::from(ii) * f64::from(ii - 1) * tau.powi(ji);
+    let mut sum: f64 = 0.0_f64;
+    for x in 1..REGION_3_COEFFS_II.len() {
+        let ii = REGION_3_COEFFS_II[x];
+        let ji = REGION_3_COEFFS_JI[x];
+        let ni = REGION_3_COEFFS_NI[x];
+        sum += ni * delta.powi(ii - 2) * (ii * (ii - 1)) as f64 * tau.powi(ji);
     }
-    sum - REGION_3_COEFFS[0][2] / delta.powi(2)
+    sum - REGION_3_COEFFS_NI[0] / delta.powi(2)
 }
 
 /// Returns the region-3 phi_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji - 1);
+    let mut sum: f64 = 0.0_f64;
+    for x in 1..REGION_3_COEFFS_II.len() {
+        let ii = REGION_3_COEFFS_II[x];
+        let ji = REGION_3_COEFFS_JI[x];
+        let ni = REGION_3_COEFFS_NI[x];
+        sum += ni * delta.powi(ii) * ji as f64 * tau.powi(ji - 1);
     }
     sum
 }
@@ -1837,14 +1847,14 @@ fn phi_tau_3(rho: f64, t: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii) * f64::from(ji) * f64::from(ji - 1) * tau.powi(ji - 2);
+    let mut sum: f64 = 0.0_f64;
+    for x in 1..REGION_3_COEFFS_II.len() {
+        let ii = REGION_3_COEFFS_II[x];
+        let ji = REGION_3_COEFFS_JI[x];
+        let ni = REGION_3_COEFFS_NI[x];
+        sum += ni * delta.powi(ii) * (ji * (ji - 1)) as f64 * tau.powi(ji - 2);
     }
     sum
 }
@@ -1853,14 +1863,14 @@ fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii - 1) * f64::from(ii) * f64::from(ji) * tau.powi(ji - 1);
+    let mut sum: f64 = 0.0_f64;
+    for x in 1..REGION_3_COEFFS_II.len() {
+        let ii = REGION_3_COEFFS_II[x];
+        let ji = REGION_3_COEFFS_JI[x];
+        let ni = REGION_3_COEFFS_NI[x];
+        sum += ni * delta.powi(ii - 1) * (ii * ji) as f64 * tau.powi(ji - 1);
     }
     sum
 }
