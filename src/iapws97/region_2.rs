@@ -547,6 +547,7 @@ fn t_ps_2b(pi: f64, s: f64) -> f64 {
     // Calculate T
     if cfg!(feature = "nightly") {
         let (eta, pi): ([f64; 44], [f64; 44]) = (
+            #[allow(clippy::approx_constant)]
             std::array::from_fn(|x| (10.0 - s / 0.7853).powi(j[x])),
             std::array::from_fn(|x| pi.powi(i[x])),
         );
