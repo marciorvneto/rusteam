@@ -1,4 +1,5 @@
 use crate::iapws97::constants;
+use std::simd::prelude::*;
 
 const REGION_1_COEFFS_II: [i32; 34] = [
     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 8, 8, 21, 23, 29,
@@ -115,14 +116,25 @@ const REGION_1_BACK_COEFFS_PS_NI: [f64; 20] = [
 fn gamma_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_COEFFS_II.len() {
-        let ii = REGION_1_COEFFS_II[x];
-        let ji = REGION_1_COEFFS_JI[x];
-        let ni = REGION_1_COEFFS_NI[x];
-        sum += ni * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji);
+    if cfg!(feature = "nightly") {
+        let (tau, pi): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| (tau - 1.222).powi(REGION_1_COEFFS_JI[x])),
+            std::array::from_fn(|x| (7.1 - pi).powi(REGION_1_COEFFS_II[x])),
+        );
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_1_COEFFS_NI);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+        let pi = Simd::<f64, 64>::load_or_default(&pi);
+        (ni * tau * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_COEFFS_II.len() {
+            let ii = REGION_1_COEFFS_II[x];
+            let ji = REGION_1_COEFFS_JI[x];
+            let ni = REGION_1_COEFFS_NI[x];
+            sum += ni * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 gamma_pi
@@ -131,14 +143,26 @@ fn gamma_1(t: f64, p: f64) -> f64 {
 fn gamma_pi_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_COEFFS_II.len() {
-        let ii = REGION_1_COEFFS_II[x];
-        let ji = REGION_1_COEFFS_JI[x];
-        let ni = REGION_1_COEFFS_NI[x];
-        sum += -ni * f64::from(ii) * (7.1 - pi).powi(ii - 1) * (tau - 1.222).powi(ji);
+    if cfg!(feature = "nightly") {
+        let (tau, pi): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| (tau - 1.222).powi(REGION_1_COEFFS_JI[x])),
+            std::array::from_fn(|x| (7.1 - pi).powi(REGION_1_COEFFS_II[x] - 1)),
+        );
+        let ii = Simd::<i32, 64>::load_or_default(&REGION_1_COEFFS_II).cast::<f64>();
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_1_COEFFS_NI);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+        let pi = Simd::<f64, 64>::load_or_default(&pi);
+        (-ni * ii * tau * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_COEFFS_II.len() {
+            let ii = REGION_1_COEFFS_II[x];
+            let ji = REGION_1_COEFFS_JI[x];
+            let ni = REGION_1_COEFFS_NI[x];
+            sum += -ni * f64::from(ii) * (7.1 - pi).powi(ii - 1) * (tau - 1.222).powi(ji);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 gamma_pi_pi
@@ -147,14 +171,28 @@ fn gamma_pi_1(t: f64, p: f64) -> f64 {
 fn gamma_pi_pi_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_COEFFS_II.len() {
-        let ii = REGION_1_COEFFS_II[x];
-        let ji = REGION_1_COEFFS_JI[x];
-        let ni = REGION_1_COEFFS_NI[x];
-        sum += ni * f64::from(ii * (ii - 1)) * (7.1 - pi).powi(ii - 2) * (tau - 1.222).powi(ji);
+    if cfg!(feature = "nightly") {
+        let tau = tau_1(t);
+        let pi = pi_1(p);
+        let (tau, pi): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| (tau - 1.222).powi(REGION_1_COEFFS_JI[x])),
+            std::array::from_fn(|x| (7.1 - pi).powi(REGION_1_COEFFS_II[x] - 2)),
+        );
+        let ii = Simd::<i32, 64>::load_or_default(&REGION_1_COEFFS_II).cast::<f64>();
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_1_COEFFS_NI);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+        let pi = Simd::<f64, 64>::load_or_default(&pi);
+        (ni * ii * (ii - f64x64::splat(1.0)) * tau * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_COEFFS_II.len() {
+            let ii = REGION_1_COEFFS_II[x];
+            let ji = REGION_1_COEFFS_JI[x];
+            let ni = REGION_1_COEFFS_NI[x];
+            sum += ni * f64::from(ii * (ii - 1)) * (7.1 - pi).powi(ii - 2) * (tau - 1.222).powi(ji);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 gamma_tau
@@ -163,14 +201,28 @@ fn gamma_pi_pi_1(t: f64, p: f64) -> f64 {
 fn gamma_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_COEFFS_II.len() {
-        let ii = REGION_1_COEFFS_II[x];
-        let ji = REGION_1_COEFFS_JI[x];
-        let ni = REGION_1_COEFFS_NI[x];
-        sum += ni * f64::from(ji) * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji - 1);
+    if cfg!(feature = "nightly") {
+        let tau = tau_1(t);
+        let pi = pi_1(p);
+        let (tau, pi): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| (tau - 1.222).powi(REGION_1_COEFFS_JI[x] - 1)),
+            std::array::from_fn(|x| (7.1 - pi).powi(REGION_1_COEFFS_II[x])),
+        );
+        let ji = Simd::<i32, 64>::load_or_default(&REGION_1_COEFFS_JI).cast::<f64>();
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_1_COEFFS_NI);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+        let pi = Simd::<f64, 64>::load_or_default(&pi);
+        (ni * ji * tau * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_COEFFS_II.len() {
+            let ii = REGION_1_COEFFS_II[x];
+            let ji = REGION_1_COEFFS_JI[x];
+            let ni = REGION_1_COEFFS_NI[x];
+            sum += ni * f64::from(ji) * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji - 1);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 gamma_tau_tau
@@ -179,14 +231,28 @@ fn gamma_tau_1(t: f64, p: f64) -> f64 {
 fn gamma_tau_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_COEFFS_II.len() {
-        let ii = REGION_1_COEFFS_II[x];
-        let ji = REGION_1_COEFFS_JI[x];
-        let ni = REGION_1_COEFFS_NI[x];
-        sum += ni * f64::from(ji * (ji - 1)) * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji - 2);
+    if cfg!(feature = "nightly") {
+        let tau = tau_1(t);
+        let pi = pi_1(p);
+        let (tau, pi): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| (tau - 1.222).powi(REGION_1_COEFFS_JI[x] - 2)),
+            std::array::from_fn(|x| (7.1 - pi).powi(REGION_1_COEFFS_II[x])),
+        );
+        let ji = Simd::<i32, 64>::load_or_default(&REGION_1_COEFFS_JI).cast::<f64>();
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_1_COEFFS_NI);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+        let pi = Simd::<f64, 64>::load_or_default(&pi);
+        (ni * ji * (ji - f64x64::splat(1.0)) * tau * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_COEFFS_II.len() {
+            let ii = REGION_1_COEFFS_II[x];
+            let ji = REGION_1_COEFFS_JI[x];
+            let ni = REGION_1_COEFFS_NI[x];
+            sum += ni * f64::from(ji * (ji - 1)) * (7.1 - pi).powi(ii) * (tau - 1.222).powi(ji - 2);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 gamma_pi_tau
@@ -195,14 +261,27 @@ fn gamma_tau_tau_1(t: f64, p: f64) -> f64 {
 fn gamma_pi_tau_1(t: f64, p: f64) -> f64 {
     let tau = tau_1(t);
     let pi = pi_1(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_COEFFS_II.len() {
-        let ii = REGION_1_COEFFS_II[x];
-        let ji = REGION_1_COEFFS_JI[x];
-        let ni = REGION_1_COEFFS_NI[x];
-        sum += -ni * f64::from(ii * ji) * (7.1 - pi).powi(ii - 1) * (tau - 1.222).powi(ji - 1);
+    if cfg!(feature = "nightly") {
+        let (tau, pi): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| (tau - 1.222).powi(REGION_1_COEFFS_JI[x] - 1)),
+            std::array::from_fn(|x| (7.1 - pi).powi(REGION_1_COEFFS_II[x] - 1)),
+        );
+        let ii = Simd::<i32, 64>::load_or_default(&REGION_1_COEFFS_II).cast::<f64>();
+        let ji = Simd::<i32, 64>::load_or_default(&REGION_1_COEFFS_JI).cast::<f64>();
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_1_COEFFS_NI);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+        let pi = Simd::<f64, 64>::load_or_default(&pi);
+        (-ni * ii * ji * tau * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_COEFFS_II.len() {
+            let ii = REGION_1_COEFFS_II[x];
+            let ji = REGION_1_COEFFS_JI[x];
+            let ni = REGION_1_COEFFS_NI[x];
+            sum += -ni * f64::from(ii * ji) * (7.1 - pi).powi(ii - 1) * (tau - 1.222).powi(ji - 1);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 tau
@@ -318,14 +397,27 @@ fn sigma_1_back(s: f64) -> f64 {
 pub fn t_ps_1(p: f64, s: f64) -> f64 {
     let sig = sigma_1_back(s);
     let pi = pi_1_back(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_BACK_COEFFS_PS_II.len() {
-        let ii = REGION_1_BACK_COEFFS_PS_II[x];
-        let ji = REGION_1_BACK_COEFFS_PS_JI[x];
-        let ni = REGION_1_BACK_COEFFS_PS_NI[x];
-        sum += ni * pi.powi(ii) * (sig + 2.0).powi(ji);
+    if cfg!(feature = "nightly") {
+        let sig = sigma_1_back(s);
+        let pi = pi_1_back(p);
+        let (sig, pi): ([f64; 20], [f64; 20]) = (
+            std::array::from_fn(|x| (sig + 2.0).powi(REGION_1_BACK_COEFFS_PS_JI[x])),
+            std::array::from_fn(|x| pi.powi(REGION_1_BACK_COEFFS_PS_II[x])),
+        );
+        let ni = Simd::<f64, 32>::load_or_default(&REGION_1_BACK_COEFFS_PS_NI);
+        let sig = Simd::<f64, 32>::load_or_default(&sig);
+        let pi = Simd::<f64, 32>::load_or_default(&pi);
+        (ni * sig * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_BACK_COEFFS_PS_II.len() {
+            let ii = REGION_1_BACK_COEFFS_PS_II[x];
+            let ji = REGION_1_BACK_COEFFS_PS_JI[x];
+            let ni = REGION_1_BACK_COEFFS_PS_NI[x];
+            sum += ni * pi.powi(ii) * (sig + 2.0).powi(ji);
+        }
+        sum
     }
-    sum
 }
 
 /// Returns the region-1 backward correlation for T(p,h)
@@ -335,12 +427,25 @@ pub fn t_ps_1(p: f64, s: f64) -> f64 {
 pub fn t_ph_1(p: f64, h: f64) -> f64 {
     let eta = eta_1_back(h);
     let pi = pi_1_back(p);
-    let mut sum = 0.0;
-    for x in 0..REGION_1_BACK_COEFFS_PH_II.len() {
-        let ii = REGION_1_BACK_COEFFS_PH_II[x];
-        let ji = REGION_1_BACK_COEFFS_PH_JI[x];
-        let ni = REGION_1_BACK_COEFFS_PH_NI[x];
-        sum += ni * pi.powi(ii) * (eta + 1.0).powi(ji);
+    if cfg!(feature = "nightly") {
+        let eta = eta_1_back(h);
+        let pi = pi_1_back(p);
+        let (eta, pi): ([f64; 20], [f64; 20]) = (
+            std::array::from_fn(|x| (eta + 1.0).powi(REGION_1_BACK_COEFFS_PH_JI[x])),
+            std::array::from_fn(|x| pi.powi(REGION_1_BACK_COEFFS_PH_II[x])),
+        );
+        let ni = Simd::<f64, 32>::load_or_default(&REGION_1_BACK_COEFFS_PH_NI);
+        let eta = Simd::<f64, 32>::load_or_default(&eta);
+        let pi = Simd::<f64, 32>::load_or_default(&pi);
+        (ni * eta * pi).reduce_sum()
+    } else {
+        let mut sum = 0.0;
+        for x in 0..REGION_1_BACK_COEFFS_PH_II.len() {
+            let ii = REGION_1_BACK_COEFFS_PH_II[x];
+            let ji = REGION_1_BACK_COEFFS_PH_JI[x];
+            let ni = REGION_1_BACK_COEFFS_PH_NI[x];
+            sum += ni * pi.powi(ii) * (eta + 1.0).powi(ji);
+        }
+        sum
     }
-    sum
 }

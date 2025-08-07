@@ -26,3 +26,12 @@ jobs:
               with:
                   run: cargo codspeed run
                   token: ${{ secrets.CODSPEED }}
+
+            - name: Build the benchmark target(s)
+              run: cargo codspeed build --features nightly
+
+            - name: Run the benchmarks
+              uses: CodSpeedHQ/action@v3
+              with:
+                  run: cargo codspeed run
+                  token: ${{ secrets.CODSPEED }}
