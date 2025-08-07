@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(portable_simd)]
+#![cfg_attr(feature = "nightly", feature(portable_simd))]
 
 pub mod iapws97 {
     #[cfg(not(feature = "std"))]

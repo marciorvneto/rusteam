@@ -28,7 +28,7 @@ jobs:
                   token: ${{ secrets.CODSPEED }}
 
     benchmark-nightly:
-        name: Run benchmarks
+        name: Run Nightly Benchmarks
         runs-on: ubuntu-latest
         env:
             RUSTFLAGS: '-Ctarget-cpu=native'
