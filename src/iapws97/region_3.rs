@@ -1,4 +1,6 @@
 use crate::iapws97::{constants, psat97};
+#[cfg(feature = "nightly")]
+use std::simd::prelude::*;
 
 use super::tsat97;
 
@@ -33,47 +35,57 @@ enum Region3 {
 
 // Region 3
 
-const REGION_3_COEFFS: [[f64; 3]; 40] = [
-    [0.0, 0.0, 0.10658070028513e1],
-    [0.0, 0.0, -0.15732845290239e2],
-    [0.0, 1.0, 0.20944396974307e2],
-    [0.0, 2.0, -0.76867707878716e1],
-    [0.0, 7.0, 0.26185947787954e1],
-    [0.0, 10.0, -0.28080781148620e1],
-    [0.0, 12.0, 0.12053369696517e1],
-    [0.0, 23.0, -0.84566812812502e-2],
-    [1.0, 2.0, -0.12654315477714e1],
-    [1.0, 6.0, -0.11524407806681e1],
-    [1.0, 15.0, 0.88521043984318],
-    [1.0, 17.0, -0.64207765181607],
-    [2.0, 0.0, 0.38493460186671],
-    [2.0, 2.0, -0.85214708824206],
-    [2.0, 6.0, 0.48972281541877e1],
-    [2.0, 7.0, -0.30502617256965e1],
-    [2.0, 22.0, 0.39420536879154e-1],
-    [2.0, 26.0, 0.12558408424308],
-    [3.0, 0.0, -0.27999329698710],
-    [3.0, 2.0, 0.13899799569460e1],
-    [3.0, 4.0, -0.20189915023570e1],
-    [3.0, 16.0, -0.82147637173963e-2],
-    [3.0, 26.0, -0.47596035734923],
-    [4.0, 0.0, 0.43984074473500e-1],
-    [4.0, 2.0, -0.44476435428739],
-    [4.0, 4.0, 0.90572070719733],
-    [4.0, 26.0, 0.70522450087967],
-    [5.0, 1.0, 0.10770512626332],
-    [5.0, 3.0, -0.32913623258954],
-    [5.0, 26.0, -0.50871062041158],
-    [6.0, 0.0, -0.22175400873096e-1],
-    [6.0, 2.0, 0.94260751665092e-1],
-    [6.0, 26.0, 0.16436278447961],
-    [7.0, 2.0, -0.13503372241348e-1],
-    [8.0, 26.0, -0.14834345352472e-1],
-    [9.0, 2.0, 0.57922953628084e-3],
-    [9.0, 26.0, 0.32308904703711e-2],
-    [10.0, 0.0, 0.80964802996215e-4],
-    [10.0, 1.0, -0.16557679795037e-3],
-    [11.0, 26.0, -0.44923899061815e-4],
+const REGION_3_COEFFS_II: [i32; 40] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6,
+    6, 7, 8, 9, 9, 10, 10, 11,
+];
+
+const REGION_3_COEFFS_JI: [i32; 40] = [
+    0, 0, 1, 2, 7, 10, 12, 23, 2, 6, 15, 17, 0, 2, 6, 7, 22, 26, 0, 2, 4, 16, 26, 0, 2, 4, 26, 1,
+    3, 26, 0, 2, 26, 2, 26, 2, 26, 0, 1, 26,
+];
+
+const REGION_3_COEFFS_NI: [f64; 40] = [
+    0.10658070028513e1,
+    -0.15732845290239e2,
+    0.20944396974307e2,
+    -0.76867707878716e1,
+    0.26185947787954e1,
+    -0.28080781148620e1,
+    0.12053369696517e1,
+    -0.84566812812502e-2,
+    -0.12654315477714e1,
+    -0.11524407806681e1,
+    0.88521043984318,
+    -0.64207765181607,
+    0.38493460186671,
+    -0.85214708824206,
+    0.48972281541877e1,
+    -0.30502617256965e1,
+    0.39420536879154e-1,
+    0.12558408424308,
+    -0.27999329698710,
+    0.13899799569460e1,
+    -0.20189915023570e1,
+    -0.82147637173963e-2,
+    -0.47596035734923,
+    0.43984074473500e-1,
+    -0.44476435428739,
+    0.90572070719733,
+    0.70522450087967,
+    0.10770512626332,
+    -0.32913623258954,
+    -0.50871062041158,
+    -0.22175400873096e-1,
+    0.94260751665092e-1,
+    0.16436278447961,
+    -0.13503372241348e-1,
+    -0.14834345352472e-1,
+    0.57922953628084e-3,
+    0.32308904703711e-2,
+    0.80964802996215e-4,
+    -0.16557679795037e-3,
+    -0.44923899061815e-4,
 ];
 
 // ================    Region 3 ===================
@@ -123,14 +135,28 @@ fn subregion_a(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 30] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p * 1e-8) - 0.085).powi(i[x - 1]) * ((t / 760.0) - 0.817).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0024
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 30], [f64; 30]) = (
+            std::array::from_fn(|x| ((p * 1e-8) - 0.085).powi(i[x])),
+            std::array::from_fn(|x| ((t / 760.0) - 0.817).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0024 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 30] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 1e-8) - 0.085).powi(i[x]) * ((t / 760.0) - 0.817).powi(j[x])))
+            .sum();
+        v * 0.0024
+    }
 }
 
 fn subregion_b(t: f64, p: f64) -> f64 {
@@ -180,14 +206,28 @@ fn subregion_b(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 32] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p * 1e-8) - 0.280).powi(i[x - 1]) * ((t / 860.0) - 0.779).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0041
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 32], [f64; 32]) = (
+            std::array::from_fn(|x| ((p * 1e-8) - 0.280).powi(i[x])),
+            std::array::from_fn(|x| ((t / 860.0) - 0.779).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0041 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 32] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 1e-8) - 0.280).powi(i[x]) * ((t / 860.0) - 0.779).powi(j[x])))
+            .sum();
+        v * 0.0041
+    }
 }
 
 fn subregion_c(t: f64, p: f64) -> f64 {
@@ -240,15 +280,28 @@ fn subregion_c(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 35] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 2.5e-8) - 0.259).powi(i[x - 1]) * ((t / 690.0) - 0.903).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0022
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 35], [f64; 35]) = (
+            std::array::from_fn(|x| ((p * 2.5e-8) - 0.259).powi(i[x])),
+            std::array::from_fn(|x| ((t / 690.0) - 0.903).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0022 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 35] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 2.5e-8) - 0.259).powi(i[x]) * ((t / 690.0) - 0.903).powi(j[x])))
+            .sum();
+        v * 0.0022
+    }
 }
 
 fn subregion_d(t: f64, p: f64) -> f64 {
@@ -304,15 +357,28 @@ fn subregion_d(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 38] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 2.5e-8) - 0.559).powi(i[x - 1]) * ((t / 690.0) - 0.939).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0029
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 38], [f64; 38]) = (
+            std::array::from_fn(|x| ((p * 2.5e-8) - 0.559).powi(i[x])),
+            std::array::from_fn(|x| ((t / 690.0) - 0.939).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0029 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 38] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 2.5e-8) - 0.559).powi(i[x]) * ((t / 690.0) - 0.939).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0029
+    }
 }
 
 fn subregion_e(t: f64, p: f64) -> f64 {
@@ -358,15 +424,28 @@ fn subregion_e(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 2.5e-8) - 0.587).powi(i[x - 1]) * ((t / 710.0) - 0.918).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0032
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 29], [f64; 29]) = (
+            std::array::from_fn(|x| ((p * 2.5e-8) - 0.587).powi(i[x])),
+            std::array::from_fn(|x| ((t / 710.0) - 0.918).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0032 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 29] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 2.5e-8) - 0.587).powi(i[x]) * ((t / 710.0) - 0.918).powi(j[x])))
+            .sum();
+        v * 0.0032
+    }
 }
 
 fn subregion_f(t: f64, p: f64) -> f64 {
@@ -426,16 +505,31 @@ fn subregion_f(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 42] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * ((((p * 002.5e-8) - 0.587).powf(0.5)).powi(i[x - 1])
-                    * ((t / 730.0) - 0.891).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0064
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 42], [f64; 42]) = (
+            std::array::from_fn(|x| (((p * 2.5e-8) - 0.587).powf(0.5)).powi(i[x])),
+            std::array::from_fn(|x| ((t / 730.0) - 0.891).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0064 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 42] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| {
+                n[x] * ((((p * 002.5e-8) - 0.587).powf(0.5)).powi(i[x])
+                    * ((t / 730.0) - 0.891).powi(j[x]))
+            })
+            .sum();
+        v.powi(4) * 0.0064
+    }
 }
 
 fn subregion_g(t: f64, p: f64) -> f64 {
@@ -491,15 +585,28 @@ fn subregion_g(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 38] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 4.0e-8) - 0.872).powi(i[x - 1]) * ((t / 660.0) - 0.971).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0027
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 38], [f64; 38]) = (
+            std::array::from_fn(|x| ((p * 4.0e-8) - 0.872).powi(i[x])),
+            std::array::from_fn(|x| ((t / 660.0) - 0.971).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0027 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 38] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 4.0e-8) - 0.872).powi(i[x]) * ((t / 660.0) - 0.971).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0027
+    }
 }
 
 fn subregion_h(t: f64, p: f64) -> f64 {
@@ -545,15 +652,28 @@ fn subregion_h(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 4.0e-8) - 0.898).powi(i[x - 1]) * ((t / 660.0) - 0.983).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0032
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 29], [f64; 29]) = (
+            std::array::from_fn(|x| ((p * 4.0e-8) - 0.898).powi(i[x])),
+            std::array::from_fn(|x| ((t / 660.0) - 0.983).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0032 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 29] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 4.0e-8) - 0.898).powi(i[x]) * ((t / 660.0) - 0.983).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0032
+    }
 }
 
 fn subregion_i(t: f64, p: f64) -> f64 {
@@ -613,16 +733,31 @@ fn subregion_i(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 42] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * ((((p * 4.0e-8) - 0.910).powf(0.5)).powi(i[x - 1])
-                    * ((t / 660.0) - 0.984).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0041
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 42], [f64; 42]) = (
+            std::array::from_fn(|x| (((p * 4.0e-8) - 0.910).powf(0.5)).powi(i[x])),
+            std::array::from_fn(|x| ((t / 660.0) - 0.984).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0041 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 42] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| {
+                n[x] * ((((p * 4.0e-8) - 0.910).powf(0.5)).powi(i[x])
+                    * ((t / 660.0) - 0.984).powi(j[x]))
+            })
+            .sum();
+        v.powi(4) * 0.0041
+    }
 }
 
 fn subregion_j(t: f64, p: f64) -> f64 {
@@ -669,16 +804,31 @@ fn subregion_j(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * ((((p * 4.0e-8) - 0.875).powf(0.5)).powi(i[x - 1])
-                    * ((t / 670.0) - 0.964).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0054
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 29], [f64; 29]) = (
+            std::array::from_fn(|x| (((p * 4.0e-8) - 0.875).powf(0.5)).powi(i[x])),
+            std::array::from_fn(|x| ((t / 670.0) - 0.964).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0054 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 29] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| {
+                n[x] * ((((p * 4.0e-8) - 0.875).powf(0.5)).powi(i[x])
+                    * ((t / 670.0) - 0.964).powi(j[x]))
+            })
+            .sum();
+        v.powi(4) * 0.0054
+    }
 }
 
 fn subregion_k(t: f64, p: f64) -> f64 {
@@ -730,15 +880,28 @@ fn subregion_k(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 34] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p * 4.0e-8) - 0.802).powi(i[x - 1]) * ((t / 680.0) - 0.935).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0077
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 34], [f64; 34]) = (
+            std::array::from_fn(|x| ((p * 4.0e-8) - 0.802).powi(i[x])),
+            std::array::from_fn(|x| ((t / 680.0) - 0.935).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0077 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 34] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p * 4.0e-8) - 0.802).powi(i[x]) * ((t / 680.0) - 0.935).powi(j[x])))
+            .sum();
+        v * 0.0077
+    }
 }
 
 fn subregion_l(t: f64, p: f64) -> f64 {
@@ -799,15 +962,28 @@ fn subregion_l(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 43] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p / 24.0e6) - 0.908).powi(i[x - 1]) * ((t / 650.0) - 0.989).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0026
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 43], [f64; 43]) = (
+            std::array::from_fn(|x| ((p / 24.0e6) - 0.908).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.989).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0026 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 43] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 24.0e6) - 0.908).powi(i[x]) * ((t / 650.0) - 0.989).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0026
+    }
 }
 
 fn subregion_m(t: f64, p: f64) -> f64 {
@@ -865,16 +1041,31 @@ fn subregion_m(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 40] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p / 23.0e6) - 1.0).powi(i[x - 1])
-                    * (((t / 650.0) - 0.997).powf(0.25)).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0028
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 40], [f64; 40]) = (
+            std::array::from_fn(|x| ((p / 23.0e6) - 1.0).powi(i[x])),
+            std::array::from_fn(|x| (((t / 650.0) - 0.997).powf(0.25)).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0028 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 40] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| {
+                n[x] * (((p / 23.0e6) - 1.0).powi(i[x])
+                    * (((t / 650.0) - 0.997).powf(0.25)).powi(j[x]))
+            })
+            .sum();
+        v * 0.0028
+    }
 }
 
 fn subregion_n(t: f64, p: f64) -> f64 {
@@ -931,15 +1122,28 @@ fn subregion_n(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 39] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * (((p / 23.0e6) - 0.976).powi(i[x - 1]) * ((t / 650.0) - 0.997).powi(j[x - 1]))
-        })
-        .sum();
-    v.exp() * 0.0031
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| ((p / 23.0e6) - 0.976).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.997).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0031 * ((n * p_base * t_base).reduce_sum()).exp()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 39] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23.0e6) - 0.976).powi(i[x]) * ((t / 650.0) - 0.997).powi(j[x])))
+            .sum();
+        v.exp() * 0.0031
+    }
 }
 
 fn subregion_o(t: f64, p: f64) -> f64 {
@@ -980,16 +1184,31 @@ fn subregion_o(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 24] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * ((((p / 23.0e6) - 0.974).powf(0.5)).powi(i[x - 1])
-                    * ((t / 650.0) - 0.996).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0034
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 24], [f64; 24]) = (
+            std::array::from_fn(|x| (((p / 23.0e6) - 0.974).powf(0.5)).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.996).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0034 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 24] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| {
+                n[x] * ((((p / 23.0e6) - 0.974).powf(0.5)).powi(i[x])
+                    * ((t / 650.0) - 0.996).powi(j[x]))
+            })
+            .sum();
+        v * 0.0034
+    }
 }
 
 fn subregion_p(t: f64, p: f64) -> f64 {
@@ -1034,16 +1253,31 @@ fn subregion_p(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 27] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1]
-                * ((((p / 23.0e6) - 0.972).powf(0.5)).powi(i[x - 1])
-                    * ((t / 650.0) - 0.997).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0041
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 27], [f64; 27]) = (
+            std::array::from_fn(|x| (((p / 23.0e6) - 0.972).powf(0.5)).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.997).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0041 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 27] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| {
+                n[x] * ((((p / 23.0e6) - 0.972).powf(0.5)).powi(i[x])
+                    * ((t / 650.0) - 0.997).powi(j[x]))
+            })
+            .sum();
+        v * 0.0041
+    }
 }
 
 fn subregion_q(t: f64, p: f64) -> f64 {
@@ -1084,14 +1318,28 @@ fn subregion_q(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 24] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.848).powi(i[x - 1]) * ((t / 650.0) - 0.983).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0022
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 24], [f64; 24]) = (
+            std::array::from_fn(|x| ((p / 23e6) - 0.848).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.983).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0022 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 24] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23e6) - 0.848).powi(i[x]) * ((t / 650.0) - 0.983).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0022
+    }
 }
 
 fn subregion_r(t: f64, p: f64) -> f64 {
@@ -1136,14 +1384,28 @@ fn subregion_r(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 27] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.874).powi(i[x - 1]) * ((t / 650.0) - 0.982).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0054
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 27], [f64; 27]) = (
+            std::array::from_fn(|x| ((p / 23e6) - 0.874).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.982).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0054 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 27] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23e6) - 0.874).powi(i[x]) * ((t / 650.0) - 0.982).powi(j[x])))
+            .sum();
+        v * 0.0054
+    }
 }
 
 fn subregion_s(t: f64, p: f64) -> f64 {
@@ -1190,14 +1452,28 @@ fn subregion_s(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 29] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 21e6) - 0.886).powi(i[x - 1]) * ((t / 640.0) - 0.990).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0022
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 29], [f64; 29]) = (
+            std::array::from_fn(|x| ((p / 21e6) - 0.886).powi(i[x])),
+            std::array::from_fn(|x| ((t / 640.0) - 0.990).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0022 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 29] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 21e6) - 0.886).powi(i[x]) * ((t / 640.0) - 0.990).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0022
+    }
 }
 
 fn subregion_t(t: f64, p: f64) -> f64 {
@@ -1248,14 +1524,28 @@ fn subregion_t(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 33] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 20e6) - 0.803).powi(i[x - 1]) * ((t / 650.0) - 1.020).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0088
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 33], [f64; 33]) = (
+            std::array::from_fn(|x| ((p / 20e6) - 0.803).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 1.020).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0088 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 33] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 20e6) - 0.803).powi(i[x]) * ((t / 650.0) - 1.020).powi(j[x])))
+            .sum();
+        v * 0.0088
+    }
 }
 
 fn subregion_u(t: f64, p: f64) -> f64 {
@@ -1311,14 +1601,28 @@ fn subregion_u(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 38] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.902).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0026
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 38], [f64; 38]) = (
+            std::array::from_fn(|x| ((p / 23e6) - 0.902).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.988).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0026 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 38] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23e6) - 0.902).powi(i[x]) * ((t / 650.0) - 0.988).powi(j[x])))
+            .sum();
+        v * 0.0026
+    }
 }
 
 fn subregion_v(t: f64, p: f64) -> f64 {
@@ -1375,14 +1679,28 @@ fn subregion_v(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 39] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.960).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0031
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| ((p / 23e6) - 0.960).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.995).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0031 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 39] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23e6) - 0.960).powi(i[x]) * ((t / 650.0) - 0.995).powi(j[x])))
+            .sum();
+        v * 0.0031
+    }
 }
 
 fn subregion_w(t: f64, p: f64) -> f64 {
@@ -1435,14 +1753,28 @@ fn subregion_w(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 35] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.959).powi(i[x - 1]) * ((t / 650.0) - 0.995).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0039
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 35], [f64; 35]) = (
+            std::array::from_fn(|x| ((p / 23e6) - 0.959).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.995).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0039 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 35] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23e6) - 0.959).powi(i[x]) * ((t / 650.0) - 0.995).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0039
+    }
 }
 
 fn subregion_x(t: f64, p: f64) -> f64 {
@@ -1496,14 +1828,28 @@ fn subregion_x(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 36] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 23e6) - 0.910).powi(i[x - 1]) * ((t / 650.0) - 0.988).powi(j[x - 1]))
-        })
-        .sum();
-    v * 0.0049
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 36], [f64; 36]) = (
+            std::array::from_fn(|x| ((p / 23e6) - 0.910).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.988).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 64>::load_or_default(&n);
+        let t_base = Simd::<f64, 64>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 64>::load_or_default(&p_base);
+
+        0.0049 * (n * p_base * t_base).reduce_sum()
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 36] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 23e6) - 0.910).powi(i[x]) * ((t / 650.0) - 0.988).powi(j[x])))
+            .sum();
+        v * 0.0049
+    }
 }
 
 fn subregion_y(t: f64, p: f64) -> f64 {
@@ -1537,14 +1883,28 @@ fn subregion_y(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 20] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 22e6) - 0.996).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0031
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 20], [f64; 20]) = (
+            std::array::from_fn(|x| ((p / 22e6) - 0.996).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.994).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0031 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 20] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 22e6) - 0.996).powi(i[x]) * ((t / 650.0) - 0.994).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0031
+    }
 }
 
 fn subregion_z(t: f64, p: f64) -> f64 {
@@ -1583,230 +1943,512 @@ fn subregion_z(t: f64, p: f64) -> f64 {
     ];
 
     // Calculate v
-    let x: [usize; 23] = core::array::from_fn(|i| i + 1);
-    let v: f64 = x
-        .into_iter()
-        .map(|x| {
-            n[x - 1] * (((p / 22e6) - 0.993).powi(i[x - 1]) * ((t / 650.0) - 0.994).powi(j[x - 1]))
-        })
-        .sum();
-    v.powi(4) * 0.0038
+    #[cfg(feature = "nightly")]
+    {
+        let (p_base, t_base): ([f64; 23], [f64; 23]) = (
+            std::array::from_fn(|x| ((p / 22e6) - 0.993).powi(i[x])),
+            std::array::from_fn(|x| ((t / 650.0) - 0.994).powi(j[x])),
+        );
+
+        let n = Simd::<f64, 32>::load_or_default(&n);
+        let t_base = Simd::<f64, 32>::load_or_default(&t_base);
+        let p_base = Simd::<f64, 32>::load_or_default(&p_base);
+
+        0.0038 * ((n * p_base * t_base).reduce_sum()).powi(4)
+    }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let x: [usize; 23] = core::array::from_fn(|i| i);
+        let v: f64 = x
+            .into_iter()
+            .map(|x| n[x] * (((p / 22e6) - 0.993).powi(i[x]) * ((t / 650.0) - 0.994).powi(j[x])))
+            .sum();
+        v.powi(4) * 0.0038
+    }
 }
 
 // Returns the subregion that corresponds
 // to the state of water given t and p
 fn subregion(t: f64, p: f64) -> Region3 {
     // Create coefficient Arrays
-    let coefficients_ab: [f64; 5] = [
-        0.154793642129415e4,
-        -0.187661219490113e3,
-        0.213144632222113e2,
-        -0.191887498864292e4,
-        0.918419702359447e3,
-    ];
+    #[cfg(feature = "nightly")]
+    {
+        let coefficients_ab: Simd<f64, 8> = [
+            0.154793642129415e4,
+            -0.187661219490113e3,
+            0.213144632222113e2,
+            -0.191887498864292e4,
+            0.918419702359447e3,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_cd: [f64; 4] = [
-        0.585276966696349e3,
-        0.278233532206915e1,
-        -0.127283549295878e-1,
-        0.159090746562729e-3,
-    ];
+        let coefficients_cd: Simd<f64, 8> = [
+            0.585276966696349e3,
+            0.278233532206915e1,
+            -0.127283549295878e-1,
+            0.159090746562729e-3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_gh: [f64; 5] = [
-        -0.249284240900418e5,
-        0.428143584791546e4,
-        -0.269029173140130e3,
-        0.751608051114157e1,
-        -0.787105249910383e-1,
-    ];
+        let coefficients_gh: Simd<f64, 8> = [
+            -0.249284240900418e5,
+            0.428143584791546e4,
+            -0.269029173140130e3,
+            0.751608051114157e1,
+            -0.787105249910383e-1,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_ij: [f64; 5] = [
-        0.584814781649163e3,
-        -0.616179320924617,
-        0.260763050899562,
-        -0.587071076864459e-2,
-        0.515308185433082e-4,
-    ];
+        let coefficients_ij: Simd<f64, 8> = [
+            0.584814781649163e3,
+            -0.616179320924617,
+            0.260763050899562,
+            -0.587071076864459e-2,
+            0.515308185433082e-4,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_jk: [f64; 5] = [
-        0.617229772068439e3,
-        -0.770600270141675e1,
-        0.697072596851896,
-        -0.157391839848015e-1,
-        0.137897492684194e-3,
-    ];
+        let coefficients_jk: Simd<f64, 8> = [
+            0.617229772068439e3,
+            -0.770600270141675e1,
+            0.697072596851896,
+            -0.157391839848015e-1,
+            0.137897492684194e-3,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_mn: [f64; 4] = [
-        0.535339483742384e3,
-        0.761978122720128e1,
-        -0.158365725441648,
-        0.192871054508108e-2,
-    ];
+        let coefficients_mn: Simd<f64, 8> = [
+            0.535339483742384e3,
+            0.761978122720128e1,
+            -0.158365725441648,
+            0.192871054508108e-2,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_op: [f64; 5] = [
-        0.969461372400213e3,
-        -0.332500170441278e3,
-        0.642859598466067e2,
-        0.773845935768222e3,
-        -0.152313732937084e4,
-    ];
+        let coefficients_op: Simd<f64, 8> = [
+            0.969461372400213e3,
+            -0.332500170441278e3,
+            0.642859598466067e2,
+            0.773845935768222e3,
+            -0.152313732937084e4,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_qu: [f64; 4] = [
-        0.565603648239126e3,
-        0.529062258221222e1,
-        -0.102020639611016,
-        0.122240301070145e-2,
-    ];
+        let coefficients_qu: Simd<f64, 8> = [
+            0.565603648239126e3,
+            0.529062258221222e1,
+            -0.102020639611016,
+            0.122240301070145e-2,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_uv: [f64; 4] = [
-        0.528199646263062e3,
-        0.890579602135307e1,
-        -0.222814134903755,
-        0.286791682263697e-2,
-    ];
+        let coefficients_uv: Simd<f64, 8> = [
+            0.528199646263062e3,
+            0.890579602135307e1,
+            -0.222814134903755,
+            0.286791682263697e-2,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_wx: [f64; 5] = [
-        0.728052609145380e1,
-        0.973505869861952e2,
-        0.147370491183191e2,
-        0.329196213998375e3,
-        0.873371668682417e3,
-    ];
+        let coefficients_wx: Simd<f64, 8> = [
+            0.728052609145380e1,
+            0.973505869861952e2,
+            0.147370491183191e2,
+            0.329196213998375e3,
+            0.873371668682417e3,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let coefficients_rx: [f64; 4] = [
-        0.584561202520006e3,
-        -0.102961025163669e1,
-        0.243293362700452,
-        -0.294905044740799e-2,
-    ];
+        let coefficients_rx: Simd<f64, 8> = [
+            0.584561202520006e3,
+            -0.102961025163669e1,
+            0.243293362700452,
+            -0.294905044740799e-2,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ]
+        .into();
 
-    let ii: [i32; 5] = [0, 1, 2, -1, -2];
+        let ii: [i32; 5] = [0, 1, 2, -1, -2];
+        let p_ln = (p * 1e-6).ln();
+        let (p_ln_base, p_base): ([f64; 5], [f64; 5]) = (
+            std::array::from_fn(|x| p_ln.powi(ii[x])),
+            std::array::from_fn(|x| (p * 1e-6).powi(x as i32)),
+        );
 
-    // Create variables for later use
-    let mut t_ab: f64 = 0.0;
-    let mut t_cd: f64 = 0.0;
-    let t_ef: f64 = 3.727888004 * ((p * 1e-6) - 22.064) + 647.096;
-    let mut t_gh: f64 = 0.0;
-    let mut t_ij: f64 = 0.0;
-    let mut t_jk: f64 = 0.0;
-    let mut t_mn: f64 = 0.0;
-    let mut t_op: f64 = 0.0;
-    let mut t_qu: f64 = 0.0;
-    let mut t_uv: f64 = 0.0;
-    let mut t_wx: f64 = 0.0;
-    let mut t_rx: f64 = 0.0;
+        let p_ln_base = Simd::<f64, 8>::load_or_default(&p_ln_base);
+        let p_base = Simd::<f64, 8>::load_or_default(&p_base);
 
-    // Calculate Boundaries
-    for x in 0..=4 {
-        if x <= 3 {
-            t_cd += coefficients_cd[x] * (p * 1e-6).powi(x as i32);
-            t_mn += coefficients_mn[x] * (p * 1e-6).powi(x as i32);
-            t_qu += coefficients_qu[x] * (p * 1e-6).powi(x as i32);
-            t_rx += coefficients_rx[x] * (p * 1e-6).powi(x as i32);
-            t_uv += coefficients_uv[x] * (p * 1e-6).powi(x as i32)
+        let t_ab = (coefficients_ab * p_ln_base).reduce_sum();
+        let t_cd = (coefficients_cd * p_base).reduce_sum();
+        let t_ef = 3.727888004 * (p * 1e-6 - 22.064) + 647.096;
+        let t_gh = (coefficients_gh * p_base).reduce_sum();
+        let t_ij = (coefficients_ij * p_base).reduce_sum();
+        let t_jk = (coefficients_jk * p_base).reduce_sum();
+        let t_mn = (coefficients_mn * p_base).reduce_sum();
+        let t_op = (coefficients_op * p_ln_base).reduce_sum();
+        let t_qu = (coefficients_qu * p_base).reduce_sum();
+        let t_rx = (coefficients_rx * p_base).reduce_sum();
+        let t_uv = (coefficients_uv * p_base).reduce_sum();
+        let t_wx = (coefficients_wx * p_ln_base).reduce_sum();
+
+        // Calculate the Density
+        match (t, p) {
+            (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => {
+                Region3::SubregionA
+            }
+            (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab => {
+                Region3::SubregionB
+            }
+            (temp, pres)
+                if ((19.00881189e6..=40.0e6).contains(&pres) && temp <= t_cd)
+                    || ((16.52916425e6..=19.008811889e6).contains(&pres)
+                        && temp <= tsat97(&pres)) =>
+            {
+                Region3::SubregionC
+            }
+            (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_cd..=t_ab).contains(&temp) => {
+                Region3::SubregionD
+            }
+            (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_ab..=t_ef).contains(&temp) => {
+                Region3::SubregionE
+            }
+            (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp => Region3::SubregionF,
+            (temp, pres) if (23.5e6..=25.0e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
+                Region3::SubregionG
+            }
+            (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_gh..=t_ef).contains(&temp) => {
+                Region3::SubregionH
+            }
+            (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_ef..=t_ij).contains(&temp) => {
+                Region3::SubregionI
+            }
+            (temp, pres) if (22.5e6..=25.0e6).contains(&pres) && (t_ij..=t_jk).contains(&temp) => {
+                Region3::SubregionJ
+            }
+            (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp => Region3::SubregionK,
+            (temp, pres) if (22.5e6..=23.5e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
+                Region3::SubregionL
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_gh..=t_mn).contains(&temp) => {
+                Region3::SubregionM
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_mn..=t_ef).contains(&temp) => {
+                Region3::SubregionN
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_ef..=t_op).contains(&temp) => {
+                Region3::SubregionO
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_op..=t_ij).contains(&temp) => {
+                Region3::SubregionP
+            }
+            (temp, pres)
+                if (21.04336732e6..=22.5e6).contains(&pres) && (t_cd..=t_qu).contains(&temp) =>
+            {
+                Region3::SubregionQ
+            }
+            (temp, pres)
+                if ((21.04336732e6..=22.5e6).contains(&pres) && (t_rx..=t_jk).contains(&temp))
+                    || ((20.5e6..=21.04336732e6).contains(&pres)
+                        && (tsat97(&pres)..=t_jk).contains(&temp)) =>
+            {
+                Region3::SubregionR
+            }
+            (temp, pres)
+                if (19.00881189e6..=21.04336732e6).contains(&pres)
+                    && (t_cd..=tsat97(&pres)).contains(&temp) =>
+            {
+                Region3::SubregionS
+            }
+            (temp, pres) if (16.52916425e6..=20.5e6).contains(&pres) && tsat97(&pres) < temp => {
+                Region3::SubregionT
+            }
+            (temp, pres)
+                if ((psat97(&temp)..=21.04336732e6).contains(&pres)
+                    && (t_qu..=tsat97(&pres)).contains(&temp))
+                    || ((21.04336732e6..=22.5e6).contains(&pres)
+                        && (t_qu..=t_uv).contains(&temp)) =>
+            {
+                Region3::SubregionU
+            }
+            (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_uv..=t_ef).contains(&temp) => {
+                Region3::SubregionV
+            }
+            (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_ef..=t_wx).contains(&temp) => {
+                Region3::SubregionW
+            }
+            (temp, pres)
+                if ((21.04336732e6..=22.5e6).contains(&pres) && (t_wx..=t_rx).contains(&temp))
+                    || ((psat97(&temp)..=21.04336732e6).contains(&pres)
+                        && (tsat97(&pres)..=t_rx).contains(&temp)) =>
+            {
+                Region3::SubregionX
+            }
+            (temp, pres)
+                if ((21.93161551e6..=22.11e6).contains(&pres) && (t_uv..=t_ef).contains(&temp))
+                    || ((psat97(&temp)..=21.93161551e6).contains(&pres)
+                        && (t_uv..=tsat97(&pres)).contains(&temp)) =>
+            {
+                Region3::SubregionY
+            }
+            _ => Region3::SubregionZ,
         }
-        t_ab += coefficients_ab[x] * ((p * 1e-6).ln()).powi(ii[x]);
-        t_gh += coefficients_gh[x] * (p * 1e-6).powi(x as i32);
-        t_ij += coefficients_ij[x] * (p * 1e-6).powi(x as i32);
-        t_jk += coefficients_jk[x] * (p * 1e-6).powi(x as i32);
-        t_op += coefficients_op[x] * ((p * 1e-6).ln()).powi(ii[x]);
-        t_wx += coefficients_wx[x] * ((p * 1e-6).ln()).powi(ii[x]);
     }
+    #[cfg(not(feature = "nightly"))]
+    {
+        let coefficients_ab: [f64; 5] = [
+            0.154793642129415e4,
+            -0.187661219490113e3,
+            0.213144632222113e2,
+            -0.191887498864292e4,
+            0.918419702359447e3,
+        ];
 
-    // Calculate the Density
-    match (t, p) {
-        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => Region3::SubregionA,
-        (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab => Region3::SubregionB,
-        (temp, pres)
-            if ((19.00881189e6..=40.0e6).contains(&pres) && temp <= t_cd)
-                || ((16.52916425e6..=19.008811889e6).contains(&pres) && temp <= tsat97(&pres)) =>
-        {
-            Region3::SubregionC
+        let coefficients_cd: [f64; 4] = [
+            0.585276966696349e3,
+            0.278233532206915e1,
+            -0.127283549295878e-1,
+            0.159090746562729e-3,
+        ];
+
+        let coefficients_gh: [f64; 5] = [
+            -0.249284240900418e5,
+            0.428143584791546e4,
+            -0.269029173140130e3,
+            0.751608051114157e1,
+            -0.787105249910383e-1,
+        ];
+
+        let coefficients_ij: [f64; 5] = [
+            0.584814781649163e3,
+            -0.616179320924617,
+            0.260763050899562,
+            -0.587071076864459e-2,
+            0.515308185433082e-4,
+        ];
+
+        let coefficients_jk: [f64; 5] = [
+            0.617229772068439e3,
+            -0.770600270141675e1,
+            0.697072596851896,
+            -0.157391839848015e-1,
+            0.137897492684194e-3,
+        ];
+
+        let coefficients_mn: [f64; 4] = [
+            0.535339483742384e3,
+            0.761978122720128e1,
+            -0.158365725441648,
+            0.192871054508108e-2,
+        ];
+
+        let coefficients_op: [f64; 5] = [
+            0.969461372400213e3,
+            -0.332500170441278e3,
+            0.642859598466067e2,
+            0.773845935768222e3,
+            -0.152313732937084e4,
+        ];
+
+        let coefficients_qu: [f64; 4] = [
+            0.565603648239126e3,
+            0.529062258221222e1,
+            -0.102020639611016,
+            0.122240301070145e-2,
+        ];
+
+        let coefficients_uv: [f64; 4] = [
+            0.528199646263062e3,
+            0.890579602135307e1,
+            -0.222814134903755,
+            0.286791682263697e-2,
+        ];
+
+        let coefficients_wx: [f64; 5] = [
+            0.728052609145380e1,
+            0.973505869861952e2,
+            0.147370491183191e2,
+            0.329196213998375e3,
+            0.873371668682417e3,
+        ];
+
+        let coefficients_rx: [f64; 4] = [
+            0.584561202520006e3,
+            -0.102961025163669e1,
+            0.243293362700452,
+            -0.294905044740799e-2,
+        ];
+
+        let ii: [i32; 5] = [0, 1, 2, -1, -2];
+
+        // Create variables for later use
+        let mut t_ab: f64 = 0.0;
+        let mut t_cd: f64 = 0.0;
+        let t_ef: f64 = 3.727888004 * ((p * 1e-6) - 22.064) + 647.096;
+        let mut t_gh: f64 = 0.0;
+        let mut t_ij: f64 = 0.0;
+        let mut t_jk: f64 = 0.0;
+        let mut t_mn: f64 = 0.0;
+        let mut t_op: f64 = 0.0;
+        let mut t_qu: f64 = 0.0;
+        let mut t_uv: f64 = 0.0;
+        let mut t_wx: f64 = 0.0;
+        let mut t_rx: f64 = 0.0;
+
+        // Calculate Boundaries
+        for x in 0..=4 {
+            if x <= 3 {
+                t_cd += coefficients_cd[x] * (p * 1e-6).powi(x as i32);
+                t_mn += coefficients_mn[x] * (p * 1e-6).powi(x as i32);
+                t_qu += coefficients_qu[x] * (p * 1e-6).powi(x as i32);
+                t_rx += coefficients_rx[x] * (p * 1e-6).powi(x as i32);
+                t_uv += coefficients_uv[x] * (p * 1e-6).powi(x as i32)
+            }
+            t_ab += coefficients_ab[x] * ((p * 1e-6).ln()).powi(ii[x]);
+            t_gh += coefficients_gh[x] * (p * 1e-6).powi(x as i32);
+            t_ij += coefficients_ij[x] * (p * 1e-6).powi(x as i32);
+            t_jk += coefficients_jk[x] * (p * 1e-6).powi(x as i32);
+            t_op += coefficients_op[x] * ((p * 1e-6).ln()).powi(ii[x]);
+            t_wx += coefficients_wx[x] * ((p * 1e-6).ln()).powi(ii[x]);
         }
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_cd..=t_ab).contains(&temp) => {
-            Region3::SubregionD
+
+        // Calculate the Density
+        match (t, p) {
+            (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp <= t_ab => {
+                Region3::SubregionA
+            }
+            (temp, pres) if (40.0e6..=100.0e6).contains(&pres) && temp > t_ab => {
+                Region3::SubregionB
+            }
+            (temp, pres)
+                if ((19.00881189e6..=40.0e6).contains(&pres) && temp <= t_cd)
+                    || ((16.52916425e6..=19.008811889e6).contains(&pres)
+                        && temp <= tsat97(&pres)) =>
+            {
+                Region3::SubregionC
+            }
+            (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_cd..=t_ab).contains(&temp) => {
+                Region3::SubregionD
+            }
+            (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_ab..=t_ef).contains(&temp) => {
+                Region3::SubregionE
+            }
+            (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp => Region3::SubregionF,
+            (temp, pres) if (23.5e6..=25.0e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
+                Region3::SubregionG
+            }
+            (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_gh..=t_ef).contains(&temp) => {
+                Region3::SubregionH
+            }
+            (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_ef..=t_ij).contains(&temp) => {
+                Region3::SubregionI
+            }
+            (temp, pres) if (22.5e6..=25.0e6).contains(&pres) && (t_ij..=t_jk).contains(&temp) => {
+                Region3::SubregionJ
+            }
+            (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp => Region3::SubregionK,
+            (temp, pres) if (22.5e6..=23.5e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
+                Region3::SubregionL
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_gh..=t_mn).contains(&temp) => {
+                Region3::SubregionM
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_mn..=t_ef).contains(&temp) => {
+                Region3::SubregionN
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_ef..=t_op).contains(&temp) => {
+                Region3::SubregionO
+            }
+            (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_op..=t_ij).contains(&temp) => {
+                Region3::SubregionP
+            }
+            (temp, pres)
+                if (21.04336732e6..=22.5e6).contains(&pres) && (t_cd..=t_qu).contains(&temp) =>
+            {
+                Region3::SubregionQ
+            }
+            (temp, pres)
+                if ((21.04336732e6..=22.5e6).contains(&pres) && (t_rx..=t_jk).contains(&temp))
+                    || ((20.5e6..=21.04336732e6).contains(&pres)
+                        && (tsat97(&pres)..=t_jk).contains(&temp)) =>
+            {
+                Region3::SubregionR
+            }
+            (temp, pres)
+                if (19.00881189e6..=21.04336732e6).contains(&pres)
+                    && (t_cd..=tsat97(&pres)).contains(&temp) =>
+            {
+                Region3::SubregionS
+            }
+            (temp, pres) if (16.52916425e6..=20.5e6).contains(&pres) && tsat97(&pres) < temp => {
+                Region3::SubregionT
+            }
+            (temp, pres)
+                if ((psat97(&temp)..=21.04336732e6).contains(&pres)
+                    && (t_qu..=tsat97(&pres)).contains(&temp))
+                    || ((21.04336732e6..=22.5e6).contains(&pres)
+                        && (t_qu..=t_uv).contains(&temp)) =>
+            {
+                Region3::SubregionU
+            }
+            (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_uv..=t_ef).contains(&temp) => {
+                Region3::SubregionV
+            }
+            (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_ef..=t_wx).contains(&temp) => {
+                Region3::SubregionW
+            }
+            (temp, pres)
+                if ((21.04336732e6..=22.5e6).contains(&pres) && (t_wx..=t_rx).contains(&temp))
+                    || ((psat97(&temp)..=21.04336732e6).contains(&pres)
+                        && (tsat97(&pres)..=t_rx).contains(&temp)) =>
+            {
+                Region3::SubregionX
+            }
+            (temp, pres)
+                if ((21.93161551e6..=22.11e6).contains(&pres) && (t_uv..=t_ef).contains(&temp))
+                    || ((psat97(&temp)..=21.93161551e6).contains(&pres)
+                        && (t_uv..=tsat97(&pres)).contains(&temp)) =>
+            {
+                Region3::SubregionY
+            }
+            _ => Region3::SubregionZ,
         }
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && (t_ab..=t_ef).contains(&temp) => {
-            Region3::SubregionE
-        }
-        (temp, pres) if (25.0e6..=40.0e6).contains(&pres) && t_ef < temp => Region3::SubregionF,
-        (temp, pres) if (23.5e6..=25.0e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
-            Region3::SubregionG
-        }
-        (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_gh..=t_ef).contains(&temp) => {
-            Region3::SubregionH
-        }
-        (temp, pres) if (23.0e6..=25.0e6).contains(&pres) && (t_ef..=t_ij).contains(&temp) => {
-            Region3::SubregionI
-        }
-        (temp, pres) if (22.5e6..=25.0e6).contains(&pres) && (t_ij..=t_jk).contains(&temp) => {
-            Region3::SubregionJ
-        }
-        (temp, pres) if (20.5e6..=25.0e6).contains(&pres) && t_jk < temp => Region3::SubregionK,
-        (temp, pres) if (22.5e6..=23.5e6).contains(&pres) && (t_cd..=t_gh).contains(&temp) => {
-            Region3::SubregionL
-        }
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_gh..=t_mn).contains(&temp) => {
-            Region3::SubregionM
-        }
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_mn..=t_ef).contains(&temp) => {
-            Region3::SubregionN
-        }
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_ef..=t_op).contains(&temp) => {
-            Region3::SubregionO
-        }
-        (temp, pres) if (22.5e6..=23.0e6).contains(&pres) && (t_op..=t_ij).contains(&temp) => {
-            Region3::SubregionP
-        }
-        (temp, pres)
-            if (21.04336732e6..=22.5e6).contains(&pres) && (t_cd..=t_qu).contains(&temp) =>
-        {
-            Region3::SubregionQ
-        }
-        (temp, pres)
-            if ((21.04336732e6..=22.5e6).contains(&pres) && (t_rx..=t_jk).contains(&temp))
-                || ((20.5e6..=21.04336732e6).contains(&pres)
-                    && (tsat97(&pres)..=t_jk).contains(&temp)) =>
-        {
-            Region3::SubregionR
-        }
-        (temp, pres)
-            if (19.00881189e6..=21.04336732e6).contains(&pres)
-                && (t_cd..=tsat97(&pres)).contains(&temp) =>
-        {
-            Region3::SubregionS
-        }
-        (temp, pres) if (16.52916425e6..=20.5e6).contains(&pres) && tsat97(&pres) < temp => {
-            Region3::SubregionT
-        }
-        (temp, pres)
-            if ((psat97(&temp)..=21.04336732e6).contains(&pres)
-                && (t_qu..=tsat97(&pres)).contains(&temp))
-                || ((21.04336732e6..=22.5e6).contains(&pres) && (t_qu..=t_uv).contains(&temp)) =>
-        {
-            Region3::SubregionU
-        }
-        (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_uv..=t_ef).contains(&temp) => {
-            Region3::SubregionV
-        }
-        (temp, pres) if (22.11e6..=22.5e6).contains(&pres) && (t_ef..=t_wx).contains(&temp) => {
-            Region3::SubregionW
-        }
-        (temp, pres)
-            if ((21.04336732e6..=22.5e6).contains(&pres) && (t_wx..=t_rx).contains(&temp))
-                || ((psat97(&temp)..=21.04336732e6).contains(&pres)
-                    && (tsat97(&pres)..=t_rx).contains(&temp)) =>
-        {
-            Region3::SubregionX
-        }
-        (temp, pres)
-            if ((21.93161551e6..=22.11e6).contains(&pres) && (t_uv..=t_ef).contains(&temp))
-                || ((psat97(&temp)..=21.93161551e6).contains(&pres)
-                    && (t_uv..=tsat97(&pres)).contains(&temp)) =>
-        {
-            Region3::SubregionY
-        }
-        _ => Region3::SubregionZ,
     }
 }
 
@@ -1828,102 +2470,206 @@ fn tau_3(t: f64) -> f64 {
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
     let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii) * tau.powi(ji);
+    #[cfg(feature = "nightly")]
+    {
+        let (delta, tau): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| delta.powi(REGION_3_COEFFS_II[x + 1])),
+            std::array::from_fn(|x| tau.powi(REGION_3_COEFFS_JI[x + 1])),
+        );
+
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_3_COEFFS_NI[1..40]);
+        let delta = Simd::<f64, 64>::load_or_default(&delta);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+
+        (ni * delta * tau).reduce_sum() + REGION_3_COEFFS_NI[0] * delta_3(rho).ln()
     }
-    sum + REGION_3_COEFFS[0][2] * delta_3(rho).ln()
+    #[cfg(not(feature = "nightly"))]
+    {
+        let mut sum: f64 = 0.0_f64;
+        for x in 1..REGION_3_COEFFS_II.len() {
+            let ii = REGION_3_COEFFS_II[x];
+            let ji = REGION_3_COEFFS_JI[x];
+            let ni = REGION_3_COEFFS_NI[x];
+            sum += ni * delta.powi(ii) * tau.powi(ji);
+        }
+        sum + REGION_3_COEFFS_NI[0] * delta_3(rho).ln()
+    }
 }
 
 /// Returns the region-3 phi_delta
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_delta_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
-    let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii - 1) * f64::from(ii) * tau.powi(ji);
+    let delta_3: f64 = delta_3(rho);
+    #[cfg(feature = "nightly")]
+    {
+        let (delta, tau): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| delta_3.powi(REGION_3_COEFFS_II[x + 1] - 1)),
+            std::array::from_fn(|x| tau.powi(REGION_3_COEFFS_JI[x + 1])),
+        );
+
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_3_COEFFS_NI[1..40]);
+        let ii = (Simd::<i32, 64>::load_or_default(&REGION_3_COEFFS_II[1..40])).cast::<f64>();
+        let delta = Simd::<f64, 64>::load_or_default(&delta);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+
+        (ni * ii * delta * tau).reduce_sum() + REGION_3_COEFFS_NI[0] / delta_3
     }
-    sum + REGION_3_COEFFS[0][2] / delta
+    #[cfg(not(feature = "nightly"))]
+    {
+        let mut sum: f64 = 0.0_f64;
+        for x in 1..REGION_3_COEFFS_II.len() {
+            let ii = REGION_3_COEFFS_II[x];
+            let ji = REGION_3_COEFFS_JI[x];
+            let ni = REGION_3_COEFFS_NI[x];
+            sum += ni * delta_3.powi(ii - 1) * ii as f64 * tau.powi(ji);
+        }
+        sum + REGION_3_COEFFS_NI[0] / delta_3
+    }
 }
 
 /// Returns the region-3 phi_delta_delta
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_delta_delta_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
-    let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii - 2) * f64::from(ii) * f64::from(ii - 1) * tau.powi(ji);
+    let delta_3: f64 = delta_3(rho);
+    #[cfg(feature = "nightly")]
+    {
+        let (delta, tau): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| delta_3.powi(REGION_3_COEFFS_II[x + 1] - 2)),
+            std::array::from_fn(|x| tau.powi(REGION_3_COEFFS_JI[x + 1])),
+        );
+
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_3_COEFFS_NI[1..40]);
+        let ii = (Simd::<i32, 64>::load_or_default(&REGION_3_COEFFS_II[1..40])).cast::<f64>();
+        let delta = Simd::<f64, 64>::load_or_default(&delta);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+
+        (ni * ii * (ii - f64x64::splat(1.0)) * delta * tau).reduce_sum()
+            - REGION_3_COEFFS_NI[0] / delta_3.powi(2)
     }
-    sum - REGION_3_COEFFS[0][2] / delta.powi(2)
+    #[cfg(not(feature = "nightly"))]
+    {
+        let mut sum: f64 = 0.0_f64;
+        for x in 1..REGION_3_COEFFS_II.len() {
+            let ii = REGION_3_COEFFS_II[x];
+            let ji = REGION_3_COEFFS_JI[x];
+            let ni = REGION_3_COEFFS_NI[x];
+            sum += ni * delta_3.powi(ii - 2) * (ii * (ii - 1)) as f64 * tau.powi(ji);
+        }
+        sum - REGION_3_COEFFS_NI[0] / delta_3.powi(2)
+    }
 }
 
 /// Returns the region-3 phi_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
-    let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii) * f64::from(ji) * tau.powi(ji - 1);
+    let delta_3: f64 = delta_3(rho);
+    #[cfg(feature = "nightly")]
+    {
+        let (delta, tau): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| delta_3.powi(REGION_3_COEFFS_II[x + 1])),
+            std::array::from_fn(|x| tau.powi(REGION_3_COEFFS_JI[x + 1] - 1)),
+        );
+
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_3_COEFFS_NI[1..40]);
+        let ji = (Simd::<i32, 64>::load_or_default(&REGION_3_COEFFS_JI[1..40])).cast::<f64>();
+        let delta = Simd::<f64, 64>::load_or_default(&delta);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+
+        (ni * ji * delta * tau).reduce_sum()
     }
-    sum
+    #[cfg(not(feature = "nightly"))]
+    {
+        let mut sum: f64 = 0.0_f64;
+        for x in 1..REGION_3_COEFFS_II.len() {
+            let ii = REGION_3_COEFFS_II[x];
+            let ji = REGION_3_COEFFS_JI[x];
+            let ni = REGION_3_COEFFS_NI[x];
+            sum += ni * delta_3.powi(ii) * ji as f64 * tau.powi(ji - 1);
+        }
+        sum
+    }
 }
 
 /// Returns the region-3 phi_tau_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_tau_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
-    let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii) * f64::from(ji) * f64::from(ji - 1) * tau.powi(ji - 2);
+    let delta_3: f64 = delta_3(rho);
+    #[cfg(feature = "nightly")]
+    {
+        let (delta, tau): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| delta_3.powi(REGION_3_COEFFS_II[x + 1])),
+            std::array::from_fn(|x| tau.powi(REGION_3_COEFFS_JI[x + 1] - 2)),
+        );
+
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_3_COEFFS_NI[1..40]);
+        let ji = (Simd::<i32, 64>::load_or_default(&REGION_3_COEFFS_JI[1..40])).cast::<f64>();
+        let delta = Simd::<f64, 64>::load_or_default(&delta);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+
+        (ni * ji * (ji - f64x64::splat(1.0)) * delta * tau).reduce_sum()
     }
-    sum
+    #[cfg(not(feature = "nightly"))]
+    {
+        let mut sum: f64 = 0.0_f64;
+        for x in 1..REGION_3_COEFFS_II.len() {
+            let ii = REGION_3_COEFFS_II[x];
+            let ji = REGION_3_COEFFS_JI[x];
+            let ni = REGION_3_COEFFS_NI[x];
+            sum += ni * delta_3.powi(ii) * (ji * (ji - 1)) as f64 * tau.powi(ji - 2);
+        }
+        sum
+    }
 }
 
 /// Returns the region-3 phi_delta_tau
 /// Temperature is assumed to be in K
 /// Pressure is assumed to be in Pa
 fn phi_delta_tau_3(rho: f64, t: f64) -> f64 {
-    let mut sum: f64 = 0.0;
     let tau: f64 = tau_3(t);
-    let delta: f64 = delta_3(rho);
-    for coefficient in REGION_3_COEFFS.iter().skip(1) {
-        let ii: i32 = coefficient[0] as i32;
-        let ji: i32 = coefficient[1] as i32;
-        let ni: f64 = coefficient[2];
-        sum += ni * delta.powi(ii - 1) * f64::from(ii) * f64::from(ji) * tau.powi(ji - 1);
+    let delta_3: f64 = delta_3(rho);
+    #[cfg(feature = "nightly")]
+    {
+        let (delta, tau): ([f64; 39], [f64; 39]) = (
+            std::array::from_fn(|x| delta_3.powi(REGION_3_COEFFS_II[x + 1] - 1)),
+            std::array::from_fn(|x| tau.powi(REGION_3_COEFFS_JI[x + 1] - 1)),
+        );
+
+        let ni = Simd::<f64, 64>::load_or_default(&REGION_3_COEFFS_NI[1..40]);
+        let ii = (Simd::<i32, 64>::load_or_default(&REGION_3_COEFFS_II[1..40])).cast::<f64>();
+        let ji = (Simd::<i32, 64>::load_or_default(&REGION_3_COEFFS_JI[1..40])).cast::<f64>();
+        let delta = Simd::<f64, 64>::load_or_default(&delta);
+        let tau = Simd::<f64, 64>::load_or_default(&tau);
+
+        (ni * ji * ii * delta * tau).reduce_sum()
     }
-    sum
+    #[cfg(not(feature = "nightly"))]
+    {
+        let mut sum: f64 = 0.0_f64;
+        for x in 1..REGION_3_COEFFS_II.len() {
+            let ii = REGION_3_COEFFS_II[x];
+            let ji = REGION_3_COEFFS_JI[x];
+            let ni = REGION_3_COEFFS_NI[x];
+            sum += ni * delta_3.powi(ii - 1) * (ii * ji) as f64 * tau.powi(ji - 1);
+        }
+        sum
+    }
 }
 
 /// Returns the pressure given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
 #[allow(dead_code)]
+#[inline]
 fn p_rho_t_3(rho: f64, t: f64) -> f64 {
     rho * (constants::_R * 1000.0) * t * delta_3(rho) * phi_delta_3(rho, t)
 }
@@ -1931,6 +2677,7 @@ fn p_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the internal energy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn u_rho_t_3(rho: f64, t: f64) -> f64 {
     tau_3(t) * phi_tau_3(rho, t) * constants::_R * t
 }
@@ -1938,6 +2685,7 @@ fn u_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the entropy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn s_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) - phi_3(rho, t)) * constants::_R
 }
@@ -1945,6 +2693,7 @@ fn s_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the enthalpy given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn h_rho_t_3(rho: f64, t: f64) -> f64 {
     (tau_3(t) * phi_tau_3(rho, t) + delta_3(rho) * phi_delta_3(rho, t)) * constants::_R * t
 }
@@ -1952,6 +2701,7 @@ fn h_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the isochoric specific heat given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
     -tau_3(t).powi(2) * phi_tau_tau_3(rho, t) * constants::_R
 }
@@ -1959,6 +2709,7 @@ fn cv_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the isobaric specific heat given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
     (-tau_3(t).powi(2) * phi_tau_tau_3(rho, t)
         + ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1969,7 +2720,7 @@ fn cp_rho_t_3(rho: f64, t: f64) -> f64 {
         * constants::_R
 }
 
-#[allow(dead_code)]
+#[inline]
 fn w_rho_t_3(rho: f64, t: f64) -> f64 {
     ((2.0 * delta_3(rho) * phi_delta_3(rho, t) + delta_3(rho).powi(2) * phi_delta_delta_3(rho, t)
         - ((delta_3(rho) * phi_delta_3(rho, t)
@@ -1985,6 +2736,7 @@ fn w_rho_t_3(rho: f64, t: f64) -> f64 {
 /// Returns the specific volume given t and rho
 /// Temperature is assumed to be in K
 /// density is assumed to be in kg/m^3
+#[inline]
 pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
     match subregion(t, p) {
         Region3::SubregionA => subregion_a(t, p),
@@ -2016,32 +2768,37 @@ pub(crate) fn v_tp_3(t: f64, p: f64) -> f64 {
     }
 }
 
+#[inline]
 pub(crate) fn cv_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cv_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn cp_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     cp_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn s_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     s_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn u_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     u_rho_t_3(rho, t)
 }
 
+#[inline]
 pub(crate) fn h_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     h_rho_t_3(rho, t)
 }
 
-#[allow(dead_code)]
+#[inline]
 pub fn w_tp_3(t: f64, p: f64) -> f64 {
     let rho: f64 = (v_tp_3(t, p)).powi(-1);
     w_rho_t_3(rho, t)

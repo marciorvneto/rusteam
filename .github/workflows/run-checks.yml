@@ -3,8 +3,8 @@ on: [push, pull_request]
 name: Continuous integration
 
 jobs:
-    check:
-        name: Check
+    check-stable:
+        name: Stable Check
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -16,9 +16,22 @@ jobs:
             - uses: actions-rs/cargo@v1
               with:
                   command: check
-
-    test:
-        name: Test Suite
+    check-nightly:
+        name: Nightly Check
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: nightly
+                  override: true
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: check
+                  args: --features nightly
+    test-stable:
+        name: Stable Test Suite
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -30,6 +43,20 @@ jobs:
             - uses: actions-rs/cargo@v1
               with:
                   command: test
+    test-nightly:
+        name: Nightly Test Suite
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: nightly
+                  override: true
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: test
+                  args: --features nightly
 
     fmt:
         name: Rustfmt
@@ -47,8 +74,8 @@ jobs:
                   command: fmt
                   args: --all -- --check
 
-    clippy:
-        name: Clippy
+    clippy-stable:
+        name: Stable Clippy
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -62,3 +89,18 @@ jobs:
               with:
                   command: clippy
                   args: -- -D warnings
+    clippy-nightly:
+        name: Nightly Clippy
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: nightly
+                  override: true
+            - run: rustup component add clippy
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: clippy
+                  args: --features nightly -- -D warnings

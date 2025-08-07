@@ -8,7 +8,16 @@ license = "MIT"
 
 [dev-dependencies]
 float-cmp = "0.10.0"
-criterion = { version = "3.0.4", package = "codspeed-criterion-compat" }
+criterion = { version = "3.0.5", package = "codspeed-criterion-compat" }
+
+[features]
+std = []
+nightly = []
+default = ["std"]
+
+[dependencies.intrinsics]
+version = "0.1.0"
+optional = true
 
 [lib]
 name = "rust_steam"
